@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   server.cpp                                         :+:    :+:            */
+/*   Server.cpp                                         :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/01 17:30:11 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/02 11:11:36 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,20 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sstream>
+#include <fcntl.h>
 
 #include "includes/Server.hpp"
 
-Server::Server() {
-
+Server::Server()
+{
 	int 	opt = 1;
 
 	// Create socket file descriptor
 	if ((this->_server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
 		put_error(strerror(errno));
+
+	//Set the resulting socketfd to be non blocking
+	fcntl(this->_server_fd, F_SETFL, O_NONBLOCK);
 
 	// Forcefully attach socket to port
 	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
@@ -42,13 +46,13 @@ Server::Server() {
 		put_error(strerror(errno));
 }
 
-Server::Server(const Server &src) {
-
+Server::Server(const Server &src)
+{
 	*this = src;
 }
 
-Server&		Server::operator=(const Server &rhs) {
-
+Server&		Server::operator=(const Server &rhs)
+{
 	if (this != &rhs) {
 
 		dup2(this->_server_fd, rhs._server_fd);
@@ -64,9 +68,9 @@ Server&		Server::operator=(const Server &rhs) {
 
 Server::~Server() {}
 
-void	Server::startListening( void ) {
-
-	int                 addrlen = sizeof(this->_address);
+void	Server::startListening( void )
+{
+	int					addrlen = sizeof(this->_address);
 	int 				new_socket;
 
 	if (listen(this->_server_fd, 10 ) < 0)
@@ -103,7 +107,7 @@ void	Server::parseRequest(int new_socket) {
 
 void	Server::parseResponse(int new_socket) {
 
-	std::string         response;
+	std::string			response;
 
 	response.append("HTTP/1.1 200 OK\n");
 	response.append("Content-Type: text/plain\n");

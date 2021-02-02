@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   server.hpp                                         :+:    :+:            */
+/*   Server.hpp                                         :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/01 20:31:22 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/02 11:30:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@ public:
 
 private:
 
-	int                 _server_fd;
-	struct sockaddr_in  _address;
+	int					_server_fd;
+	struct sockaddr_in	_address;
 };
 
-void    		put_error( const std::string &str );
-void   			*ft_memset( void *b, int c, size_t len );
+void			put_error( const std::string &str );
+void			*ft_memset( void *b, int c, size_t len );
 unsigned short	ft_htons(unsigned short x);
 
 #endif
