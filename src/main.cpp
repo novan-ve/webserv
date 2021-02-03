@@ -3,19 +3,19 @@
 /*                                                        ::::::::            */
 /*   main.cpp                                           :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
+/*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:36:22 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 14:16:23 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
+/*   Updated: 2021/02/03 15:48:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Request.hpp"
-#include "Method.hpp"
-#include <iostream>
+#include "Server.hpp"
 
-int main(void)
-{
-	
-	return (0);
+int 	main() {
+
+	Server	serv;
+
+	serv.startListening();
+	return 0;
 }
