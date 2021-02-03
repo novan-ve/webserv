@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/02 11:33:25 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/03 19:23:40 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,9 @@ INCL := $(addprefix -I ,$(dir $(HEADER)))
 
 SRC =	main.cpp \
 		utilities.cpp \
+		WebServer.cpp \
+		Configuration.cpp \
+		Client.cpp \
 		Server.cpp
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 15:39:50 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 20:19:30 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,22 +14,33 @@
 # define WEB_SERVER_HPP
 
 # include "Configuration.hpp"
+# include "Client.hpp"
 # include "Server.hpp"
 # include <vector>
 # include <map>
+# include <sys/select.h>
+# include <sys/time.h>
+# include <sys/types.h>
+# include <unistd.h>
 
 class WebServer
 {
 	private:
-		WebServer();
-		Configuration			config;
-		std::vector<Server>		servers;
+		friend class Configuration;
 
-		//clients collected in the program class to be able to have one fd_set containing all connections
-		std::map<int, Client>	clients; //int = fd
+		WebServer();
+		std::vector<Server>		servers;
+		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once
+		fd_set					sockets;
+		Configuration			config;
+
+		bool	newClientAdded();
+
+		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
 	public:
 		WebServer(char *config_path);
 		WebServer(const WebServer& other);
+		void	start();
 		WebServer& operator = (const WebServer& other);
 		~WebServer();
 };

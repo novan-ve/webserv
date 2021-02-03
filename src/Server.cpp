@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/02 11:11:36 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 19:50:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sstream>
 #include <fcntl.h>
+#include <stdexcept>
 
 #include "includes/Server.hpp"
 
@@ -25,14 +26,15 @@ Server::Server()
 
 	// Create socket file descriptor
 	if ((this->_server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
-		put_error(strerror(errno));
+		throw std::runtime_error("Error: Creation of socket failed");
 
 	//Set the resulting socketfd to be non blocking
-	fcntl(this->_server_fd, F_SETFL, O_NONBLOCK);
+	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
 
 	// Forcefully attach socket to port
 	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
-		put_error(strerror(errno));
+		throw std::runtime_error("Error: Failed to set socket options");
 
 	// Assign transport address
 	this->_address.sin_family = AF_INET;
@@ -43,7 +45,10 @@ Server::Server()
 	// Attach socket to transport address
 	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
 			sizeof( this->_address )) < 0)
-		put_error(strerror(errno));
+		throw std::runtime_error("Error: binding server-socket to a port failed");
+
+	if (listen(this->_server_fd, 10 ) < 0)
+		throw std::runtime_error("Error: could not set server-socket to listening mode");
 }
 
 Server::Server(const Server &src)
@@ -55,7 +60,8 @@ Server&		Server::operator=(const Server &rhs)
 {
 	if (this != &rhs) {
 
-		dup2(this->_server_fd, rhs._server_fd);
+//		dup2(this->_server_fd, rhs._server_fd); //dont think this is the right course of action for assignment
+		this->_server_fd = rhs._server_fd;
 
 		this->_address.sin_family = rhs._address.sin_family;
 		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
@@ -68,30 +74,27 @@ Server&		Server::operator=(const Server &rhs)
 
 Server::~Server() {}
 
-void	Server::startListening( void )
-{
-	int					addrlen = sizeof(this->_address);
-	int 				new_socket;
+// void	Server::startListening( void )
+// {
+// 	unsigned int		addrlen = sizeof(this->_address);
+// 	int 				new_socket;
 
-	if (listen(this->_server_fd, 10 ) < 0)
-		put_error(strerror(errno));
+// 	while(true) {
 
-	while(true) {
+// 		std::cout << std::endl << "+++++++ Waiting for new connection ++++++++" << std::endl << std::endl;
 
-		std::cout << std::endl << "+++++++ Waiting for new connection ++++++++" << std::endl << std::endl;
+// 		if ((new_socket = accept(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
+// 				reinterpret_cast<socklen_t*>(&addrlen))) < 0)
+// 			throw std::runtime_error("Error: error occurred when accepting a new client connection");
 
-		if ((new_socket = accept(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
-				reinterpret_cast<socklen_t*>(&addrlen))) < 0)
-			put_error(strerror(errno));
+// 		this->parseRequest(new_socket);
+// 		this->parseResponse(new_socket);
 
-		this->parseRequest(new_socket);
-		this->parseResponse(new_socket);
+// 		std::cout << "------------------Hello message sent-------------------" << std::endl;
 
-		std::cout << "------------------Hello message sent-------------------" << std::endl;
-
-		close(new_socket);
-	}
-}
+// 		close(new_socket);
+// 	}
+// }
 
 void	Server::parseRequest(int new_socket) {
 

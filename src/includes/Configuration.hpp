@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:00:37 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 14:53:37 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 19:51:28 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,19 @@
 # define CONFIGURATION_HPP
 
 #include <vector>
-#include "Server.hpp"
+
+class WebServer;
 
 //Handles all the configuration parsing with member functions and makes all the needed variables available through variables or methods
 class Configuration
 {
 	//populate the servers vector on construction
 	public:
-		Configuration(std::vector<Server>& servers)
+		Configuration(char *config, WebServer& webserv);
 	private:
-		Configuration();
+		WebServer&	webserv;
+		void		addServer();
+//		Configuration();
 };
 
 #endif

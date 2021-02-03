@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/02 11:30:56 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 19:11:32 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,11 @@ public:
 	void	startListening( void );
 	void	parseRequest( int new_socket );
 	void	parseResponse( int new_socket );
+	int		acceptNewClient();
+	int					_server_fd;
 
 private:
 
-	int					_server_fd;
 	struct sockaddr_in	_address;
 };
 

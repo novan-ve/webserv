@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 14:14:12 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 18:01:00 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,5 +30,5 @@ Request::~Request() {}
 
 void	Request::send(int fd) const
 {
-
+	return ;
 }
