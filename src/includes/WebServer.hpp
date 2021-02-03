@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 20:19:30 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 21:27:48 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,10 @@ class WebServer
 		friend class Configuration;
 
 		WebServer();
-		std::vector<Server>		servers;
+		std::map<int, Server*>	servers;
 		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once
-		fd_set					sockets;
+		fd_set					sockets; //contain all sockets
+		fd_set					set_sockets; //first: copy of sockets, after select(): contains only sockets with activity
 		Configuration			config;
 
 		bool	newClientAdded();
@@ -40,7 +41,7 @@ class WebServer
 	public:
 		WebServer(char *config_path);
 		WebServer(const WebServer& other);
-		void	start();
+		void	run();
 		WebServer& operator = (const WebServer& other);
 		~WebServer();
 };

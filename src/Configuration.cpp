@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 20:07:13 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 21:23:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ Configuration::Configuration(char *config, WebServer& webserv) : webserv(webserv
 
 void	Configuration::addServer()
 {
-	Server	new_server = Server();
-	this->webserv.servers.push_back(new_server);
-	FD_SET(new_server._server_fd, &this->webserv.sockets);
+	Server*	new_server = new Server();
+	this->webserv.servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
+	FD_SET(new_server->_server_fd, &this->webserv.sockets);
 }
 
 //Configuration::Configuration() {}

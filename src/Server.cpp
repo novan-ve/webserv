@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/03 19:50:02 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 21:44:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,36 +19,37 @@
 #include <stdexcept>
 
 #include "includes/Server.hpp"
+#include "Utilities.hpp"
 
 Server::Server()
 {
 	int 	opt = 1;
 
 	// Create socket file descriptor
-	if ((this->_server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+	if ((this->_server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		throw std::runtime_error("Error: Creation of socket failed");
 
-	//Set the resulting socketfd to be non blocking
-	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
-
 	// Forcefully attach socket to port
-	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
 		throw std::runtime_error("Error: Failed to set socket options");
 
 	// Assign transport address
 	this->_address.sin_family = AF_INET;
 	this->_address.sin_addr.s_addr = INADDR_ANY;
-	this->_address.sin_port = ft_htons(PORT);
-	ft_memset(this->_address.sin_zero, '\0', sizeof(this->_address.sin_zero));
+	this->_address.sin_port = ft::htons(PORT);
+	ft::memset(this->_address.sin_zero, '\0', sizeof(this->_address.sin_zero));
 
 	// Attach socket to transport address
-	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
-			sizeof( this->_address )) < 0)
+	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address), sizeof( this->_address )) == -1)
 		throw std::runtime_error("Error: binding server-socket to a port failed");
 
-	if (listen(this->_server_fd, 10 ) < 0)
+	//Set the resulting socketfd to be non blocking
+	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
+
+	if (listen(this->_server_fd, 10 ) == -1)
 		throw std::runtime_error("Error: could not set server-socket to listening mode");
+	std::cout << "SERVER CREATED!" << std::endl;
 }
 
 Server::Server(const Server &src)
@@ -66,13 +67,17 @@ Server&		Server::operator=(const Server &rhs)
 		this->_address.sin_family = rhs._address.sin_family;
 		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
 		this->_address.sin_port = rhs._address.sin_port;
-		ft_memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
+		ft::memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
 	}
 
 	return *this;
 }
 
-Server::~Server() {}
+Server::~Server()
+{
+	std::cout << "DECONSTRUCTING SERVER" << std::endl;
+	close(this->_server_fd);
+}
 
 // void	Server::startListening( void )
 // {
@@ -100,10 +105,10 @@ void	Server::parseRequest(int new_socket) {
 
 	char			buffer[1024];
 
-	memset(&buffer, '\0', 1024);
+	ft::memset(&buffer, '\0', 1024);
 
 	if (recv(new_socket, buffer, 1024, 0) < 0)
-		put_error(strerror(errno));
+		ft::put_error(strerror(errno));
 
 	std::cout << buffer << std::endl;
 }
@@ -118,5 +123,5 @@ void	Server::parseResponse(int new_socket) {
 	response.append("\nSpoderman");
 
 	if (send(new_socket, response.c_str(), response.length(), 0) < 0)
-		put_error(strerror(errno));
+		ft::put_error(strerror(errno));
 }
