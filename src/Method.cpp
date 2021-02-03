@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 20:24:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 13:09:24 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 14:00:51 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,16 @@
 #include <string>
 #include <vector>
 
-const char * const Method::names[] = {"OPTIONS","GET","HEAD","POST","PUT","DELETE","TRACE","CONNECT"};
+const char * const Method::names[] = {
+	[OPTIONS] = "OPTIONS",
+	[GET] = "GET",
+	[HEAD] = "HEAD",
+	[POST] = "POST",
+	[PUT] = "PUT",
+	[DELETE] = "DELETE",
+	[TRACE] = "TRACE",
+	[CONNECT] = "CONNECT"
+};
 
 Method::Method(const Method& other) : EnumString(other) {}
 

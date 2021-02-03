@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 19:40:54 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 14:14:12 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ Request& Request::operator = (const Request& other)
 {
 	if (this != &other)
 	{
-		this->method = other.method;
+//		this->method = other.method;
 	}
 	return (*this);
 }
@@ -30,5 +30,5 @@ Request::~Request() {}
 
 void	Request::send(int fd) const
 {
-	std::cout << GetStringe_method(this->method) << std::endl;
+
 }

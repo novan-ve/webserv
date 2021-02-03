@@ -1,29 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Configuration.hpp                                  :+:    :+:            */
+/*   Client.hpp                                         :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:00:37 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 14:53:37 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/03 15:24:51 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/03 15:35:47 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONFIGURATION_HPP
-# define CONFIGURATION_HPP
+#ifndef CLIENT_HPP
+# define CLIENT_HPP
 
-#include <vector>
 #include "Server.hpp"
 
-//Handles all the configuration parsing with member functions and makes all the needed variables available through variables or methods
-class Configuration
+class Client
 {
-	//populate the servers vector on construction
-	public:
-		Configuration(std::vector<Server>& servers)
 	private:
-		Configuration();
+		int		fd;
+		Server&	server;
+	public:
+		Client(Server& server);
+		Client(const Client& other);
+		Client& operator = (const Client& other);
+		~Client();
 };
 
 #endif
