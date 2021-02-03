@@ -6,14 +6,15 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:32:14 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 20:59:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 12:59:12 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef METHOD_HPP
 # define METHOD_HPP
 
-#include <string>
+# include "EnumString.hpp"
+# include <string>
 
 enum	e_method
 {
@@ -27,21 +28,18 @@ enum	e_method
 	CONNECT
 };
 
-class	Method
+class	Method : public EnumString<e_method>
 {
 	public:
 		Method(e_method id);
 		Method(std::string str);
 		Method(const Method& other);
-		Method& operator = (const Method& other);
 		~Method();
 
-		e_method		id;
-		std::string		str;
 	private:
 		Method(); //fuck 42s coplien
-		e_method		toId();
-		std::string		toString();
+		static const char * const names[]; //needed for EnumString, declared in cpp
+		Method& operator = (const Method& other); //everything is const
 };
 
 #endif

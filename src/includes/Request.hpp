@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 21:03:32 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 12:00:57 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Request : public Message
 	private:
 		Request(); //42's "coplien" forces us to do this, ew
 		Method	method;
+		
 };
 
 #endif
