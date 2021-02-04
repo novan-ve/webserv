@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 10:31:36 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 17:19:37 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ Configuration::Configuration(char *config, WebServer& webserv) : webserv(webserv
 {
 	(void)config; //DELETE
 }
+
+
 
 //parse the config into Servers and presumably also global settings ?
 void	Configuration::parse()

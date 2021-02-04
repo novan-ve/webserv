@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:25:18 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:32:28 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,11 +70,6 @@ bool	WebServer::newClientAdded()
 		this->clients[client_fd] = new_client;
 		FD_CLR(server->_server_fd, &this->set_sockets);
 		FD_SET(client_fd, &this->sockets);
-		//We might be missing a step, using connect() and the setup that it requires.
-		// server->parseRequest(client_fd);
-		// server->parseResponse(client_fd);
-		// this->deleteClient(client_fd);
-//		break ;
 	}
 	return (new_client_added);
 }

@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/03 19:23:40 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/04 18:07:17 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ SRC =	main.cpp \
 		utilities.cpp \
 		WebServer.cpp \
 		Configuration.cpp \
+		URI.cpp \
 		Client.cpp \
 		Server.cpp
 OBJ := $(SRC:%.cpp=./obj/%.o)
