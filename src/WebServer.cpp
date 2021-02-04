@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:08:21 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:25:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,10 @@ bool	WebServer::newClientAdded()
 		FD_CLR(server->_server_fd, &this->set_sockets);
 		FD_SET(client_fd, &this->sockets);
 		//We might be missing a step, using connect() and the setup that it requires.
-		server->parseRequest(client_fd);
-		server->parseResponse(client_fd);
-		this->deleteClient(client_fd);
-		break ;
+		// server->parseRequest(client_fd);
+		// server->parseResponse(client_fd);
+		// this->deleteClient(client_fd);
+//		break ;
 	}
 	return (new_client_added);
 }
@@ -99,6 +99,18 @@ void	WebServer::run()
 			std::cout << "NEW CLIENT ADDED" << std::endl;
 
 			fds_ready--;
+		}
+		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
+		{
+			Client *client = it->second;
+
+			if (!FD_ISSET(it->first, &this->set_sockets))
+			{
+				it++;
+				continue ;
+			}
+			client->handleRequest();
+			this->deleteClient((it++)->first);
 		}
 	}
 }

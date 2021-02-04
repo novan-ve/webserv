@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 02:15:20 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:12:29 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,10 @@ void	Server::parseRequest(int new_socket) {
 	ft::memset(&buffer, '\0', 1024);
 
 	if (recv(new_socket, buffer, 1024, 0) < 0)
+	{
+		std::cout << strerror(errno) << std::endl;
 		throw std::runtime_error("Error: Could not receive request from the client");
+	}
 
 	std::cout << buffer << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:01:11 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:19:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,12 @@ Client::Client(Server& server) : server(server)
 int		Client::getFd()
 {
 	return (this->fd);
+}
+
+void	Client::handleRequest()
+{
+	this->server.parseRequest(this->fd);
+	this->server.parseResponse(this->fd);
 }
 
 Client::Client(const Client& other) : server(other.server), address(other.address), addr_len(other.addr_len), fd(other.fd) {}
