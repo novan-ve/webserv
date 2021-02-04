@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 11:01:50 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:08:21 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ WebServer::~WebServer()
 	this->servers.clear();
 }
 
-WebServer::WebServer(char *config_path) : servers(), clients(), config(config_path, *this)
+WebServer::WebServer(char *config_path) : servers(), clients()
 {
 	FD_ZERO(&this->sockets);
 	Configuration	config(config_path, *this);
@@ -48,6 +48,7 @@ void	WebServer::deleteClient(int fd)
 {
 	if (!this->clients.count(fd))
 		throw std::runtime_error("Could not delete client, not in 'clients'");
+	delete this->clients[fd];
 	this->clients.erase(fd);
 	FD_CLR(fd, &this->sockets);
 }
@@ -67,6 +68,7 @@ bool	WebServer::newClientAdded()
 		new_client = new Client(*server);
 		client_fd = new_client->getFd();
 		this->clients[client_fd] = new_client;
+		FD_CLR(server->_server_fd, &this->set_sockets);
 		FD_SET(client_fd, &this->sockets);
 		//We might be missing a step, using connect() and the setup that it requires.
 		server->parseRequest(client_fd);
@@ -92,15 +94,11 @@ void	WebServer::run()
 			std::cout << "No connection, sleeping for 3 seconds" << std::endl;
 			continue ;
 		}
-		if (this->newClientAdded()) //new connection has priority
+		while (this->newClientAdded()) //new connection has priority
 		{
 			std::cout << "NEW CLIENT ADDED" << std::endl;
 
 			fds_ready--;
 		}
-		// if (fds_ready) //handle existing clients
-		// {
-
-		// }
 	}
 }

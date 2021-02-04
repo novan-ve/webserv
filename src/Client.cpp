@@ -6,13 +6,14 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 10:57:04 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 15:01:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include <iostream>
 #include <fcntl.h>
+#include <unistd.h>
 
 //Client::Client() {}
 
@@ -33,6 +34,7 @@ Client::Client(const Client& other) : server(other.server), address(other.addres
 Client::~Client()
 {
 	std::cout << "CLIENT DESTRUCTOR CALLED" << std::endl;
+	close(this->fd);
 }
 
 //private garbage
