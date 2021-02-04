@@ -17,8 +17,10 @@
 #include <sstream>
 #include <fcntl.h>
 #include <stdexcept>
+#include <vector>
 
 #include "includes/Server.hpp"
+#include "includes/ReadUtils.hpp"
 #include "Utilities.hpp"
 
 Server::Server()
@@ -61,7 +63,6 @@ Server&		Server::operator=(const Server &rhs)
 {
 	if (this != &rhs) {
 
-//		dup2(this->_server_fd, rhs._server_fd); //dont think this is the right course of action for assignment
 		this->_server_fd = rhs._server_fd;
 
 		this->_address.sin_family = rhs._address.sin_family;
@@ -79,41 +80,16 @@ Server::~Server()
 	close(this->_server_fd);
 }
 
-// void	Server::startListening( void )
-// {
-// 	unsigned int		addrlen = sizeof(this->_address);
-// 	int 				new_socket;
-
-// 	while(true) {
-
-// 		std::cout << std::endl << "+++++++ Waiting for new connection ++++++++" << std::endl << std::endl;
-
-// 		if ((new_socket = accept(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
-// 				reinterpret_cast<socklen_t*>(&addrlen))) < 0)
-// 			throw std::runtime_error("Error: error occurred when accepting a new client connection");
-
-// 		this->parseRequest(new_socket);
-// 		this->parseResponse(new_socket);
-
-// 		std::cout << "------------------Hello message sent-------------------" << std::endl;
-
-// 		close(new_socket);
-// 	}
-// }
-
 void	Server::parseRequest(int new_socket) {
 
-	char			buffer[1024];
+	std::vector<std::string>	lines;
+//	Request	req;
 
-	ft::memset(&buffer, '\0', 1024);
+	lines = ft::get_lines(new_socket);
 
-	if (recv(new_socket, buffer, 1024, 0) < 0)
-	{
-		std::cout << strerror(errno) << std::endl;
-		throw std::runtime_error("Error: Could not receive request from the client");
-	}
-
-	std::cout << buffer << std::endl;
+	std::cout << "Line size: " << lines.size() << std::endl;
+	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++)
+		std::cout << *it << std::endl;
 }
 
 void	Server::parseResponse(int new_socket) {

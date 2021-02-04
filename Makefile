@@ -19,6 +19,7 @@ INCL := $(addprefix -I ,$(dir $(HEADER)))
 
 SRC =	main.cpp \
 		utilities.cpp \
+		ReadUtils.cpp \
 		WebServer.cpp \
 		Configuration.cpp \
 		Client.cpp \
