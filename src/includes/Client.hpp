@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 15:24:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 19:28:42 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 02:08:48 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,10 @@ class Client
 		socklen_t				addr_len;
 //		Client(); //impossible because no Server reference is provided
 //		Client& operator = (const Client& other); //server is a reference, cant be copied with assignment operator, so this makes 0 sense
-	public:
 		int						fd;
-		Client(Server& server, int fd, struct sockaddr_in address, socklen_t len);
+	public:
+		int	getFd();
+		Client(Server& server);
 		Client(const Client& other);
 		~Client();
 };

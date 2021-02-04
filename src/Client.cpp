@@ -6,16 +6,27 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 19:28:36 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 02:09:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include <iostream>
+#include <fcntl.h>
 
 //Client::Client() {}
 
-Client::Client(Server& server, int fd, struct sockaddr_in address, socklen_t len) : server(server), address(address), addr_len(len), fd(fd) {}
+Client::Client(Server& server) : server(server)
+{
+	this->fd = accept(server._server_fd, reinterpret_cast<struct sockaddr*>(&this->address), &this->addr_len);
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Error: Could not set client-socket to O_NONBLOCK");
+}
+
+int		Client::getFd()
+{
+	return (this->fd);
+}
 
 Client::Client(const Client& other) : server(other.server), address(other.address), addr_len(other.addr_len), fd(other.fd) {}
 

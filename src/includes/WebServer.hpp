@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 21:27:48 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 02:17:40 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,12 @@ class WebServer
 
 		WebServer();
 		std::map<int, Server*>	servers;
-		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once
+		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once, when it's deleted
 		fd_set					sockets; //contain all sockets
 		fd_set					set_sockets; //first: copy of sockets, after select(): contains only sockets with activity
 		Configuration			config;
 
+		void	deleteClient(int fd);
 		bool	newClientAdded();
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
