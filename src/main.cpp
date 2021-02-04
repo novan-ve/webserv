@@ -6,16 +6,28 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/02 11:26:59 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/03 20:48:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "WebServer.hpp"
+#include <stdio.h>
+#include <iostream>
 
-int 	main() {
+int 	main(int argc, char **argv) {
 
-	Server	serv;
+	if (argc != 1 && argc != 2)
+		return (!!dprintf(2, "Wrong number of arguments!"));
+	WebServer	webserv(argv[1]);
 
-	serv.startListening();
+	try
+	{
+		webserv.run();
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return (1);
+	}
 	return 0;
 }
