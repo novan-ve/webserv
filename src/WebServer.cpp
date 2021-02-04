@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 02:19:25 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/04 11:01:50 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,16 @@ WebServer::~WebServer()
 
 WebServer::WebServer(char *config_path) : servers(), clients(), config(config_path, *this)
 {
+	FD_ZERO(&this->sockets);
+	Configuration	config(config_path, *this);
+	config.parse();
+}
 
+void	WebServer::newServer()
+{
+	Server*	new_server = new Server();
+	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
+	FD_SET(new_server->_server_fd, &this->sockets);
 }
 
 void	WebServer::deleteClient(int fd)
@@ -78,7 +87,6 @@ void	WebServer::run()
 		this->set_sockets = this->sockets;
 		if ((fds_ready = select(max_fd, &this->set_sockets, NULL, NULL, NULL)) == -1)
 			throw std::runtime_error("Error: select() returned an error");
-		sleep(1);
 		if (fds_ready == 0) //no pending connections/requests
 		{
 			std::cout << "No connection, sleeping for 3 seconds" << std::endl;
