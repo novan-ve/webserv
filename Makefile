@@ -23,7 +23,10 @@ SRC =	main.cpp \
 		WebServer.cpp \
 		Configuration.cpp \
 		Client.cpp \
-		Server.cpp
+		Server.cpp \
+		Request.cpp \
+		Response.cpp \
+		Message.cpp
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)
 

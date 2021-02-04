@@ -21,7 +21,8 @@
 
 #include "includes/Server.hpp"
 #include "includes/ReadUtils.hpp"
-#include "Utilities.hpp"
+#include "includes/Utilities.hpp"
+#include "includes/Response.hpp"
 
 Server::Server()
 {
@@ -83,24 +84,17 @@ Server::~Server()
 void	Server::parseRequest(int new_socket) {
 
 	std::vector<std::string>	lines;
-//	Request	req;
 
 	lines = ft::get_lines(new_socket);
+	Request	req(lines);
+	req.printRequest();
 
-	std::cout << "Line size: " << lines.size() << std::endl;
-	for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); it++)
-		std::cout << *it << std::endl;
+	this->parseResponse(new_socket, &req);
 }
 
-void	Server::parseResponse(int new_socket) {
+void	Server::parseResponse(int new_socket, Request *req) {
 
-	std::string			response;
+	Response	resp(req);
 
-	response.append("HTTP/1.1 200 OK\n");
-	response.append("Content-Type: text/plain\n");
-	response.append("Connection: keep-alive\n");
-	response.append("\nSpoderman");
-
-	if (send(new_socket, response.c_str(), response.length(), 0) < 0)
-		throw std::runtime_error("Error: Could not send request to the client");
+	resp.sendResponse(new_socket);
 }

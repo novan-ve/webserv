@@ -13,16 +13,19 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
-# include "Message.hpp"
+# include "Request.hpp"
 
 class Response : public Message
 {
 	public:
-		Response();
+		Response(Request *request);
 		Response(const Response& other);
 		Response& operator = (const Response& other);
 		~Response();
-		void	send(int fd) const;
+		void	sendResponse(int fd) const;
+	private:
+		Response();
+		Request*	req;
 };
 
 #endif

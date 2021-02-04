@@ -20,14 +20,18 @@
 class Request : public Message
 {
 	public:
-		Request(Method method, char *path, int version);
+		Request(std::vector<std::string> &lines);
+		//Request(Method method, char *path, int version);
 		Request(const Request& other);
 		Request& operator = (const Request& other);
 		~Request();
-		void	send(int fd) const;
+		void	printRequest(void) const;
+	//	void	send(int fd) const;
 	private:
 		Request(); //42's "coplien" forces us to do this, ew
-		Method	method;
+		bool		has_body;
+		bool		faulty_header;
+		std::string status_line;
 		
 };
 

@@ -15,7 +15,10 @@
 
 Message::Message() {}
 
-Message::Message(const Message& other) {}
+Message::Message(const Message& other) {
+
+	*this = other;
+}
 
 Message& Message::operator = (const Message& other)
 {

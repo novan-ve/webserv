@@ -17,6 +17,7 @@
 # include <netinet/in.h>
 
 # include "Utilities.hpp"
+# include "Request.hpp"
 
 # define PORT 8080
 
@@ -31,7 +32,7 @@ public:
 
 	void	startListening( void );
 	void	parseRequest( int new_socket );
-	void	parseResponse( int new_socket );
+	void	parseResponse( int new_socket, Request *req );
 	int		acceptNewClient();
 	int					_server_fd;
 
