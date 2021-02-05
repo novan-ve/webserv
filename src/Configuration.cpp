@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 17:36:45 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/05 18:21:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,12 +71,7 @@ void	Configuration::populateTokens(std::list<std::string>& tokens)
 			break ;
 	}
 	strip_comments(raw_content);
-
-	std::vector<std::string>	delimiters;
-	delimiters.push_back("\n\t\r ");
-	delimiters.push_back("{};");
-
-	std::vector<std::string>	vec_tokens = ft::split(raw_content, delimiters, true);
+	std::vector<std::string>	vec_tokens = ft::split(raw_content, "\n\t\r {};", "{};");
 	(void)tokens;
 }
 
