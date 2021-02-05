@@ -26,9 +26,15 @@ Request::Request(std::vector<std::string> &lines) : has_body(false), faulty_head
 		if (*header_end == "\r")
 			break;
 	}
+
 	// Place header values inside headers attribute
 	for (std::vector<std::string>::iterator it = lines.begin(); it != header_end; it++) {
 		if (it == lines.begin()) {
+			// Enables faulty_header and returns if request only contains 1 line
+			if (it + 1 == header_end) {
+				this->faulty_header = true;
+				return;
+			}
 			this->status_line = *it;
 		}
 		else if ((*it).find(':') != std::string::npos) {
@@ -37,14 +43,12 @@ Request::Request(std::vector<std::string> &lines) : has_body(false), faulty_head
 		}
 		// Return if line in header doesn't contain ':' and isn't the first line
 		else {
-			std::cout << "Faulty header" << std::endl;
 			this->faulty_header = true;
 			return;
 		}
 	}
-
 	// If a body exists, place lines inside body attribute
-	if (++header_end != lines.end()) {
+	if (header_end != lines.end() && ++header_end != lines.end()) {
 		this->has_body = true;
 		for (std::vector<std::string>::iterator it = header_end; it != lines.end(); it++)
 			this->body.push_back(*it);
@@ -66,22 +70,26 @@ Request& Request::operator = (const Request& other)
 
 void	Request::printRequest(void) const {
 	// Print values for debugging
-	std::cout << "Headers:" << std::endl;
-	std::cout << this->status_line << std::endl;
+	std::cout << std::endl << "Request:" << std::endl;
+	if (this->faulty_header) {
+		std::cout << "  Faulty header" << std::endl;
+		return;
+	}
+	std::cout << "  Headers:" << std::endl;
+	std::cout << "\t" << this->status_line << std::endl;
 	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
-		std::cout << it->first << ": " << it->second << std::endl;
+		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
 	if (this->has_body) {
-		std::cout << "Body:" << std::endl;
+		std::cout << "  Body:" << std::endl;
 		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-			std::cout << *it << std::endl;
+			std::cout << "\t" << *it << std::endl;
 	}
 	else {
-		std::cout << "No body" << std::endl;
+		std::cout << "  No body" << std::endl;
 	}
 }
 
-//void	Request::send(int fd) const
-//{
-//	return ;
-//}
+bool			Request::get_has_body() const { return this->has_body; }
+bool			Request::get_faulty_header() const { return this->faulty_header; }
+std::string		Request::get_status_line() const { return this->status_line; }

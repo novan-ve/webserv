@@ -22,10 +22,18 @@ class Response : public Message
 		Response(const Response& other);
 		Response& operator = (const Response& other);
 		~Response();
-		void	sendResponse(int fd) const;
+
+		void		composeResponse(void);
+		void		sendResponse(int fd) const;
+		void		printResponse(void) const;
+
+		std::string	getTime(void) const;
+
 	private:
 		Response();
 		Request*	req;
+		std::string	status_line;
+		int			code;
 };
 
 #endif

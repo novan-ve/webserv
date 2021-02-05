@@ -81,20 +81,25 @@ Server::~Server()
 	close(this->_server_fd);
 }
 
-void	Server::parseRequest(int new_socket) {
+int	Server::parseRequest(int new_socket) {
 
 	std::vector<std::string>	lines;
 
 	lines = ft::get_lines(new_socket);
+	if (lines[0] == "\r")
+		return 0;
 	Request	req(lines);
 	req.printRequest();
 
 	this->parseResponse(new_socket, &req);
+	return 1;
 }
 
 void	Server::parseResponse(int new_socket, Request *req) {
 
 	Response	resp(req);
 
+	resp.composeResponse();
+	resp.printResponse();
 	resp.sendResponse(new_socket);
 }

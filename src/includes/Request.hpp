@@ -26,6 +26,10 @@ class Request : public Message
 		Request& operator = (const Request& other);
 		~Request();
 		void	printRequest(void) const;
+
+		bool		get_has_body(void) const;
+		bool		get_faulty_header(void) const;
+		std::string	get_status_line(void) const;
 	//	void	send(int fd) const;
 	private:
 		Request(); //42's "coplien" forces us to do this, ew

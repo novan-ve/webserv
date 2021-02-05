@@ -31,7 +31,7 @@ public:
 	~Server();
 
 	void	startListening( void );
-	void	parseRequest( int new_socket );
+	int		parseRequest( int new_socket );
 	void	parseResponse( int new_socket, Request *req );
 	int		acceptNewClient();
 	int					_server_fd;

@@ -37,6 +37,8 @@ namespace ft
 	void	*memset(void *b, int c, size_t len);
 
 	unsigned short	htons(unsigned short x);
+
+	std::string		getTime(void);
 }
 
 #endif
