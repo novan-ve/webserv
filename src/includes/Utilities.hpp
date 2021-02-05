@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 21:46:16 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/05 14:40:39 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,13 @@
 # define UTILITIES_HPP
 
 #include <map>
+#include <limits>
+#include <string>
+#include <vector>
+
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 256
+#endif
 
 namespace ft
 {
@@ -37,6 +44,10 @@ namespace ft
 	void	*memset(void *b, int c, size_t len);
 
 	unsigned short	htons(unsigned short x);
+
+	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
+
+	std::vector<std::string>	split(std::string raw, std::vector<std::string>	delim_groups, bool preserve_delim = false);
 }
 
 #endif

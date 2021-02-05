@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 14:55:30 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/05 13:10:16 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 # include <sys/time.h>
 # include <sys/types.h>
 # include <unistd.h>
+
+# define DEFAULT_CONFIG "./config/default.conf"
 
 class WebServer
 {
