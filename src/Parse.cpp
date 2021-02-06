@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:32:51 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 10:38:04 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@
 Parse::Parse(Attribute& attr, std::list<std::string> args, std::list<std::string> tokens) : attr(attr), args(args), tokens(tokens) {}
 
 Parse::Parse(const Parse& other) : attr(other.attr), args(other.args), tokens(other.tokens) {}
+
+//KEY [ARGS] { [KEYS] }
 
 void	Parse::parse()
 {
@@ -63,6 +65,7 @@ void	Parse::parse()
 				childrenTokens.splice(childrenTokens.begin(), this->tokens, it--, end);
 
 				this->children.push(Parse(attr.handle_keyword(key), args, childrenTokens));
+				it++;
 			}
 		}
 	}

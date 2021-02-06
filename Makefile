@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/06 01:22:42 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/06 13:03:56 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,10 @@ SRC =	main.cpp \
 		WebServer.cpp \
 		Configuration.cpp \
 		Parse.cpp \
+		Attribute.cpp \
 		Location.cpp \
+		Scope.cpp \
+		Properties.cpp \
 		URI.cpp \
 		Client.cpp \
 		Server.cpp

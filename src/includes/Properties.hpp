@@ -1,30 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Context.hpp                                        :+:    :+:            */
+/*   Properties.hpp                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 23:49:18 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 09:28:09 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 09:37:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONTEXT_HPP
-# define CONTEXT_HPP
+#ifndef PROPERTIES_HPP
+# define PROPERTIES_HPP
 
-# include "Attribute.hpp"
-
-# include <vector>
-# include <string>
 # include <map>
+# include <vector>
+# include <list>
+# include <string>
+# include <iostream>
 
-//base class for 'server', 'location', etc..
-//A Context is an Attribute that also holds other attributes
-class Context : public Attribute
+struct Properties
 {
-	protected:
-		std::vector<Attribute>	attributes;
+	Properties();
+	Properties(const Properties& other);
+
+	std::map<std::string, size_t>	values;
 };
 
 #endif

@@ -6,17 +6,25 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:26:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 13:13:17 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
-#include "Context.hpp"
-#include "Attribute.hpp"
+#include "Scope.hpp"
 
-Location::Location() {}
+//Location is a child scope of Server
+Location::Location(Scope& parent) : Scope(parent)
+{
+	std::cout << "LOCATION CREATED!" << std::endl;
+}
 
-Location::Location(const Location& other) : Context() { (void)other; }
+Location::~Location()
+{
+	std::cout << "LOCATION DECONSTRUCTED" << std::endl;
+}
+
+Location::Location(const Location& other) : Scope() { (void)other; }
 
 void	Location::handle_args(std::list<std::string> args)
 {

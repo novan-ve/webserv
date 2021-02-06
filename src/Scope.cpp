@@ -1,33 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Location.hpp                                       :+:    :+:            */
+/*   Scope.cpp                                          :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 13:13:35 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 09:33:44 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 13:11:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LOCATION_HPP
-# define LOCATION_HPP
+#include "Attribute.hpp"
+#include "Scope.hpp"
+#include "Properties.hpp"
 
-# include <list>
-# include <string>
+//Parent scope
+Scope::Scope() : Attribute(*this), parent(*this), properties() {}
 
-# include "Utilities.hpp"
-# include "Scope.hpp"
-# include "Attribute.hpp"
+//Child scope
+Scope::Scope(Scope& parent) : Attribute(parent.scope), parent(parent), properties(parent.properties) {}
 
-class Location : public Scope
-{
-	public:
-//		Location();
-		~Location();
-		Location(Scope& parent);
-		Location(const Location& other);
-		void		handle_args(std::list<std::string> args);
-};
-
-#endif
+Scope::~Scope() {}

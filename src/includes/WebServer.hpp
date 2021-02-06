@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:08:39 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 13:08:25 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@
 # include "Configuration.hpp"
 # include "Client.hpp"
 # include "Server.hpp"
-# include "Context.hpp"
+# include "Scope.hpp"
+# include "Attribute.hpp"
 
 # include <vector>
 # include <map>
@@ -27,7 +28,7 @@
 
 # define DEFAULT_CONFIG "./config/default.conf"
 
-class WebServer : public Context
+class WebServer : public Scope
 {
 	private:
 		friend class Configuration;

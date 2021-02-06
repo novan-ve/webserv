@@ -1,33 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Location.hpp                                       :+:    :+:            */
+/*   Properties.cpp                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 13:13:35 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 09:37:47 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 09:45:41 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LOCATION_HPP
-# define LOCATION_HPP
+# include "Properties.hpp"
 
-# include <list>
-# include <string>
+Properties::Properties() {}
 
-# include "Utilities.hpp"
-# include "Scope.hpp"
-# include "Attribute.hpp"
-
-class Location : public Scope
-{
-	public:
-//		Location();
-		~Location();
-		Location(Scope& parent);
-		Location(const Location& other);
-		void		handle_args(std::list<std::string> args);
-};
-
-#endif
+Properties::Properties(const Properties& other) : values(other.values) {}

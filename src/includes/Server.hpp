@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:28:20 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 13:11:07 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,18 @@
 # include <list>
 # include <vector>
 
-# include "Context.hpp"
+# include "Scope.hpp"
+# include "Attribute.hpp"
 # include "Utilities.hpp"
 # include "Location.hpp"
 
 # define PORT 8080
 
-class Server : public Context
+class Server : public Scope
 {
 	public:
-		Server();
+//		Server();
+		Server(Scope& parent);
 		Server( const Server &src );
 		Server&	operator=( const Server &rhs );
 		~Server();

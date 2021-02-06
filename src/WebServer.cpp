@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:08:23 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 13:07:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,10 @@
 #include "Client.hpp"
 #include "WebServer.hpp"
 #include "Utilities.hpp"
+//#include "Attribute.hpp"
+#include "Scope.hpp"
+
+//class Attribute;
 
 //WebServer::WebServer() {}
 
@@ -30,7 +34,7 @@ WebServer::~WebServer()
 	this->servers.clear();
 }
 
-WebServer::WebServer(char *config_path) : servers(), clients()
+WebServer::WebServer(char *config_path) : Scope(), servers(), clients()
 {
 	FD_ZERO(&this->sockets);
 	this->keywords.push_back("server");
@@ -40,7 +44,7 @@ WebServer::WebServer(char *config_path) : servers(), clients()
 
 Server&	WebServer::newServer()
 {
-	Server*	new_server = new Server();
+	Server*	new_server = new Server(*this);
 	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
 	FD_SET(new_server->_server_fd, &this->sockets);
 	return (*new_server);
@@ -120,6 +124,8 @@ void	WebServer::handle_args(std::list<std::string>	args)
 		throw std::runtime_error("Error: Configuration error encountered in 'webserver'");
 	return ;
 }
+
+#include "Attribute.hpp"
 
 Attribute&	WebServer::handle_keyword(std::string key)
 {

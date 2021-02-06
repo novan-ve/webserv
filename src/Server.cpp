@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:29:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 13:11:03 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,13 @@
 #include "includes/Server.hpp"
 #include "Utilities.hpp"
 #include "Location.hpp"
+#include "Scope.hpp"
 
-Server::Server()
+//scope - WebServer, Server is a child scope of WebServer
+Server::Server(Scope& parent) : Scope(parent)
 {
 	this->keywords.push_back("location");
+	this->keywords.push_back("listen");
 	int 	opt = 1;
 
 	// Create socket file descriptor
@@ -123,8 +126,6 @@ void	Server::handle_args(std::list<std::string>	args)
 Attribute&	Server::handle_keyword(std::string key)
 {
 	if (key == "location")
-		this->locations.push_back(new Location());
+		this->locations.push_back(new Location(*this));
 	return (*(this->locations.back()));
-	// (void)key;
-	// return *this;
 }
