@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 18:21:18 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 00:41:32 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 #include "Utilities.hpp"
 #include "WebServer.hpp"
 #include "Server.hpp"
-#include <fcntl.h>
+#include "Parse.hpp"
 
+#include <fcntl.h>
 #include <string>
 #include <list>
 
@@ -44,7 +45,6 @@ void	strip_comments(std::string& config)
 		else if (start != std::string::npos && config[i] == '\n')
 		{
 			config.erase(start, i + entire_line - start);
-			std::cout << config << std::endl;
 			i = start;
 			start = std::string::npos;
 		}
@@ -72,7 +72,7 @@ void	Configuration::populateTokens(std::list<std::string>& tokens)
 	}
 	strip_comments(raw_content);
 	std::vector<std::string>	vec_tokens = ft::split(raw_content, "\n\t\r {};", "{};");
-	(void)tokens;
+	tokens = std::list<std::string>(vec_tokens.begin(), vec_tokens.end());
 }
 
 //parse the config into Servers and presumably also global settings ?
@@ -80,14 +80,14 @@ void	Configuration::parse()
 {
 	std::list<std::string>	tokens;
 	populateTokens(tokens);
-	addServer();
+	Parse(this->webserv, std::list<std::string>(), tokens).parse();
+//	addServer();
 }
 
 //interact with the webserv class to create a new Server
 void	Configuration::addServer()
 {
 	this->webserv.newServer();
-	
 }
 
 Configuration::~Configuration()

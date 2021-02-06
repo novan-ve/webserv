@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:00:37 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 13:48:59 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 01:10:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,10 @@
 #include <vector>
 #include <list>
 #include <string>
+
+# include "Attribute.hpp"
+# include "Context.hpp"
+# include "Parse.hpp"
 
 class WebServer;
 
@@ -32,6 +36,19 @@ class Configuration
 		WebServer&	webserv;
 		void		addServer();
 //		Configuration();
+};
+
+class Root : public Attribute
+{
+	public:
+		void	handle_args(std::list<std::string> args);
+};
+
+class LimitExcept : public Context
+{
+	public:
+		void	handle_args(std::list<std::string> args);
+
 };
 
 #endif

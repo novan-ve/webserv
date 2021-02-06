@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:32:28 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 01:08:23 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,15 +33,17 @@ WebServer::~WebServer()
 WebServer::WebServer(char *config_path) : servers(), clients()
 {
 	FD_ZERO(&this->sockets);
+	this->keywords.push_back("server");
 	Configuration	config(config_path, *this);
 	config.parse();
 }
 
-void	WebServer::newServer()
+Server&	WebServer::newServer()
 {
 	Server*	new_server = new Server();
 	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
 	FD_SET(new_server->_server_fd, &this->sockets);
+	return (*new_server);
 }
 
 void	WebServer::deleteClient(int fd)
@@ -108,4 +110,19 @@ void	WebServer::run()
 			this->deleteClient((it++)->first);
 		}
 	}
+}
+
+void	WebServer::handle_args(std::list<std::string>	args)
+{
+	std::cout << "ARGS" << std::endl;
+	ft::print_iteration(args.begin(), args.end());
+	if (args.size())
+		throw std::runtime_error("Error: Configuration error encountered in 'webserver'");
+	return ;
+}
+
+Attribute&	WebServer::handle_keyword(std::string key)
+{
+	(void)key;
+	return (this->newServer());
 }

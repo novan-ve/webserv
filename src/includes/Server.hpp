@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/03 21:47:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 01:28:20 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,29 +15,36 @@
 
 # include <iostream>
 # include <netinet/in.h>
+# include <string>
+# include <list>
+# include <vector>
 
+# include "Context.hpp"
 # include "Utilities.hpp"
+# include "Location.hpp"
 
 # define PORT 8080
 
-class Server {
+class Server : public Context
+{
+	public:
+		Server();
+		Server( const Server &src );
+		Server&	operator=( const Server &rhs );
+		~Server();
 
-public:
+		void	startListening( void );
+		void	parseRequest( int new_socket );
+		void	parseResponse( int new_socket );
+		int		acceptNewClient();
+		int					_server_fd;
 
-	Server();
-	Server( const Server &src );
-	Server&	operator=( const Server &rhs );
-	~Server();
+		void	handle_args(std::list<std::string> args);
+		Attribute&	handle_keyword(std::string key);
 
-	void	startListening( void );
-	void	parseRequest( int new_socket );
-	void	parseResponse( int new_socket );
-	int		acceptNewClient();
-	int					_server_fd;
-
-private:
-
-	struct sockaddr_in	_address;
+	private:
+		std::vector<Location*>	locations;
+		struct sockaddr_in		_address;
 };
 
 #endif

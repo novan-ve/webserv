@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:12:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 01:29:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,11 @@
 
 #include "includes/Server.hpp"
 #include "Utilities.hpp"
+#include "Location.hpp"
 
 Server::Server()
 {
+	this->keywords.push_back("location");
 	int 	opt = 1;
 
 	// Create socket file descriptor
@@ -76,30 +78,10 @@ Server&		Server::operator=(const Server &rhs)
 Server::~Server()
 {
 	std::cout << "DECONSTRUCTING SERVER" << std::endl;
+	for (size_t i = 0; i < this->locations.size(); i++)
+		delete this->locations[i];
 	close(this->_server_fd);
 }
-
-// void	Server::startListening( void )
-// {
-// 	unsigned int		addrlen = sizeof(this->_address);
-// 	int 				new_socket;
-
-// 	while(true) {
-
-// 		std::cout << std::endl << "+++++++ Waiting for new connection ++++++++" << std::endl << std::endl;
-
-// 		if ((new_socket = accept(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
-// 				reinterpret_cast<socklen_t*>(&addrlen))) < 0)
-// 			throw std::runtime_error("Error: error occurred when accepting a new client connection");
-
-// 		this->parseRequest(new_socket);
-// 		this->parseResponse(new_socket);
-
-// 		std::cout << "------------------Hello message sent-------------------" << std::endl;
-
-// 		close(new_socket);
-// 	}
-// }
 
 void	Server::parseRequest(int new_socket) {
 
@@ -127,4 +109,22 @@ void	Server::parseResponse(int new_socket) {
 
 	if (send(new_socket, response.c_str(), response.length(), 0) < 0)
 		throw std::runtime_error("Error: Could not send request to the client");
+}
+
+void	Server::handle_args(std::list<std::string>	args)
+{
+	std::cout << "ARGS" << std::endl;
+	ft::print_iteration(args.begin(), args.end());
+	if (args.size())
+		throw std::runtime_error("Error: Configuration error encountered in 'server'");
+	return ;
+}
+
+Attribute&	Server::handle_keyword(std::string key)
+{
+	if (key == "location")
+		this->locations.push_back(new Location());
+	return (*(this->locations.back()));
+	// (void)key;
+	// return *this;
 }

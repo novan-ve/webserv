@@ -1,33 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Request.hpp                                        :+:    :+:            */
+/*   Location.hpp                                       :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 00:44:35 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 01:25:16 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef Request_HPP
-# define Request_HPP
+#ifndef LOCATION_HPP
+# define LOCATION_HPP
 
-# include "Message.hpp"
-# include "Method.hpp"
-# include <utility>
+# include <list>
+# include <string>
 
-class Request : public Message
+# include "Context.hpp"
+# include "Utilities.hpp"
+
+class Location : public Context
 {
 	public:
-		Request(Method method, char *path, int version);
-		Request(const Request& other);
-		Request& operator = (const Request& other);
-		~Request();
-		void	send(int fd) const;
-	private:
-		Request(); //42's "coplien" forces us to do this, ew
-		Method	method;
+		Location();
+		Location(const Location& other);
+		void		handle_args(std::list<std::string> args);
 };
 
 #endif

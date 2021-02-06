@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/05 18:20:31 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 00:59:03 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ namespace ft
 		for (size_t begin = 0 ; begin < raw.size();)
 		{
 			end = raw.find_first_of(delim, begin);
-//			std::cout << end << " char: " << ((end != std::string::npos) ? std::string(1, raw[end]) : std::string(" END")) << std::endl;
 			if (end == std::string::npos)
 				end = raw.size();
 			if (begin != end)
@@ -50,10 +49,6 @@ namespace ft
 				tokens.push_back(std::string(1, raw[end]));
 			for (end = end + 1; end < raw.size() && delim.find(raw[end]) != std::string::npos && (preserve_delim.size() == 0 || preserve_delim.find(raw[end]) == std::string::npos) ; end++) {}
 			begin = end;
-		}
-		for (size_t i = 0; i < tokens.size(); i++)
-		{
-			std::cout << "'" << ((tokens[i] == "\n") ? "\\n" : tokens[i]) << "'" << std::endl;
 		}
 		return (tokens);
 	}

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 18:20:25 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 01:00:50 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 256
@@ -37,6 +38,13 @@ namespace ft
 	T	max(T a, T b)
 	{
 		return ((a > b) ? a : b);
+	}
+
+	template <class Iter>
+	void	print_iteration(Iter first, Iter last, std::string delim = ",")
+	{
+		for (; first != last;)
+			std::cout << *first << ((++first == last) ? "\n" : delim);	
 	}
 
 	void	put_error(const std::string &str);

@@ -1,33 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Request.hpp                                        :+:    :+:            */
+/*   Context.hpp                                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 00:44:35 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/05 23:49:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef Request_HPP
-# define Request_HPP
+#ifndef CONTEXT_HPP
+# define CONTEXT_HPP
 
-# include "Message.hpp"
-# include "Method.hpp"
-# include <utility>
+# include "Attribute.hpp"
 
-class Request : public Message
+# include <vector>
+# include <string>
+# include <map>
+
+//base class for 'server', 'location', etc..
+//A Context is an Attribute that also holds other attributes
+class Context : public Attribute
 {
-	public:
-		Request(Method method, char *path, int version);
-		Request(const Request& other);
-		Request& operator = (const Request& other);
-		~Request();
-		void	send(int fd) const;
-	private:
-		Request(); //42's "coplien" forces us to do this, ew
-		Method	method;
+	protected:
+		std::vector<Attribute>	attributes;
 };
 
 #endif
