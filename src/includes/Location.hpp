@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 13:13:35 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 16:23:43 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,18 @@
 # include <string>
 
 # include "Utilities.hpp"
-# include "Scope.hpp"
+# include "Context.hpp"
 # include "Attribute.hpp"
 
-class Location : public Scope
+class Location : public Context
 {
 	public:
 //		Location();
 		~Location();
-		Location(Scope& parent);
+		Location(Context& parent);
 		Location(const Location& other);
 		void		handle_args(std::list<std::string> args);
+		Attribute&		handle_keyword(std::string key);
 };
 
 #endif

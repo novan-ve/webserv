@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 10:38:04 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 17:20:24 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,13 @@ Parse::Parse(const Parse& other) : attr(other.attr), args(other.args), tokens(ot
 
 void	Parse::parse()
 {
+	std::list<std::string>	childrenTokens;
 	if (args.size())
 		attr.handle_args(args);
+		//actually does stuff to the properties
 
 	ft::print_iteration(tokens.begin(), tokens.end());
-	for (std::list<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++)
+	for (std::list<std::string>::iterator it = tokens.begin(); it != tokens.end();)
 	{
 		std::cout << "Key: " << *it << std::endl;
 		//if it's a known keyword
@@ -54,20 +56,25 @@ void	Parse::parse()
 				}
 				args.push_back(*it);
 			}
-			it++;
 			if (body)
 			{
+				it++;
+				childrenTokens.clear();
+				std::cout << "KEY HAS BODY" << std::endl;
 				std::list<std::string>::iterator	end = this->endOfBlock(it, tokens.end());
 				if (end == tokens.end())
 					throw std::runtime_error("Error: Unclosed block in configuration");
 
-				std::list<std::string>	childrenTokens;
 				childrenTokens.splice(childrenTokens.begin(), this->tokens, it--, end);
-
-				this->children.push(Parse(attr.handle_keyword(key), args, childrenTokens));
 				it++;
 			}
+			it++;
+			//only creates attributes. (handle_keyword);
+			this->children.push(Parse(attr.handle_keyword(key), args, childrenTokens));
 		}
+		else
+			throw std::runtime_error("Error: unrecognized keyword in config-parser");
+//		it++;
 	}
 	while (this->children.size())
 	{

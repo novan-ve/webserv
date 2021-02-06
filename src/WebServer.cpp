@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 13:07:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 16:37:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "WebServer.hpp"
 #include "Utilities.hpp"
 //#include "Attribute.hpp"
-#include "Scope.hpp"
+#include "Context.hpp"
 
 //class Attribute;
 
@@ -34,7 +34,7 @@ WebServer::~WebServer()
 	this->servers.clear();
 }
 
-WebServer::WebServer(char *config_path) : Scope(), servers(), clients()
+WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 {
 	FD_ZERO(&this->sockets);
 	this->keywords.push_back("server");
@@ -44,9 +44,10 @@ WebServer::WebServer(char *config_path) : Scope(), servers(), clients()
 
 Server&	WebServer::newServer()
 {
+	//deprecated, done by attributeSpawner now
 	Server*	new_server = new Server(*this);
 	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
-	FD_SET(new_server->_server_fd, &this->sockets);
+	FD_SET(new_server->_server_fd, &this->sockets); //<- MOVE to Configuration
 	return (*new_server);
 }
 

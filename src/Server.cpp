@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 13:11:03 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 17:22:41 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,17 @@
 #include "includes/Server.hpp"
 #include "Utilities.hpp"
 #include "Location.hpp"
-#include "Scope.hpp"
+#include "Context.hpp"
 
-//scope - WebServer, Server is a child scope of WebServer
-Server::Server(Scope& parent) : Scope(parent)
+//Context - WebServer, Server is a child Context of WebServer
+Server::Server(Context& parent) : Context(parent)
 {
 	this->keywords.push_back("location");
 	this->keywords.push_back("listen");
+	this->keywords.push_back("server_name");
+	this->keywords.push_back("error_page");
+	this->keywords.push_back("client_max_body_size");
+//	this->keywords.push_back("listen");
 	int 	opt = 1;
 
 	// Create socket file descriptor
@@ -64,17 +68,17 @@ Server::Server(const Server &src)
 
 Server&		Server::operator=(const Server &rhs)
 {
-	if (this != &rhs) {
-
-//		dup2(this->_server_fd, rhs._server_fd); //dont think this is the right course of action for assignment
+	if (this != &rhs)
+	{
 		this->_server_fd = rhs._server_fd;
 
 		this->_address.sin_family = rhs._address.sin_family;
 		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
 		this->_address.sin_port = rhs._address.sin_port;
 		ft::memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
-	}
 
+		this->keywords = rhs.keywords;
+	}
 	return *this;
 }
 
@@ -118,14 +122,7 @@ void	Server::handle_args(std::list<std::string>	args)
 {
 	std::cout << "ARGS" << std::endl;
 	ft::print_iteration(args.begin(), args.end());
-	if (args.size())
-		throw std::runtime_error("Error: Configuration error encountered in 'server'");
+	// if (args.size())
+	// 	throw std::runtime_error("Error: Configuration error encountered in 'server'");
 	return ;
-}
-
-Attribute&	Server::handle_keyword(std::string key)
-{
-	if (key == "location")
-		this->locations.push_back(new Location(*this));
-	return (*(this->locations.back()));
 }

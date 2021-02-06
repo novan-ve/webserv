@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Scope.hpp                                        :+:    :+:            */
+/*   Context.hpp                                        :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 09:31:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 16:55:03 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SCOPE_HPP
-# define SCOPE_HPP
+#ifndef CONTEXT_HPP
+# define CONTEXT_HPP
 
 # include "Attribute.hpp"
 # include "Properties.hpp"
@@ -21,17 +21,20 @@
 # include <map>
 
 //base class for 'server', 'location', etc..
-//A scope is an Attribute that holds properties
+//A Context is an Attribute that holds properties
 
-class Scope : public Attribute
+class Context : public Attribute
 {
 	public:
-		Scope();
-		Scope(Scope& other);
-		virtual ~Scope();
+		Context();
+		Context(Context& other);
+		virtual ~Context();
+		Attribute&	attributeSpawner(std::string key);
 	protected:
-		Scope&	parent;
-		Properties	properties;
+		Context&				parent;
+		Properties			properties;
+		std::vector<Context*>	children;
+		std::vector<Attribute*>	temporaries;
 };
 
 #endif
