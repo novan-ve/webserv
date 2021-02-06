@@ -17,7 +17,10 @@
 
 Request::Request() {}
 
-Request::Request(std::vector<std::string> &lines) : has_body(false), faulty_header(false) {
+Request::Request(const std::string& requestMethod, const std::string &file_path) : has_body(false), faulty_header(false),
+															method(requestMethod), path(file_path) {}
+
+void Request::composeRequest(std::vector<std::string> &lines) {
 
 	std::vector<std::string>::iterator	header_end;
 
@@ -29,22 +32,11 @@ Request::Request(std::vector<std::string> &lines) : has_body(false), faulty_head
 
 	// Place header values inside headers attribute
 	for (std::vector<std::string>::iterator it = lines.begin(); it != header_end; it++) {
-		if (it == lines.begin()) {
-			// Enables faulty_header and returns if request only contains 1 line
-			if (it + 1 == header_end) {
-				this->faulty_header = true;
-				return;
-			}
+		if (it == lines.begin())
 			this->status_line = *it;
-		}
 		else if ((*it).find(':') != std::string::npos) {
 			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it);
 			this->headers.push_back(keyval);
-		}
-		// Return if line in header doesn't contain ':' and isn't the first line
-		else {
-			this->faulty_header = true;
-			return;
 		}
 	}
 	// If a body exists, place lines inside body attribute

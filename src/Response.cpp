@@ -11,17 +11,37 @@
 /* ************************************************************************** */
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <sys/socket.h>
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 
-Response::Response(Request *request) : req(request), code(200) {}
+Response::Response(Request *request, int code=200) : req(request), response_code(code) {
+
+	this->setStatusCodes();
+}
+
+Response::Response(int code) : response_code(code) {
+
+	this->setStatusCodes();
+
+	this->status_line.append("HTTP/1.1 " + this->status_codes[code]);
+	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
+	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
+	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
+	this->setBodyError();
+	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
+	this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "close"));
+}
 
 Response::~Response() {}
 
-Response::Response(const Response& other) : req(other.req) {}
+Response::Response(const Response& other) : req(other.req), status_line(other.status_line), response_code(other.response_code) {
+
+	this->setStatusCodes();
+}
 
 Response& Response::operator = (const Response& other)
 {
@@ -32,28 +52,66 @@ Response& Response::operator = (const Response& other)
 	return (*this);
 }
 
+void		Response::setStatusCodes(void) {
+
+	this->status_codes[200] = "200 OK";
+	this->status_codes[400] = "400 Bad Request";
+	this->status_codes[404] = "404 Not Found";
+	this->status_codes[505] = "505 HTTP Version Not Supported";
+}
+
+std::string Response::getBodyLength(void) const {
+
+	std::stringstream	ss;
+	std::string			result;
+	int 				total = 0;
+
+	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+		total += (*it).size();
+
+	ss << total;
+	ss >> result;
+
+	return result;
+}
+
+void	Response::setBodyError(void) {
+
+	this->body.push_back("<html>\n");
+	this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>\n");
+	this->body.push_back("<body>\n");
+	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>\n");
+	this->body.push_back("<hr><center>webserv/1.0</center>\n");
+	this->body.push_back("</body>\n");
+	this->body.push_back("</html>\n");
+}
+
 void	Response::composeResponse(void) {
 
 	this->status_line.append("HTTP/1.1 ");
 
-	if (this->req->get_faulty_header()) {
+	if (this->req->get_faulty_header())
+		this->response_code = 400;
 
-		this->code = 400;
-		this->status_line.append("400 Bad Request");
-	}
-	else
-		status_line.append("200 OK");
+	this->status_line.append(this->status_codes[this->response_code]);
 
 	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
 	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
-	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
 
-	if (this->code == 200)
-		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "keep-alive"));
-	else
+	if (this->response_code != 200) {
+
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
+		this->setBodyError();
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
 		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "close"));
 
-	this->body.push_back("Spoderman\n");
+	}
+	else {
+		this->body.push_back("Spoderman\n");
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
+		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "keep-alive"));
+	}
 }
 
 void	Response::sendResponse(int fd) const
@@ -76,7 +134,6 @@ void	Response::sendResponse(int fd) const
 
 	if (send(fd, response.c_str(), response.length(), 0) < 0)
 		throw std::runtime_error("Error: Could not send request to the client");
-	return ;
 }
 
 void	Response::printResponse(void) const {
@@ -90,5 +147,6 @@ void	Response::printResponse(void) const {
 	}
 	std::cout << "  Body:" << std::endl;
 	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		std::cout << "\t" << *it << std::endl;
+		std::cout << "\t" << *it;
+	std::cout << std::endl;
 }

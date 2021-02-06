@@ -20,21 +20,24 @@
 class Request : public Message
 {
 	public:
-		Request(std::vector<std::string> &lines);
-		//Request(Method method, char *path, int version);
+		Request(const std::string& requestMethod, const std::string &file_path);
 		Request(const Request& other);
 		Request& operator = (const Request& other);
 		~Request();
-		void	printRequest(void) const;
+
+		void		composeRequest(std::vector<std::string> &lines);
+		void		printRequest(void) const;
 
 		bool		get_has_body(void) const;
 		bool		get_faulty_header(void) const;
 		std::string	get_status_line(void) const;
-	//	void	send(int fd) const;
+
 	private:
 		Request(); //42's "coplien" forces us to do this, ew
 		bool		has_body;
 		bool		faulty_header;
+		std::string	method;
+		std::string path;
 		std::string status_line;
 		
 };

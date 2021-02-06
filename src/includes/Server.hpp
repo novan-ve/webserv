@@ -31,14 +31,23 @@ public:
 	~Server();
 
 	void	startListening( void );
-	int		parseRequest( int new_socket );
-	void	parseResponse( int new_socket, Request *req );
 	int		acceptNewClient();
+
+	int		isStatusLine(const std::string &line);
+
+	int		handleRequest( int new_socket );
+	int		parseRequest( const std::string &line, int new_socket );
+	void	handleResponse( int new_socket, Request *req );
+	int		errorResponse( int status_code, int new_socket );
+
 	int					_server_fd;
 
 private:
 
-	struct sockaddr_in	_address;
+	struct sockaddr_in			_address;
+	std::string					_status_line;
+	std::vector<std::string>	_lines;
+
 };
 
 #endif

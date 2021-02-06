@@ -13,27 +13,32 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
+# include <map>
 # include "Request.hpp"
 
 class Response : public Message
 {
 	public:
-		Response(Request *request);
+		Response(Request *request, int code);
+		Response(int code);
 		Response(const Response& other);
 		Response& operator = (const Response& other);
 		~Response();
+
+		void		setStatusCodes(void);
+		std::string	getBodyLength(void) const;
+		void		setBodyError(void);
 
 		void		composeResponse(void);
 		void		sendResponse(int fd) const;
 		void		printResponse(void) const;
 
-		std::string	getTime(void) const;
-
 	private:
 		Response();
-		Request*	req;
-		std::string	status_line;
-		int			code;
+		Request*					req;
+		std::map<int, std::string>	status_codes;
+		std::string					status_line;
+		int							response_code;
 };
 
 #endif

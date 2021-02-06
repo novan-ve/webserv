@@ -31,7 +31,7 @@ int		Client::getFd()
 
 int		Client::handleRequest()
 {
-	return (this->server.parseRequest(this->fd));
+	return (this->server.handleRequest(this->fd));
 }
 
 Client::Client(const Client& other) : server(other.server), address(other.address), addr_len(other.addr_len), fd(other.fd) {}

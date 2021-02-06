@@ -24,7 +24,7 @@
 #include "includes/Utilities.hpp"
 #include "includes/Response.hpp"
 
-Server::Server()
+Server::Server() : _status_line("")
 {
 	int 	opt = 1;
 
@@ -81,25 +81,191 @@ Server::~Server()
 	close(this->_server_fd);
 }
 
-int	Server::parseRequest(int new_socket) {
+int Server::errorResponse(int status_code, int new_socket) {
 
-	std::vector<std::string>	lines;
+	Response	resp(status_code);
 
-	lines = ft::get_lines(new_socket);
-	if (lines[0] == "\r")
+	resp.printResponse();
+	resp.sendResponse(new_socket);
+
+	this->_status_line = "";
+	this->_lines.clear();
+
+	return 2;
+}
+
+int Server::isStatusLine(const std::string &line) {
+
+	size_t 		i = 0;
+
+	// Search method
+	while(i < line.length()) {
+
+		// Method is at least 1 letter
+		if (line[i] == ' ' && i > 0)
+			break;
+
+			// First word is smaller than 3 letters or bigger than 7 letters
+		else if (line[i] == ' ' && (i < 2 || i > 7))
+			return 0;
+
+		// Not an uppercase letter
+		if (line[i] < 'A' || line[i] > 'Z')
+			return 0;
+		i++;
+	}
+	// No spaces found
+	if (line[i] == '\0')
 		return 0;
-	Request	req(lines);
-	req.printRequest();
 
-	this->parseResponse(new_socket, &req);
+	// Find start of path
+	while (line[i] != '\0') {
+		if (line[i] == '/')
+			break;
+		// Not a valid path
+		if (line[i] != ' ')
+			return 0;
+		i++;
+	}
+
+	// No path found
+	if (line[i] == '\0')
+		return 0;
+
+	// Find end of path
+	while (line[i] != '\0') {
+		if (line[i] == 'H')
+			break;
+			// Invalid character in path
+		else if (line[i] < 20 || line[i] >= 127)
+			return 0;
+		i++;
+	}
+
+	// No HTTP version found or no space between path and http version
+	if (line[i] == '\0' || line[i - 1] != ' ')
+		return 0;
+
+	// Version doesn't start with HTTP/
+	if (line.substr(i, 5) != "HTTP/")
+		return 0;
+	i += 5;
+
+	bool	dot = false;
+
+	while (line[i] != '\0' && line[i] != '\r') {
+		// Not a valid version number
+		if (line[i] == ' ')
+			break;
+		if ((line[i] < '0' || line[i] > '9') && line[i] != '.')
+			return 0;
+		else if (line[i] == '.') {
+			// Can't have more than 2 dots or have the dot not surrounded by numbers
+			if (dot || line[i - 1] < '0' || line[i - 1] > '9' || line[i + 1] < '0' || line[i + 1] > '9')
+				return 0;
+			dot = true;
+		}
+		i++;
+	}
+	// No dot found
+	if (!dot)
+		return 0;
+
+	while (line[i] == ' ')
+		i++;
+
+	// Has something after the HTTP version
+	if (line[i] != '\0' && line[i] != '\r')
+		return 0;
+
 	return 1;
 }
 
-void	Server::parseResponse(int new_socket, Request *req) {
+int Server::parseRequest(const std::string &line, int new_socket) {
 
-	Response	resp(req);
+	if (line == "\r") {
+		if (this->_status_line == "")
+			return 0;
+		else if (this->_status_line != "" && this->_lines.size() == 0)
+			return this->errorResponse(400, new_socket);
+		else if (this->_status_line != "" && this->_lines.size() > 0) {
+
+			int	end_pos_method = this->_status_line.find(' ');
+			while (line[end_pos_method] == ' ')
+				end_pos_method++;
+
+			int end_pos_path = this->_status_line.substr(end_pos_method + 1, this->_status_line.length()).find(' ');
+
+			Request	req(this->_status_line.substr(0, end_pos_method),
+			   			this->_status_line.substr(end_pos_method + 1, end_pos_path - end_pos_method + 1));
+
+			req.composeRequest(this->_lines);
+			req.printRequest();
+			this->handleResponse(new_socket, &req);
+			return 1;
+		}
+	}
+	else if (isStatusLine(line)) {
+		if (this->_status_line == "") {
+
+			int start = line.length() - 1;
+
+			while (line[start] == ' ' || (line[start] >= 10 && line[start] <= 13))
+				start--;
+
+			int end = start;
+
+			while (line[start] != ' ')
+				start--;
+
+			if (line.substr(start + 1, end - start) != "HTTP/1.1")
+				return this->errorResponse(505, new_socket);
+			this->_status_line = line;
+		}
+		return 0;
+	}
+	else if (line.find(':') != std::string::npos) {
+		if (this->_status_line == "")
+			return this->errorResponse(400, new_socket);
+
+		this->_lines.push_back(line);
+		return 0;
+	}
+	if (this->_status_line != "")
+		return 0;
+	return this->errorResponse(400, new_socket);
+}
+
+int	Server::handleRequest(int new_socket) {
+
+	std::vector<std::string>	lines_read;
+
+	lines_read = ft::get_lines(new_socket);
+
+	// Telnet request
+	if (lines_read.size() == 1) {
+		if (parseRequest(lines_read[0], new_socket) == 2)
+			return 1;
+		return 0;
+	}
+
+	// Browser request
+	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end(); it++) {
+		if (parseRequest(*it, new_socket))
+			return 1;
+	}
+	std::cout << "This isn't supposed to be printed, an error occurred in Server::handleRequest" << std::endl;
+	return 1;
+}
+
+void	Server::handleResponse(int new_socket, Request *req) {
+
+	Response	resp(req, 200);
 
 	resp.composeResponse();
 	resp.printResponse();
 	resp.sendResponse(new_socket);
+
+	this->_status_line = "";
+	this->_lines.clear();
 }
