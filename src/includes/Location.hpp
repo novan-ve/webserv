@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:23:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 18:46:01 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ class Location : public Context
 		Location(Context& parent);
 		Location(const Location& other);
 		void		handle_args(std::list<std::string> args);
-		Attribute&		handle_keyword(std::string key);
 };
 
 #endif

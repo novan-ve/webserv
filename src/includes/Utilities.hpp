@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 01:00:50 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 19:07:50 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,8 +43,11 @@ namespace ft
 	template <class Iter>
 	void	print_iteration(Iter first, Iter last, std::string delim = ",")
 	{
+		size_t distance = std::distance(first, last);
 		for (; first != last;)
-			std::cout << *first << ((++first == last) ? "\n" : delim);	
+			std::cout << *first << ((++first == last) ? "\n" : delim);
+		if (!distance)
+			std::cout << std::endl;
 	}
 
 	void	put_error(const std::string &str);

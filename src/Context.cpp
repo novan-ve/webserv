@@ -17,8 +17,14 @@
 #include "Location.hpp"
 #include "Server.hpp"
 
+// Location	*Context::createLocation(Context& context)
+// {
+// 	return (new Location(this->context));
+// }
+
 Attribute&	Context::attributeSpawner(std::string key)
 {
+	std::cout << "KEY: " << key << std::endl;
 	if (key == "server")
 	{
 		this->children.push_back(new Server(this->context));

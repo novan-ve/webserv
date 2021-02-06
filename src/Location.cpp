@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:52:11 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 19:04:45 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,6 @@ Location::Location(const Location& other) : Context(other.parent) {}
 
 void	Location::handle_args(std::list<std::string> args)
 {
-	std::cout << "ARGS" << std::endl;
+	std::cout << "Location ARGS: ";
 	ft::print_iteration(args.begin(), args.end());
-}
-
-Attribute&	Location::handle_keyword(std::string key)
-{
-	std::cout << "Location - handle_keyword: " << key << std::endl;
-	return (*this);
 }

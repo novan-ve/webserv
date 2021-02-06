@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 17:22:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 19:04:58 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,9 +120,9 @@ void	Server::parseResponse(int new_socket) {
 
 void	Server::handle_args(std::list<std::string>	args)
 {
-	std::cout << "ARGS" << std::endl;
+	std::cout << "Server ARGS: ";
 	ft::print_iteration(args.begin(), args.end());
-	// if (args.size())
-	// 	throw std::runtime_error("Error: Configuration error encountered in 'server'");
+	if (args.size())
+		throw std::runtime_error("Error: Configuration error encountered in 'server'");
 	return ;
 }

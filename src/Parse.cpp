@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 17:20:24 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 19:03:30 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Parse::Parse(Attribute& attr, std::list<std::string> args, std::list<std::string
 
 Parse::Parse(const Parse& other) : attr(other.attr), args(other.args), tokens(other.tokens) {}
 
-//KEY [ARGS] { [KEYS] }
+//KEY [ARGS] (; | { [KEYS] })
 
 void	Parse::parse()
 {
@@ -36,14 +36,15 @@ void	Parse::parse()
 		attr.handle_args(args);
 		//actually does stuff to the properties
 
+	std::cout << "TOKENS: ";
 	ft::print_iteration(tokens.begin(), tokens.end());
 	for (std::list<std::string>::iterator it = tokens.begin(); it != tokens.end();)
 	{
-		std::cout << "Key: " << *it << std::endl;
+//		std::cout << "Key: " << *it << std::endl;
 		//if it's a known keyword
 		if (find(attr.keywords.begin(), attr.keywords.end(), *it) != attr.keywords.end())
 		{
-			std::cout << "KEYWORD FOUND!" << std::endl;
+//			std::cout << "KEYWORD FOUND!" << std::endl;
 			std::string		key = *it++;
 			bool			body = false;
 			args.clear();
@@ -60,7 +61,7 @@ void	Parse::parse()
 			{
 				it++;
 				childrenTokens.clear();
-				std::cout << "KEY HAS BODY" << std::endl;
+//				std::cout << "KEY HAS BODY" << std::endl;
 				std::list<std::string>::iterator	end = this->endOfBlock(it, tokens.end());
 				if (end == tokens.end())
 					throw std::runtime_error("Error: Unclosed block in configuration");
