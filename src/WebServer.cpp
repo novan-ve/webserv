@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:37:19 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 01:51:06 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,40 +16,38 @@
 #include "Client.hpp"
 #include "WebServer.hpp"
 #include "Utilities.hpp"
-//#include "Attribute.hpp"
 #include "Context.hpp"
-
-//class Attribute;
 
 //WebServer::WebServer() {}
 
+//servers are Context*s stored in 'children' inherited Context
 WebServer::~WebServer()
 {
 	//delete all clients
 	for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
 		delete it->second;
 	this->clients.clear();
-	for (std::map<int, Server*>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
-		delete it->second;
 	this->servers.clear();
 }
 
 WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 {
-	FD_ZERO(&this->sockets);
+	this->type = "WebServer";
 	this->keywords.push_back("server");
+
+	FD_ZERO(&this->sockets);
 	Configuration	config(config_path, *this);
 	config.parse();
 }
 
-Server&	WebServer::newServer()
-{
-	//deprecated, done by attributeSpawner now
-	Server*	new_server = new Server(*this);
-	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
-	FD_SET(new_server->_server_fd, &this->sockets); //<- MOVE to Configuration
-	return (*new_server);
-}
+// Server&	WebServer::newServer()
+// {
+// 	//deprecated, done by attributeSpawner now
+// 	Server*	new_server = new Server(*this);
+// 	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
+// 	FD_SET(new_server->_server_fd, &this->sockets); //<- MOVE to Configuration
+// 	return (*new_server);
+// }
 
 void	WebServer::deleteClient(int fd)
 {
@@ -127,9 +125,3 @@ void	WebServer::handle_args(std::list<std::string>	args)
 }
 
 #include "Attribute.hpp"
-
-Attribute&	WebServer::handle_keyword(std::string key)
-{
-	(void)key;
-	return (this->newServer());
-}

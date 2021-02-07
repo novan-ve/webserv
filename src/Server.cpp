@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 19:04:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 23:09:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 //Context - WebServer, Server is a child Context of WebServer
 Server::Server(Context& parent) : Context(parent)
 {
+	this->type = "Server";
 	this->keywords.push_back("location");
 	this->keywords.push_back("listen");
 	this->keywords.push_back("server_name");

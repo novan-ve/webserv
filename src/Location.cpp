@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 19:04:45 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 23:08:54 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 //Location is a child Context of Server
 Location::Location(Context& parent) : Context(parent)
 {
+	this->type = "Location";
 	this->keywords.push_back("limit_except");
 	this->keywords.push_back("root");
 	this->keywords.push_back("autoindex");

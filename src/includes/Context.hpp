@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:55:03 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 01:49:23 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Context : public Attribute
 		Context&				parent;
 		Properties			properties;
 		std::vector<Context*>	children;
-		std::vector<Attribute*>	temporaries;
 };
 
 #endif

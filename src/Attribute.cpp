@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 10:06:11 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 19:20:13 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 23:18:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,23 +15,25 @@
 #include "Utilities.hpp"
 
 //set Context of attribute
-Attribute::Attribute(Context& context) : context(context) {}
+Attribute::Attribute(Context& context) : context(context)
+{
+	std::cout << "ATTRIBUTE CONSTRUCTOR!!!!!" << std::endl;
+}
 
 Attribute&	Attribute::handle_keyword(std::string key)
 {
 	return (this->context.attributeSpawner(key));
 }
 
-void	Attribute::cleanupTemporaries()
+Attribute::~Attribute()
 {
-	for (size_t i = 0; i < temporaries.size(); i++)
+	std::cout << "ATTRIBUTE DESTRUCTOR OF " << this->type << "!!!!!" << std::endl;
+	for (size_t i = 0; i < this->temporaries.size(); i++)
 		delete temporaries[i];
 	temporaries.clear();
 }
 
-Attribute::~Attribute() {}
-
-Root::Root(Context& context) : Attribute(context) {}
+Root::Root(Context& context) : Attribute(context) { this->type = "Root"; }
 void	Root::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -39,7 +41,7 @@ void	Root::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-AutoIndex::AutoIndex(Context& context) : Attribute(context) {}
+AutoIndex::AutoIndex(Context& context) : Attribute(context) { this->type = "AutoIndex"; }
 void	AutoIndex::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -47,7 +49,7 @@ void	AutoIndex::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-Index::Index(Context& context) : Attribute(context) {}
+Index::Index(Context& context) : Attribute(context) { this->type = "Index"; }
 void	Index::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -69,6 +71,7 @@ void	Index::handle_args(std::list<std::string> args)
 
 LimitExcept::LimitExcept(Context& context) : Attribute(context)
 {
+	this->type = "LimitExcept";
 	// this->keywords.push_back("allow");
 	// this->keywords.push_back("deny");
 }
@@ -79,7 +82,7 @@ void	LimitExcept::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-MaxClientBodySize::MaxClientBodySize(Context& context) : Attribute(context) {}
+MaxClientBodySize::MaxClientBodySize(Context& context) : Attribute(context) { this->type = "MaxClientBodySize"; }
 void	MaxClientBodySize::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -87,7 +90,7 @@ void	MaxClientBodySize::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-ErrorPage::ErrorPage(Context& context) : Attribute(context) {}
+ErrorPage::ErrorPage(Context& context) : Attribute(context) { this->type = "ErrorPage"; }
 void	ErrorPage::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -95,7 +98,7 @@ void	ErrorPage::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-ServerName::ServerName(Context& context) : Attribute(context) {}
+ServerName::ServerName(Context& context) : Attribute(context) { this->type = "ServerName"; }
 void	ServerName::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -103,7 +106,7 @@ void	ServerName::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 }
 
-Listen::Listen(Context& context) : Attribute(context) {}
+Listen::Listen(Context& context) : Attribute(context) { this->type = "Listen"; }
 void	Listen::handle_args(std::list<std::string> args)
 {
 	(void)args;
@@ -111,4 +114,8 @@ void	Listen::handle_args(std::list<std::string> args)
 	ft::print_iteration(args.begin(), args.end());
 	if (args.size() != 1 && args.size() != 2)
 		throw std::runtime_error("Error: incorrect amount of arguments to 'listen'");
+}
+Listen::~Listen()
+{
+	std::cout << "LISTEN DECONSTRUCTED" << std::endl;
 }

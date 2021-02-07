@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 17:15:32 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 23:15:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ class Attribute
 		void				cleanupTemporaries();
 		Attribute();
 		Attribute(Context& context);
+		Attribute(const Attribute& other);
 		virtual ~Attribute();
 		//keywords that the attribute responds to for parsing
+		std::string					type;
 		std::vector<std::string>	keywords;
 		Context&					context;
 		std::vector<Attribute*>		temporaries;
@@ -114,6 +116,7 @@ class Listen : public Attribute
 {
 	public:
 		Listen(Context& context);
+		~Listen();
 		void	handle_args(std::list<std::string> args);
 };
 

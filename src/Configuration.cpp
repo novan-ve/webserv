@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 00:41:32 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 21:06:58 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,6 @@ void	Configuration::parse()
 	populateTokens(tokens);
 	Parse(this->webserv, std::list<std::string>(), tokens).parse();
 //	addServer();
-}
-
-//interact with the webserv class to create a new Server
-void	Configuration::addServer()
-{
-	this->webserv.newServer();
 }
 
 Configuration::~Configuration()

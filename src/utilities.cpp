@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 00:59:03 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 22:46:58 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,45 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 namespace ft
 {
-	// size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& group)
-	// {
-	// 	size_t smallest = std::string::npos;
+	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match)
+	{
+		size_t smallest = std::string::npos;
 
-	// 	for (size_t i = 0; i < delim_groups.size(); i++)
-	// 	{
-	// 		size_t tmp = raw.find_first_of(delim_groups[i], search_start);
-	// 		if (tmp < smallest)
-	// 		{
-	// 			group = i;
-	// 			smallest = tmp;
-	// 		}
-	// 	}
-	// 	return (smallest);
-	// }
+		for (size_t i = 0; i < delim_groups.size(); i++)
+		{
+			size_t tmp = raw.find(delim_groups[i], search_start);
+			if (tmp < smallest)
+			{
+				match = (int)i;
+				smallest = tmp;
+			}
+		}
+		return (smallest);
+	}
+
+	std::vector<std::string>	split(std::string raw, std::vector<std::string>& delim)
+	{
+		std::vector<std::string>	tokens;
+		size_t	end;
+		int		match;
+		for (size_t begin = 0 ; begin < raw.size();)
+		{
+			match = -1;
+			end = first_of_group(raw, delim, begin, match);
+			if (end == std::string::npos)
+				end = raw.size();
+			if (begin != end)
+				tokens.push_back(raw.substr(begin, end - begin));
+			if (match == -1)
+				break ;
+			begin = end + delim[match].size();
+		}
+		return (tokens);
+	}
 
 	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim = "")
 	{

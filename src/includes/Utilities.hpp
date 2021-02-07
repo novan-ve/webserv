@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 19:07:50 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 22:47:17 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 #ifndef BUFFER_SIZE
 # define BUFFER_SIZE 256
@@ -26,12 +27,20 @@
 namespace ft
 {
 	template <class T1, class T2>
-	size_t	max_element(const std::map<T1,T2>& container)
+	T1	max_element(const std::map<T1,T2>& container)
 	{
 		typename std::map<T1,T2>::const_reverse_iterator it;
 		if (!container.size() || (it = container.rbegin()) == container.rend())
-			return (0);
+			return (T1());
 		return (it->first);
+	}
+	template <class T1>
+	T1	max_element(const std::vector<T1>& container)
+	{
+		typename std::vector<T1>::const_reverse_iterator it;
+		if (!container.size() || (it = container.rbegin()) == container.rend())
+			return (T1());
+		return (std::max_element(container.begin(), container.end()));
 	}
 
 	template <class T>
@@ -57,6 +66,8 @@ namespace ft
 	unsigned short	htons(unsigned short x);
 
 	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
+
+	std::vector<std::string>	split(std::string raw, std::vector<std::string>& delim);
 
 	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim = "");
 }

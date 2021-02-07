@@ -16,6 +16,7 @@
 
 #include "Location.hpp"
 #include "Server.hpp"
+#include "WebServer.hpp"
 
 // Location	*Context::createLocation(Context& context)
 // {
@@ -27,8 +28,12 @@ Attribute&	Context::attributeSpawner(std::string key)
 	std::cout << "KEY: " << key << std::endl;
 	if (key == "server")
 	{
-		this->children.push_back(new Server(this->context));
-		return (*this->children.back());
+		WebServer& parent = dynamic_cast<WebServer&>(this->context);
+		Server*	newServer = new Server(this->context);
+		this->children.push_back(newServer);
+		parent.servers[newServer->_server_fd] = newServer;
+		FD_SET(newServer->_server_fd, &parent.sockets);
+		return (*newServer);
 	}
 	else if (key == "location")
 	{
@@ -97,6 +102,7 @@ Context::Context(Context& parent) : Attribute(parent.context), parent(parent), p
 
 Context::~Context()
 {
+	std::cout << "CONTEXT DECONSTRUCTOR!!!" << std::endl;
 	for (size_t i = 0; i < children.size(); i++)
 	{
 		if (dynamic_cast<Server *>(children[i]))

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:23:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 21:30:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class WebServer : public Context
 {
 	private:
 		friend class Configuration;
+		friend class Context;
 
 		WebServer();
 		std::map<int, Server*>	servers;
@@ -40,7 +41,7 @@ class WebServer : public Context
 		fd_set					set_sockets; //first: copy of sockets, after select(): contains only sockets with activity
 
 		void	deleteClient(int fd);
-		Server&	newServer();
+//		Server&	newServer();
 		bool	newClientAdded();
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
@@ -51,7 +52,6 @@ class WebServer : public Context
 		WebServer& operator = (const WebServer& other);
 		~WebServer();
 
-		Attribute&	handle_keyword(std::string key);
 		void		handle_args(std::list<std::string> args);
 };
 

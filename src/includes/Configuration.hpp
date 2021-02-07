@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:00:37 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 16:25:23 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 21:07:12 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class Configuration
 		int		fd;
 		void	populateTokens(std::list<std::string>& tokens);
 		WebServer&	webserv;
-		void		addServer();
 //		Configuration();
 };
 
