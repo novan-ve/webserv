@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/06 19:18:15 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/07 16:50:01 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,6 @@ NAME = webserv
 SRC_DIR = ./src/
 
 HEADER =	./src/includes/Server.hpp \
-			./src/includes/Attribute.hpp \
 			./src/includes/Client.hpp \
 			./src/includes/Configuration.hpp \
 			./src/includes/Context.hpp \
@@ -40,7 +39,6 @@ SRC =	main.cpp \
 		WebServer.cpp \
 		Configuration.cpp \
 		Parse.cpp \
-		Attribute.cpp \
 		Location.cpp \
 		Context.cpp \
 		Properties.cpp \

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 18:46:01 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:51:13 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 
 # include "Utilities.hpp"
 # include "Context.hpp"
-# include "Attribute.hpp"
 
 class Location : public Context
 {

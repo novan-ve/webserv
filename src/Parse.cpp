@@ -6,12 +6,11 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 23:02:02 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:59:41 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Parse.hpp"
-#include "Attribute.hpp"
 #include "Configuration.hpp"
 #include "Utilities.hpp"
 
@@ -23,30 +22,27 @@
 #include <stdexcept>
 #include <iostream>
 
-Parse::Parse(Attribute& attr, std::list<std::string> args, std::list<std::string> tokens) : attr(attr), args(args), tokens(tokens) {}
+Parse::Parse(Context& context, std::list<std::string> tokens) : context(context), tokens(tokens) {}
 
-Parse::Parse(const Parse& other) : attr(other.attr), args(other.args), tokens(other.tokens) {}
+Parse::Parse(const Parse& other) : context(other.context), tokens(other.tokens) {}
 
 //KEY [ARGS] (; | { [KEYS] })
 
 void	Parse::parse()
 {
 	std::list<std::string>	childrenTokens;
-	if (args.size())
-		attr.handle_args(args);
-		//actually does stuff to the properties
+	std::list<std::string>	args;
 
 	std::cout << "TOKENS: ";
 	ft::print_iteration(tokens.begin(), tokens.end());
 	for (std::list<std::string>::iterator it = tokens.begin(); it != tokens.end();)
 	{
-//		std::cout << "Key: " << *it << std::endl;
-		//if it's a known keyword
-		if (find(attr.keywords.begin(), attr.keywords.end(), *it) != attr.keywords.end())
+		std::cout << "Key: " << *it << std::endl;
+		if (find(context.keywords.begin(), context.keywords.end(), *it) != context.keywords.end())
 		{
-//			std::cout << "KEYWORD FOUND!" << std::endl;
 			std::string		key = *it++;
 			bool			body = false;
+			Context			*child;
 			args.clear();
 			for (; it != tokens.end(); it++)
 			{
@@ -55,27 +51,29 @@ void	Parse::parse()
 					body = (*it == "{");
 					break ;
 				}
+				std::cout << "argument: " << *it << std::endl;
 				args.push_back(*it);
 			}
+			child = context.parse_keyword(key, args);
 			if (body)
 			{
+				std::cout << "BODY ENCOUNTERED" << std::endl;
+				if (!child)
+					std::runtime_error("Error: unexpected body encountered in config-parse");
 				it++;
 				childrenTokens.clear();
 //				std::cout << "KEY HAS BODY" << std::endl;
 				std::list<std::string>::iterator	end = this->endOfBlock(it, tokens.end());
 				if (end == tokens.end())
 					throw std::runtime_error("Error: Unclosed block in configuration");
-
 				childrenTokens.splice(childrenTokens.begin(), this->tokens, it--, end);
 				it++;
+				this->children.push(Parse(*child, childrenTokens));
 			}
 			it++;
-			//only creates attributes. (handle_keyword);
-			this->children.push(Parse(attr.handle_keyword(key), args, childrenTokens));
 		}
 		else
 			throw std::runtime_error("Error: unrecognized keyword in config-parser");
-//		it++;
 	}
 	while (this->children.size())
 	{

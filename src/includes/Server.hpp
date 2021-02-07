@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 17:03:02 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:51:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@
 # include <vector>
 
 # include "Context.hpp"
-# include "Attribute.hpp"
 # include "Utilities.hpp"
 # include "Location.hpp"
 
@@ -39,12 +38,12 @@ class Server : public Context
 		void	parseRequest( int new_socket );
 		void	parseResponse( int new_socket );
 		int		acceptNewClient();
+		std::map<std::string, Location*>	locations;
 		int					_server_fd;
 
 		void	handle_args(std::list<std::string> args);
 
 	private:
-		std::vector<Location*>	locations;
 		struct sockaddr_in		_address;
 };
 

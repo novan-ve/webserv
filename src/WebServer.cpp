@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 01:51:06 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 17:00:37 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,22 +32,12 @@ WebServer::~WebServer()
 
 WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 {
-	this->type = "WebServer";
 	this->keywords.push_back("server");
 
 	FD_ZERO(&this->sockets);
 	Configuration	config(config_path, *this);
 	config.parse();
 }
-
-// Server&	WebServer::newServer()
-// {
-// 	//deprecated, done by attributeSpawner now
-// 	Server*	new_server = new Server(*this);
-// 	this->servers.insert(std::pair<int, Server*>(new_server->_server_fd, new_server));
-// 	FD_SET(new_server->_server_fd, &this->sockets); //<- MOVE to Configuration
-// 	return (*new_server);
-// }
 
 void	WebServer::deleteClient(int fd)
 {
@@ -123,5 +113,3 @@ void	WebServer::handle_args(std::list<std::string>	args)
 		throw std::runtime_error("Error: Configuration error encountered in 'webserver'");
 	return ;
 }
-
-#include "Attribute.hpp"
