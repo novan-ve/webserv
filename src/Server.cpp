@@ -70,6 +70,10 @@ Server&		Server::operator=(const Server &rhs)
 		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
 		this->_address.sin_port = rhs._address.sin_port;
 		ft::memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
+
+		this->_address = rhs._address;
+		this->_status_line = rhs._status_line;
+		this->_lines = rhs._lines;
 	}
 
 	return *this;
@@ -79,19 +83,6 @@ Server::~Server()
 {
 	std::cout << "DECONSTRUCTING SERVER" << std::endl;
 	close(this->_server_fd);
-}
-
-int Server::errorResponse(int status_code, int new_socket) {
-
-	Response	resp(status_code);
-
-	resp.printResponse();
-	resp.sendResponse(new_socket);
-
-	this->_status_line = "";
-	this->_lines.clear();
-
-	return 2;
 }
 
 int Server::isStatusLine(const std::string &line) {
@@ -181,28 +172,55 @@ int Server::isStatusLine(const std::string &line) {
 	return 1;
 }
 
+int	Server::handleResponse(int new_socket, Request *req, int code) {
+
+	Response	resp(req, code);
+
+	resp.composeResponse();
+	resp.printResponse();
+	resp.sendResponse(new_socket);
+
+	this->_status_line = "";
+	this->_lines.clear();
+
+	if (code != 200)
+		return 2;
+	return 1;
+}
+
 int Server::parseRequest(const std::string &line, int new_socket) {
 
 	if (line == "\r") {
 		if (this->_status_line == "")
 			return 0;
 		else if (this->_status_line != "" && this->_lines.size() == 0)
-			return this->errorResponse(400, new_socket);
+			return this->handleResponse(new_socket, NULL, 400);
 		else if (this->_status_line != "" && this->_lines.size() > 0) {
 
 			int	end_pos_method = this->_status_line.find(' ');
-			while (line[end_pos_method] == ' ')
-				end_pos_method++;
+			int start_pos_path = end_pos_method;
 
-			int end_pos_path = this->_status_line.substr(end_pos_method + 1, this->_status_line.length()).find(' ');
+			while (this->_status_line[start_pos_path] == ' ')
+				start_pos_path++;
+
+			// Set end_pos_path to character before the \r\0 and remove whitespaces
+			int end_pos_path = this->_status_line.length() - 2;
+			while (this->_status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			// Move back to first character before HTTP/1.1
+			end_pos_path -= 8;
+
+			// Remove white spaces and up 1 to get character right after path
+			while (this->_status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			end_pos_path++;
 
 			Request	req(this->_status_line.substr(0, end_pos_method),
-			   			this->_status_line.substr(end_pos_method + 1, end_pos_path - end_pos_method + 1));
+			   			this->_status_line.substr(start_pos_path, end_pos_path - start_pos_path));
 
-			req.composeRequest(this->_lines);
+			req.saveRequest(this->_lines);
 			req.printRequest();
-			this->handleResponse(new_socket, &req);
-			return 1;
+			return (this->handleResponse(new_socket, &req, 200));
 		}
 	}
 	else if (isStatusLine(line)) {
@@ -219,21 +237,21 @@ int Server::parseRequest(const std::string &line, int new_socket) {
 				start--;
 
 			if (line.substr(start + 1, end - start) != "HTTP/1.1")
-				return this->errorResponse(505, new_socket);
+				return this->handleResponse(new_socket, NULL, 505);
 			this->_status_line = line;
 		}
 		return 0;
 	}
 	else if (line.find(':') != std::string::npos) {
 		if (this->_status_line == "")
-			return this->errorResponse(400, new_socket);
+			return this->handleResponse(new_socket, NULL, 400);
 
 		this->_lines.push_back(line);
 		return 0;
 	}
 	if (this->_status_line != "")
 		return 0;
-	return this->errorResponse(400, new_socket);
+	return this->handleResponse(new_socket, NULL, 400);
 }
 
 int	Server::handleRequest(int new_socket) {
@@ -251,21 +269,9 @@ int	Server::handleRequest(int new_socket) {
 
 	// Browser request
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end(); it++) {
+		// If response has been send, stop reading
 		if (parseRequest(*it, new_socket))
 			return 1;
 	}
-	std::cout << "This isn't supposed to be printed, an error occurred in Server::handleRequest" << std::endl;
 	return 1;
-}
-
-void	Server::handleResponse(int new_socket, Request *req) {
-
-	Response	resp(req, 200);
-
-	resp.composeResponse();
-	resp.printResponse();
-	resp.sendResponse(new_socket);
-
-	this->_status_line = "";
-	this->_lines.clear();
 }

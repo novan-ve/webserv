@@ -18,47 +18,29 @@
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 
-Response::Response(Request *request, int code=200) : req(request), response_code(code) {
-
-	this->setStatusCodes();
-}
-
-Response::Response(int code) : response_code(code) {
-
-	this->setStatusCodes();
-
-	this->status_line.append("HTTP/1.1 " + this->status_codes[code]);
-	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
-	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
-	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
-	this->setBodyError();
-	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
-	this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "close"));
-}
-
-Response::~Response() {}
-
-Response::Response(const Response& other) : req(other.req), status_line(other.status_line), response_code(other.response_code) {
-
-	this->setStatusCodes();
-}
-
-Response& Response::operator = (const Response& other)
-{
-	if (this != &other)
-	{
-		this->req = other.req;
-	}
-	return (*this);
-}
-
-void		Response::setStatusCodes(void) {
+Response::Response(Request *request, int code) : req(request), response_code(code) {
 
 	this->status_codes[200] = "200 OK";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
+
+Response::Response(const Response& other) : req(other.req), status_line(other.status_line),
+											response_code(other.response_code) {}
+
+Response& Response::operator = (const Response& other)
+{
+	if (this != &other)
+	{
+		this->req = other.req;
+		this->status_line = other.status_line;
+		this->response_code = other.response_code;
+	}
+	return (*this);
+}
+
+Response::~Response() {}
 
 std::string Response::getBodyLength(void) const {
 
@@ -89,9 +71,6 @@ void	Response::setBodyError(void) {
 void	Response::composeResponse(void) {
 
 	this->status_line.append("HTTP/1.1 ");
-
-	if (this->req->get_faulty_header())
-		this->response_code = 400;
 
 	this->status_line.append(this->status_codes[this->response_code]);
 

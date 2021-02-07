@@ -35,10 +35,9 @@ public:
 
 	int		isStatusLine(const std::string &line);
 
+	int 	handleResponse( int new_socket, Request *req, int code );
 	int		handleRequest( int new_socket );
 	int		parseRequest( const std::string &line, int new_socket );
-	void	handleResponse( int new_socket, Request *req );
-	int		errorResponse( int status_code, int new_socket );
 
 	int					_server_fd;
 

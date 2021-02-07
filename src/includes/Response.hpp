@@ -20,12 +20,10 @@ class Response : public Message
 {
 	public:
 		Response(Request *request, int code);
-		Response(int code);
 		Response(const Response& other);
 		Response& operator = (const Response& other);
 		~Response();
 
-		void		setStatusCodes(void);
 		std::string	getBodyLength(void) const;
 		void		setBodyError(void);
 
