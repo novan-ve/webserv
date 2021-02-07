@@ -6,12 +6,16 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 17:37:34 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 20:30:22 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 20:18:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "URI.hpp"
+#include "Utilities.hpp"
 #include <iostream>
+
+#define yeet throw
+#define kitkat break
 
 URI::~URI() {}
 
@@ -21,28 +25,38 @@ URI::URI() {}
 
 URI::URI(const std::string& uri) : parts(URI_FRAGMENT_ID + 1, std::string())
 {
-	const char *sep[] = {
-		"://",
-		":",
-		"/",
-		"?",
-		"#",
-		""
-	};
-	std::vector<std::string>	separators(sep, sep + (sizeof(sep) / sizeof(char *)));
+	std::vector<std::vector<std::string> >	separators(6);
+
+	separators[URI_SCHEME].push_back("://");
+	separators[URI_HOST].push_back(":");
+	separators[URI_HOST].push_back("/");
+	separators[URI_PORT].push_back("/");
+	separators[URI_PATH].push_back("?");
+	separators[URI_QUERY].push_back("#");
 
 	size_t start = 0;
 	size_t end = 0;
-	for (size_t part = 0; part < separators.size() && end < uri.size(); part++)
+	size_t part = 0;
+	bool begun = false;
+	for (; part < separators.size() && start < uri.size(); part++)
 	{
-		size_t	current_part = part;
-		end = uri.find_first_of(separators[current_part], start);
-		for (;end == std::string::npos && part + 1 < separators.size(); part++)
-			end = uri.find_first_of(separators[part + 1], start);
-		end = (end == std::string::npos) ? uri.size() : end;
-		this->parts[current_part] = uri.substr(start, end - start);
-		start = end + separators[current_part].size();
+		int match = -1;
+		end = ft::first_of_group(uri, separators[part], start, match);
+		if (match != -1)
+			begun = true;
+		if (match == -1 && !begun)
+			continue ;
+		else if (match == -1)
+			kitkat ;
+		if (end == std::string::npos)
+			end = uri.size();
+		this->parts[part] = uri.substr(start, end - start);
+		start = end + separators[part][match].size();
+		if (match == 1)
+			part++;
 	}
+	if (part < separators.size())
+		this->parts[part] = uri.substr(start, uri.size());
 
 	// const char *partnames[] = {
 	// 	"SCHEME",

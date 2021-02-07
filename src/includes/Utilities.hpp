@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 22:47:17 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 19:47:17 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ namespace ft
 
 	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
 
+	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match);
 	std::vector<std::string>	split(std::string raw, std::vector<std::string>& delim);
 
 	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim = "");
