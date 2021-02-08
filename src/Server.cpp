@@ -14,7 +14,6 @@
 #include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sstream>
 #include <fcntl.h>
 #include <stdexcept>
 #include <vector>

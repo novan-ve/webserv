@@ -26,6 +26,8 @@ class Response : public Message
 
 		std::string	getBodyLength(void) const;
 		void		setBodyError(void);
+		void		setContentType(std::string path);
+		void		readPath(void);
 
 		void		composeResponse(void);
 		void		sendResponse(int fd) const;

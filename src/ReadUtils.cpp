@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 16:13:27 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 16:13:31 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/08 16:01:49 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ namespace ft
 				bytes_read = read(fd, buf, BUFFER_SIZE); //read again
 				if (bytes_read < 0)
 					return (lines);
+                else if (bytes_read == 0)
+                    break;
 				buf[bytes_read] = '\0';
 				buffers[fd] = std::string(buf); //replace buffer with newly read data
 			}
