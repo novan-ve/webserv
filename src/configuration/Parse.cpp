@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/08 13:51:08 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/08 14:10:04 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ void	Parse::parse()
 					throw std::runtime_error("Error: unexpected body encountered in config-parse");
 				it++;
 				childrenTokens.clear();
-//				std::cout << "KEY HAS BODY" << std::endl;
 				std::list<std::string>::iterator	end = this->endOfBlock(it, tokens.end());
 				if (end == tokens.end())
 					throw std::runtime_error("Error: Unclosed block in configuration");

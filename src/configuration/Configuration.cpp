@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:54:07 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/08 14:09:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,9 +81,7 @@ void	Configuration::parse()
 	std::list<std::string>	tokens;
 	populateTokens(tokens);
 	std::list<std::string>	arguments;
-//	this->webserv.parse_keyword("server", arguments);
 	Parse(this->webserv, tokens).parse();
-//	addServer();
 }
 
 Configuration::~Configuration()
