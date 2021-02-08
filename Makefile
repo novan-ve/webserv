@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/07 16:50:01 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/08 14:06:34 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,37 +14,42 @@ NAME = webserv
 
 SRC_DIR = ./src/
 
-HEADER =	./src/includes/Server.hpp \
-			./src/includes/Client.hpp \
-			./src/includes/Configuration.hpp \
-			./src/includes/Context.hpp \
-			./src/includes/EnumString.hpp \
-			./src/includes/Location.hpp \
-			./src/includes/Message.hpp \
-			./src/includes/Method.hpp \
-			./src/includes/Parse.hpp \
-			./src/includes/Properties.hpp \
-			./src/includes/Request.hpp \
-			./src/includes/Response.hpp \
-			./src/includes/Server.hpp \
-			./src/includes/URI.hpp \
-			./src/includes/Utilities.hpp \
-			./src/includes/WebServer.hpp \
-			
-INCL := $(addprefix -I ,$(dir $(HEADER)))
-INCL := $(sort $(INCL)) #removes duplicates
+HEADER =	Server.hpp \
+			Client.hpp \
+			configuration/Configuration.hpp \
+			configuration/Context.hpp \
+			configuration/Location.hpp \
+			configuration/Parse.hpp \
+			EnumString.hpp \
+			Message.hpp \
+			Method.hpp \
+			Properties.hpp \
+			Request.hpp \
+			Response.hpp \
+			Server.hpp \
+			URI.hpp \
+			Utilities.hpp \
+			WebServer.hpp
+
+HEADER :=	$(addprefix ./src/includes/, $(HEADER))
+
+INCL_FOLDERS = $(dir $(HEADER))
+INCL_FOLDERS := $(sort $(INCL_FOLDERS))
+
+INCL := $(addprefix -I ,$(INCL_FOLDERS))
 
 SRC =	main.cpp \
 		utilities.cpp \
 		WebServer.cpp \
-		Configuration.cpp \
-		Parse.cpp \
-		Location.cpp \
-		Context.cpp \
+		configuration/Configuration.cpp \
+		configuration/Parse.cpp \
+		configuration/Location.cpp \
+		configuration/Context.cpp \
 		Properties.cpp \
 		URI.cpp \
 		Client.cpp \
 		Server.cpp
+
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)
 

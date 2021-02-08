@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:59:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/08 13:51:08 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	Parse::parse()
 			{
 				std::cout << "BODY ENCOUNTERED" << std::endl;
 				if (!child)
-					std::runtime_error("Error: unexpected body encountered in config-parse");
+					throw std::runtime_error("Error: unexpected body encountered in config-parse");
 				it++;
 				childrenTokens.clear();
 //				std::cout << "KEY HAS BODY" << std::endl;
