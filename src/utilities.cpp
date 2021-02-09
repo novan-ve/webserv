@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/09 19:12:55 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 19:58:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,15 @@ namespace ft
 {
 	std::string	itos(int num, const std::string base = "0123456789")
 	{
-		size_t size = 0;
+		size_t size = (num <= 0);
+		num *= ((num >= 0) + (num >= 0) - 1);
 		for (int tmp = num; tmp ; tmp /= base.size(), size++) {}
-
-		std::string	number(size, '\0');
-		for (--size ; num ; num /= base.size(), size--)
+		if (!size || !base.size())
+			return ("");
+		std::string	number(size, '-');
+		if (!num)
+			number[num] = base[num];
+		for (--size; num ; num /= base.size(), size--)
 			number[size] = base[num % base.size()];
 		return (number);
 	}
@@ -35,14 +39,18 @@ namespace ft
 	{
 		int res = 0;
 
-		for (size_t i = 0; i < number.size(); i++)
+		if (!number.size())
+			return (res);
+		int sign = (number[0] == '+') - (number[0] == '-');
+		for (size_t i = !!sign; i < number.size(); i++)
 		{
 			size_t num = base.find(number[i]);
 			if (num == std::string::npos)
 				throw std::runtime_error("Error: string is not a number");
-			res = res * 10 + num;
+			res = res * base.size() + num;
 		}
-		return (res);
+		sign += (!sign);
+		return (res * sign);
 	}
 
 	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match)
