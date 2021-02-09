@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 22:51:00 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 19:13:20 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "Utilities.hpp"
 
 int		main(int argc, char **argv)
 {

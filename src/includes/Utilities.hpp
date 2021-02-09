@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 19:47:17 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 19:03:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,10 @@
 
 namespace ft
 {
+	std::string	itos(int num, const std::string base = "0123456789");
+
+	int stoi(std::string number, const std::string base = "0123456789");
+
 	template <class T1, class T2>
 	T1	max_element(const std::map<T1,T2>& container)
 	{

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:53:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 18:49:54 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,11 @@ Server::Server(Context& parent) : Context(parent), _status_line("")
 	int 	opt = 1;
 
 	// Create socket file descriptor
-	if ((this->_server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	if ((this->_server_fd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
 		throw std::runtime_error("Error: Creation of socket failed");
 
 	// Forcefully attach socket to port
-	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
 		throw std::runtime_error("Error: Failed to set socket options");
 
 	// Assign transport address
@@ -52,13 +52,13 @@ Server::Server(Context& parent) : Context(parent), _status_line("")
 	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address), sizeof( this->_address )) == -1)
 		throw std::runtime_error("Error: binding server-socket to a port failed");
 
-	//Set the resulting socketfd to be non blocking
-	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
-
 	if (listen(this->_server_fd, 10 ) == -1)
 		throw std::runtime_error("Error: could not set server-socket to listening mode");
 	std::cout << "SERVER CREATED!" << std::endl;
+
+	//Set the resulting socketfd to be non blocking
+	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
 }
 
 Server::Server(const Server &src)

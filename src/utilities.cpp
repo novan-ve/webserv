@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/06 22:46:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 19:12:55 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,31 @@
 
 namespace ft
 {
+	std::string	itos(int num, const std::string base = "0123456789")
+	{
+		size_t size = 0;
+		for (int tmp = num; tmp ; tmp /= base.size(), size++) {}
+
+		std::string	number(size, '\0');
+		for (--size ; num ; num /= base.size(), size--)
+			number[size] = base[num % base.size()];
+		return (number);
+	}
+
+	int stoi(std::string number, const std::string base = "0123456789")
+	{
+		int res = 0;
+
+		for (size_t i = 0; i < number.size(); i++)
+		{
+			size_t num = base.find(number[i]);
+			if (num == std::string::npos)
+				throw std::runtime_error("Error: string is not a number");
+			res = res * 10 + num;
+		}
+		return (res);
+	}
+
 	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match)
 	{
 		size_t smallest = std::string::npos;
