@@ -28,6 +28,7 @@ HEADER =	Server.hpp \
 			Response.hpp \
 			URI.hpp \
 			Utilities.hpp \
+			Exception.hpp \
 			WebServer.hpp
 
 HEADER :=	$(addprefix ./src/includes/, $(HEADER))
@@ -51,6 +52,7 @@ SRC =	main.cpp \
 		Request.cpp \
 		Response.cpp \
 		get_lines.cpp \
+		Exception.cpp \
 		Message.cpp
 
 OBJ := $(SRC:%.cpp=./obj/%.o)

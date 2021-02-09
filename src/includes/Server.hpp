@@ -36,25 +36,15 @@ class Server : public Context
 		~Server();
 
 		void	startListening( void );
-		void	parseRequest( int new_socket );
-		void	parseResponse( int new_socket );
 		int		acceptNewClient();
 
 		void	handle_args(std::list<std::string> args);
-
-		int		isStatusLine(const std::string &line);
-
-		int 	handleResponse( int new_socket, Request *req, int code );
-		int		handleRequest( int new_socket );
-		int		parseRequest( const std::string &line, int new_socket );
 
 		std::map<std::string, Location*>	locations;
 		int									_server_fd;
 
 	private:
 		struct sockaddr_in			_address;
-		std::string					_status_line;
-		std::vector<std::string>	_lines;
 };
 
 #endif
