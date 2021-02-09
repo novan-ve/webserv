@@ -1,33 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Message.cpp                                        :+:    :+:            */
+/*   Location.hpp                                       :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 18:01:23 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/07 16:51:13 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Message.hpp"
-#include <iostream>
+#ifndef LOCATION_HPP
+# define LOCATION_HPP
 
-Message::Message() {}
+# include <list>
+# include <string>
 
-Message::Message(const Message& other) {
+# include "Utilities.hpp"
+# include "Context.hpp"
 
-	*this = other;
-}
-
-Message& Message::operator = (const Message& other)
+class Location : public Context
 {
-	if (this != &other)
-	{
-		this->body = other.body;
-		this->headers = other.headers;
-	}
-	return (*this);
-}
+	public:
+//		Location();
+		~Location();
+		Location(Context& parent);
+		Location(const Location& other);
+		void		handle_args(std::list<std::string> args);
+};
 
-Message::~Message() {}
+#endif

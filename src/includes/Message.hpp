@@ -25,7 +25,6 @@ class Message
 		Message(const Message& other);
 		Message& operator = (const Message& other);
 		virtual ~Message();
-		virtual void	send(int fd) const = 0;
 	protected:
 		std::vector<std::pair<std::string, std::string> >	headers;
 		std::vector<std::string>							body;

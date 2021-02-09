@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/03 21:47:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:51:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,29 +15,46 @@
 
 # include <iostream>
 # include <netinet/in.h>
+# include <string>
+# include <list>
+# include <vector>
 
+# include "Context.hpp"
 # include "Utilities.hpp"
+# include "Request.hpp"
+# include "Location.hpp"
 
 # define PORT 8080
 
-class Server {
+class Server : public Context
+{
+	public:
+//		Server();
+		Server(Context& parent);
+		Server( const Server &src );
+		Server&	operator=( const Server &rhs );
+		~Server();
 
-public:
+		void	startListening( void );
+		void	parseRequest( int new_socket );
+		void	parseResponse( int new_socket );
+		int		acceptNewClient();
 
-	Server();
-	Server( const Server &src );
-	Server&	operator=( const Server &rhs );
-	~Server();
+		void	handle_args(std::list<std::string> args);
 
-	void	startListening( void );
-	void	parseRequest( int new_socket );
-	void	parseResponse( int new_socket );
-	int		acceptNewClient();
-	int					_server_fd;
+		int		isStatusLine(const std::string &line);
 
-private:
+		int 	handleResponse( int new_socket, Request *req, int code );
+		int		handleRequest( int new_socket );
+		int		parseRequest( const std::string &line, int new_socket );
 
-	struct sockaddr_in	_address;
+		std::map<std::string, Location*>	locations;
+		int									_server_fd;
+
+	private:
+		struct sockaddr_in			_address;
+		std::string					_status_line;
+		std::vector<std::string>	_lines;
 };
 
 #endif

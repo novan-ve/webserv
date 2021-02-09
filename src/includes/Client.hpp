@@ -25,7 +25,7 @@ class Client
 //		Client& operator = (const Client& other); //server is a reference, cant be copied with assignment operator, so this makes 0 sense
 		int						fd;
 	public:
-		void	handleRequest();
+		int	handleRequest();
 		int	getFd();
 		Client(Server& server);
 		Client(const Client& other);

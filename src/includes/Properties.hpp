@@ -1,33 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   Message.cpp                                        :+:    :+:            */
+/*   Properties.hpp                                     :+:    :+:            */
 /*                                                     +:+                    */
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 18:01:23 by tbruinem      ########   odam.nl         */
+/*   Created: 2021/02/06 09:28:09 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 09:37:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Message.hpp"
-#include <iostream>
+#ifndef PROPERTIES_HPP
+# define PROPERTIES_HPP
 
-Message::Message() {}
+# include <map>
+# include <vector>
+# include <list>
+# include <string>
+# include <iostream>
 
-Message::Message(const Message& other) {
-
-	*this = other;
-}
-
-Message& Message::operator = (const Message& other)
+struct Properties
 {
-	if (this != &other)
-	{
-		this->body = other.body;
-		this->headers = other.headers;
-	}
-	return (*this);
-}
+	Properties();
+	Properties(const Properties& other);
 
-Message::~Message() {}
+	std::map<std::string, size_t>	values;
+};
+
+#endif

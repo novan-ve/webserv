@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:12:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:53:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,24 @@
 #include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sstream>
 #include <fcntl.h>
 #include <stdexcept>
+#include <vector>
 
-#include "includes/Server.hpp"
+#include "Server.hpp"
 #include "Utilities.hpp"
+#include "Location.hpp"
+#include "Context.hpp"
+#include "Response.hpp"
 
-Server::Server()
+//Context - WebServer, Server is a child Context of WebServer
+Server::Server(Context& parent) : Context(parent), _status_line("")
 {
+	this->keywords.push_back("location");
+	this->keywords.push_back("listen");
+	this->keywords.push_back("server_name");
+	this->keywords.push_back("error_page");
+	this->keywords.push_back("client_max_body_size");
 	int 	opt = 1;
 
 	// Create socket file descriptor
@@ -59,17 +68,16 @@ Server::Server(const Server &src)
 
 Server&		Server::operator=(const Server &rhs)
 {
-	if (this != &rhs) {
-
-//		dup2(this->_server_fd, rhs._server_fd); //dont think this is the right course of action for assignment
+	if (this != &rhs)
+	{
 		this->_server_fd = rhs._server_fd;
 
-		this->_address.sin_family = rhs._address.sin_family;
-		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
-		this->_address.sin_port = rhs._address.sin_port;
-		ft::memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
-	}
+		this->_address = rhs._address;
+		this->_status_line = rhs._status_line;
+		this->_lines = rhs._lines;
 
+		this->keywords = rhs.keywords;
+	}
 	return *this;
 }
 
@@ -79,52 +87,201 @@ Server::~Server()
 	close(this->_server_fd);
 }
 
-// void	Server::startListening( void )
-// {
-// 	unsigned int		addrlen = sizeof(this->_address);
-// 	int 				new_socket;
+int Server::isStatusLine(const std::string &line) {
 
-// 	while(true) {
+	size_t i = 0;
 
-// 		std::cout << std::endl << "+++++++ Waiting for new connection ++++++++" << std::endl << std::endl;
+	// Search method
+	while (i < line.length()) {
 
-// 		if ((new_socket = accept(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address),
-// 				reinterpret_cast<socklen_t*>(&addrlen))) < 0)
-// 			throw std::runtime_error("Error: error occurred when accepting a new client connection");
+		// Method is at least 1 letter
+		if (line[i] == ' ' && i > 0)
+			break;
 
-// 		this->parseRequest(new_socket);
-// 		this->parseResponse(new_socket);
+			// First word is smaller than 3 letters or bigger than 7 letters
+		else if (line[i] == ' ' && (i < 2 || i > 7))
+			return 0;
 
-// 		std::cout << "------------------Hello message sent-------------------" << std::endl;
+		// Not an uppercase letter
+		if (line[i] < 'A' || line[i] > 'Z')
+			return 0;
+		i++;
+	}
+	// No spaces found
+	if (line[i] == '\0')
+		return 0;
 
-// 		close(new_socket);
-// 	}
-// }
-
-void	Server::parseRequest(int new_socket) {
-
-	char			buffer[1024];
-
-	ft::memset(&buffer, '\0', 1024);
-
-	if (recv(new_socket, buffer, 1024, 0) < 0)
-	{
-		std::cout << strerror(errno) << std::endl;
-		throw std::runtime_error("Error: Could not receive request from the client");
+	// Find start of path
+	while (line[i] != '\0') {
+		if (line[i] == '/')
+			break;
+		// Not a valid path
+		if (line[i] != ' ')
+			return 0;
+		i++;
 	}
 
-	std::cout << buffer << std::endl;
+	// No path found
+	if (line[i] == '\0')
+		return 0;
+
+	// Find end of path
+	while (line[i] != '\0') {
+		if (line[i] == 'H')
+			break;
+			// Invalid character in path
+		else if (line[i] < 20 || line[i] >= 127)
+			return 0;
+		i++;
+	}
+	// No HTTP version found or no space between path and http version
+	if (line[i] == '\0' || line[i - 1] != ' ')
+		return 0;
+
+	// Version doesn't start with HTTP/
+	if (line.substr(i, 5) != "HTTP/")
+		return 0;
+	i += 5;
+
+	bool    dot = false;
+
+	while (line[i] != '\0' && line[i] != '\r') {
+		// Not a valid version number
+		if (line[i] == ' ')
+			break;
+		if ((line[i] < '0' || line[i] > '9') && line[i] != '.')
+			return 0;
+		else if (line[i] == '.') {
+			// Can't have more than 2 dots or have the dot not surrounded by numbers
+			if (dot || line[i - 1] < '0' || line[i - 1] > '9' || line[i + 1] < '0' || line[i + 1] > '9')
+				return 0;
+			dot = true;
+		}
+		i++;
+	}
+	// No dot found
+	if (!dot)
+		return 0;
+
+	while (line[i] == ' ')
+		i++;
+
+	// Has something after the HTTP version
+	if (line[i] != '\0' && line[i] != '\r')
+		return 0;
+
+	return 1;
 }
 
-void	Server::parseResponse(int new_socket) {
+int	Server::handleResponse(int new_socket, Request *req, int code) {
 
-	std::string			response;
+	Response	resp(req, code);
 
-	response.append("HTTP/1.1 200 OK\n");
-	response.append("Content-Type: text/plain\n");
-	response.append("Connection: keep-alive\n");
-	response.append("\nSpoderman");
+	resp.composeResponse();
+	resp.printResponse();
+	resp.sendResponse(new_socket);
 
-	if (send(new_socket, response.c_str(), response.length(), 0) < 0)
-		throw std::runtime_error("Error: Could not send request to the client");
+	this->_status_line = "";
+	this->_lines.clear();
+
+	if (code != 200)
+		return 2;
+	return 1;
+}
+
+int Server::parseRequest(const std::string &line, int new_socket) {
+
+	if (line == "\r") {
+		if (this->_status_line == "")
+			return 0;
+		else if (this->_status_line != "" && this->_lines.size() == 0)
+			return this->handleResponse(new_socket, NULL, 400);
+		else if (this->_status_line != "" && this->_lines.size() > 0) {
+
+			int	end_pos_method = this->_status_line.find(' ');
+			int start_pos_path = end_pos_method;
+
+			while (this->_status_line[start_pos_path] == ' ')
+				start_pos_path++;
+
+			// Set end_pos_path to character before the \r\0 and remove whitespaces
+			int end_pos_path = this->_status_line.length() - 2;
+			while (this->_status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			// Move back to first character before HTTP/1.1
+			end_pos_path -= 8;
+
+			// Remove white spaces and up 1 to get character right after path
+			while (this->_status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			end_pos_path++;
+
+			Request	req(this->_status_line.substr(0, end_pos_method),
+			   			this->_status_line.substr(start_pos_path, end_pos_path - start_pos_path));
+
+			req.saveRequest(this->_lines);
+			req.printRequest();
+			return (this->handleResponse(new_socket, &req, 200));
+		}
+	}
+	else if (isStatusLine(line)) {
+		if (this->_status_line == "") {
+
+			int start = line.length() - 1;
+
+			while (line[start] == ' ' || (line[start] >= 10 && line[start] <= 13))
+				start--;
+
+			int end = start;
+
+			while (line[start] != ' ')
+				start--;
+
+			if (line.substr(start + 1, end - start) != "HTTP/1.1")
+				return this->handleResponse(new_socket, NULL, 505);
+			this->_status_line = line;
+		}
+		return 0;
+	}
+	else if (line.find(':') != std::string::npos) {
+		if (this->_status_line == "")
+			return this->handleResponse(new_socket, NULL, 400);
+
+		this->_lines.push_back(line);
+		return 0;
+	}
+	if (this->_status_line != "")
+		return 0;
+	return this->handleResponse(new_socket, NULL, 400);
+}
+
+int	Server::handleRequest(int new_socket) {
+
+	std::vector<std::string>	lines_read;
+
+	lines_read = ft::get_lines(new_socket);
+
+	// Telnet request
+	if (lines_read.size() == 1) {
+		if (parseRequest(lines_read[0], new_socket) == 2)
+			return 1;
+		return 0;
+	}
+
+	// Browser request
+	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end(); it++) {
+		// If response has been send, stop reading
+		if (parseRequest(*it, new_socket))
+			return 1;
+	}
+	return 1;
+}
+
+void	Server::handle_args(std::list<std::string>	args)
+{
+	std::cout << "Server ARGS: ";
+	ft::print_iteration(args.begin(), args.end());
+	if (args.size())
+		throw std::runtime_error("Error: Configuration error encountered in 'server'");
+	return ;
 }

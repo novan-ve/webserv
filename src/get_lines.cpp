@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 13:00:05 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 15:21:22 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 17:06:40 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,48 +22,56 @@
 # define BUFFER_SIZE 256
 #endif
 
-std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max())
+namespace ft
 {
-	static std::map<int,std::string>	buffers;
-	std::vector<std::string>			lines;
-	char								buf[BUFFER_SIZE + 1];
-	size_t								bytes_read = 1;
-	size_t								end_pos;
-
-	for (size_t i = 0; i < max_lines && bytes_read; i++)
+	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max())
 	{
-		while (end_pos = buffers[fd].find('\n') == std::string::npos) //while there is no newline in buffer
+		static std::map<int,std::string>	buffers;
+		std::vector<std::string>			lines;
+		char								buf[BUFFER_SIZE + 1];
+		ssize_t								bytes_read = 1;
+		size_t								end_pos;
+
+		for (size_t i = 0; i < max_lines && bytes_read; i++)
 		{
-			if (buffers[fd].size()) //add the remainder to line
+			while ((end_pos = buffers[fd].find('\n')) == std::string::npos) //while there is no newline in buffer
 			{
-				if (i >= lines.size())
-					lines.push_back(buffers[fd]);
-				else
-					lines[i] += buffers[fd];
+				if (buffers[fd].size()) //add the remainder to line
+				{
+					if (i >= lines.size())
+						lines.push_back(buffers[fd]);
+					else
+						lines[i] += buffers[fd];
+				}
+				bytes_read = read(fd, buf, BUFFER_SIZE); //read again
+				if (bytes_read < 0)
+				{
+					buffers.erase(fd);
+					return (lines);
+				}
+				else if (!bytes_read)
+					break ;
+				buf[bytes_read] = '\0';
+				buffers[fd] = std::string(buf); //replace buffer with newly read data
 			}
-			bytes_read = read(fd, buf, BUFFER_SIZE); //read again
-			buf[bytes_read] = '\0';
-			buffers[fd] = std::string(buf); //replace buffer with newly read data
-			if (!bytes_read)
-				break ;
-		}
-		end_pos = buffers[fd].find('\n');
-		if (end_pos != std::string::npos) //if there is a newline, we add the last part of the line
-		{
-			std::string new_line = buffers[fd].substr(0, end_pos);
-			if (i >= lines.size())
-				lines.push_back(new_line);
+			end_pos = buffers[fd].find('\n');
+			if (end_pos != std::string::npos) //if there is a newline, we add the last part of the line
+			{
+				std::string new_line = buffers[fd].substr(0, end_pos);
+				if (i >= lines.size())
+					lines.push_back(new_line);
+				else
+					lines[i].append(new_line);
+			}
 			else
-				lines[i].append(new_line);
+				end_pos = buffers[fd].size() - 1;
+			buffers[fd] = buffers[fd].substr(end_pos + 1, buffers[fd].size()); //remove the last part of the line from buff
+			if (bytes_read <= 0) //last line, done reading
+			{
+				buffers.erase(fd);
+				break ;
+			}
 		}
-		else
-			end_pos = buffers[fd].size() - 1;
-		buffers[fd] = buffers[fd].substr(end_pos + 1, buffers[fd].size()); //remove the last part of the line from buff
-		if (!bytes_read) //last line, done reading
-		{
-			buffers.erase(fd);
-			break ;
-		}
+		return (lines);
 	}
-	return (lines);
 }
