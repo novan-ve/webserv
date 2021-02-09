@@ -18,7 +18,6 @@
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
-#include "includes/ReadUtils.hpp"
 
 Response::Response(Request *request, int code) : req(request), response_code(code) {
 

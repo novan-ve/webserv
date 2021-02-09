@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 14:55:30 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:51:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include "Configuration.hpp"
 # include "Client.hpp"
 # include "Server.hpp"
+# include "Context.hpp"
+
 # include <vector>
 # include <map>
 # include <sys/select.h>
@@ -23,10 +25,13 @@
 # include <sys/types.h>
 # include <unistd.h>
 
-class WebServer
+# define DEFAULT_CONFIG "./config/default.conf"
+
+class WebServer : public Context
 {
 	private:
 		friend class Configuration;
+		friend class Context;
 
 		WebServer();
 		std::map<int, Server*>	servers;
@@ -35,7 +40,7 @@ class WebServer
 		fd_set					set_sockets; //first: copy of sockets, after select(): contains only sockets with activity
 
 		void	deleteClient(int fd);
-		void	newServer();
+//		Server&	newServer();
 		bool	newClientAdded();
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
@@ -45,6 +50,8 @@ class WebServer
 		void	run();
 		WebServer& operator = (const WebServer& other);
 		~WebServer();
+
+		void		handle_args(std::list<std::string> args);
 };
 
 #endif

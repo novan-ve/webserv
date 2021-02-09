@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:12:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/07 16:53:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,20 @@
 #include <stdexcept>
 #include <vector>
 
-#include "includes/Server.hpp"
-#include "includes/ReadUtils.hpp"
-#include "includes/Utilities.hpp"
-#include "includes/Response.hpp"
+#include "Server.hpp"
+#include "Utilities.hpp"
+#include "Location.hpp"
+#include "Context.hpp"
+#include "Response.hpp"
 
-Server::Server() : _status_line("")
+//Context - WebServer, Server is a child Context of WebServer
+Server::Server(Context& parent) : Context(parent), _status_line("")
 {
+	this->keywords.push_back("location");
+	this->keywords.push_back("listen");
+	this->keywords.push_back("server_name");
+	this->keywords.push_back("error_page");
+	this->keywords.push_back("client_max_body_size");
 	int 	opt = 1;
 
 	// Create socket file descriptor
@@ -61,20 +68,16 @@ Server::Server(const Server &src)
 
 Server&		Server::operator=(const Server &rhs)
 {
-	if (this != &rhs) {
-
+	if (this != &rhs)
+	{
 		this->_server_fd = rhs._server_fd;
-
-		this->_address.sin_family = rhs._address.sin_family;
-		this->_address.sin_addr.s_addr = rhs._address.sin_addr.s_addr;
-		this->_address.sin_port = rhs._address.sin_port;
-		ft::memset(this->_address.sin_zero, '\0', sizeof(rhs._address.sin_zero));
 
 		this->_address = rhs._address;
 		this->_status_line = rhs._status_line;
 		this->_lines = rhs._lines;
-	}
 
+		this->keywords = rhs.keywords;
+	}
 	return *this;
 }
 
@@ -86,10 +89,10 @@ Server::~Server()
 
 int Server::isStatusLine(const std::string &line) {
 
-	size_t 		i = 0;
+	size_t i = 0;
 
 	// Search method
-	while(i < line.length()) {
+	while (i < line.length()) {
 
 		// Method is at least 1 letter
 		if (line[i] == ' ' && i > 0)
@@ -131,7 +134,6 @@ int Server::isStatusLine(const std::string &line) {
 			return 0;
 		i++;
 	}
-
 	// No HTTP version found or no space between path and http version
 	if (line[i] == '\0' || line[i - 1] != ' ')
 		return 0;
@@ -141,7 +143,7 @@ int Server::isStatusLine(const std::string &line) {
 		return 0;
 	i += 5;
 
-	bool	dot = false;
+	bool    dot = false;
 
 	while (line[i] != '\0' && line[i] != '\r') {
 		// Not a valid version number
@@ -273,4 +275,13 @@ int	Server::handleRequest(int new_socket) {
 			return 1;
 	}
 	return 1;
+}
+
+void	Server::handle_args(std::list<std::string>	args)
+{
+	std::cout << "Server ARGS: ";
+	ft::print_iteration(args.begin(), args.end());
+	if (args.size())
+		throw std::runtime_error("Error: Configuration error encountered in 'server'");
+	return ;
 }

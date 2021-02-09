@@ -6,22 +6,23 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/03 20:48:38 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/06 22:51:00 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServer.hpp"
+#include "URI.hpp"
+
 #include <stdio.h>
 #include <iostream>
 
-int 	main(int argc, char **argv) {
-
+int		main(int argc, char **argv)
+{
 	if (argc != 1 && argc != 2)
 		return (!!dprintf(2, "Wrong number of arguments!"));
-	WebServer	webserv(argv[1]);
-
 	try
 	{
+		WebServer	webserv(argv[1]);
 		webserv.run();
 	}
 	catch (std::exception& e)

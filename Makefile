@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/03 19:23:40 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/02/09 14:22:55 by novan-ve      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,19 +14,45 @@ NAME = webserv
 
 SRC_DIR = ./src/
 
-HEADER = ./src/includes/Server.hpp
-INCL := $(addprefix -I ,$(dir $(HEADER)))
+HEADER =	Server.hpp \
+			Client.hpp \
+			configuration/Configuration.hpp \
+			configuration/Context.hpp \
+			configuration/Location.hpp \
+			configuration/Parse.hpp \
+			EnumString.hpp \
+			Message.hpp \
+			Method.hpp \
+			Properties.hpp \
+			Request.hpp \
+			Response.hpp \
+			URI.hpp \
+			Utilities.hpp \
+			WebServer.hpp
+
+HEADER :=	$(addprefix ./src/includes/, $(HEADER))
+
+INCL_FOLDERS = $(dir $(HEADER))
+INCL_FOLDERS := $(sort $(INCL_FOLDERS))
+
+INCL := $(addprefix -I ,$(INCL_FOLDERS))
 
 SRC =	main.cpp \
 		utilities.cpp \
-		ReadUtils.cpp \
 		WebServer.cpp \
-		Configuration.cpp \
+		configuration/Configuration.cpp \
+		configuration/Parse.cpp \
+		configuration/Location.cpp \
+		configuration/Context.cpp \
+		Properties.cpp \
+		URI.cpp \
 		Client.cpp \
 		Server.cpp \
 		Request.cpp \
 		Response.cpp \
+		get_lines.cpp \
 		Message.cpp
+
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)
 
@@ -40,7 +66,7 @@ CC = clang++
 
 all: $(NAME)
 
-obj/%.o: src/%.cpp
+obj/%.o: src/%.cpp $(HEADER)
 	mkdir -p $(@D)
 	$(CC) $(FLAGS) $(INCL) -c $< -o $@
 

@@ -1,26 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        ::::::::            */
-/*   ReadUtils.hpp                                      :+:    :+:            */
+/*   Properties.hpp                                     :+:    :+:            */
 /*                                                     +:+                    */
-/*   By: novan-ve <marvin@codam.nl>                   +#+                     */
+/*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
-/*   Created: 2021/02/04 16:11:06 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/04 16:11:07 by novan-ve      ########   odam.nl         */
+/*   Created: 2021/02/06 09:28:09 by tbruinem      #+#    #+#                 */
+/*   Updated: 2021/02/06 09:37:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef READUTILS_HPP
-# define READUTILS_HPP
+#ifndef PROPERTIES_HPP
+# define PROPERTIES_HPP
 
+# include <map>
 # include <vector>
-# include <limits>
+# include <list>
+# include <string>
+# include <iostream>
 
-namespace ft
+struct Properties
 {
-	std::vector <std::string> get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
+	Properties();
+	Properties(const Properties& other);
 
-	std::pair<std::string, std::string>	get_keyval(std::string raw, char delimiter = ':');
-}
+	std::map<std::string, size_t>	values;
+};
 
 #endif
