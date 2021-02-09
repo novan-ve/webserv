@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 13:00:05 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/05 13:27:25 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/09 17:06:40 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,10 @@ namespace ft
 				}
 				bytes_read = read(fd, buf, BUFFER_SIZE); //read again
 				if (bytes_read < 0)
+				{
+					buffers.erase(fd);
 					return (lines);
+				}
 				else if (!bytes_read)
 					break ;
 				buf[bytes_read] = '\0';
