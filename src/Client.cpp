@@ -59,9 +59,7 @@ int		Client::handleRequest()
 			req->parseLine(*it);
 			if (req->get_done()) {
 				this->handleResponse(200);
-				if (lines_read.size() == 1)
-					return 0;
-				return 1;
+				return 0;
 			}
 			if (lines_read.size() == 1)
 				return 0;

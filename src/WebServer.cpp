@@ -99,9 +99,9 @@ void	WebServer::run()
 				it++;
 				continue ;
 			}
-			client->handleRequest();
-//				this->deleteClient((it++)->first);
-//			else
+			if (client->handleRequest())
+				this->deleteClient((it++)->first);
+			else
 				it++;
 		}
 	}
