@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 17:00:37 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/10 18:45:41 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,9 +99,9 @@ void	WebServer::run()
 				it++;
 				continue ;
 			}
-			if (client->handleRequest())
-				this->deleteClient((it++)->first);
-			else
+			client->handleRequest();
+//				this->deleteClient((it++)->first);
+//			else
 				it++;
 		}
 	}

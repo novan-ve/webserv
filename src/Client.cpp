@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/04 15:19:18 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/10 18:21:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ int		Client::handleRequest()
 		req = new Request;
 
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end(); it++) {
+		std::cout << "REQUEST: " << *it << std::endl;
 		try {
 			req->parseLine(*it);
 			if (req->get_done()) {
