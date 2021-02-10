@@ -20,22 +20,26 @@
 class Request : public Message
 {
 	public:
-		Request(const std::string& requestMethod, const std::string &file_path);
+		Request();
 		Request(const Request& other);
 		Request& operator = (const Request& other);
 		~Request();
 
-		void		saveRequest(std::vector<std::string> &lines);
+		int 		isStatusLine(const std::string& line);
+		void		parseLine(std::string line);
+		void		splitRequest(void);
 		void		printRequest(void) const;
 
+		bool		get_done(void) const;
 		std::string	get_method(void) const;
 		std::string	get_path(void) const;
 
 	private:
-		Request(); //42's "coplien" forces us to do this, ew
-
-		std::string	method;
-		std::string path;
+		bool						done;
+		std::string 				status_line;
+		std::vector<std::string>	lines;
+		std::string					method;
+		std::string					path;
 };
 
 #endif

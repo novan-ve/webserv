@@ -27,6 +27,7 @@ class Response : public Message
 		std::string	getBodyLength(void) const;
 		void		setBodyError(void);
 		void		setContentType(std::string path);
+		void		setModified(void);
 		void		readPath(void);
 
 		void		composeResponse(void);
@@ -39,6 +40,7 @@ class Response : public Message
 		std::map<int, std::string>	status_codes;
 		std::string					status_line;
 		int							response_code;
+		std::string					path;
 };
 
 #endif

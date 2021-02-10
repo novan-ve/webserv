@@ -21,12 +21,14 @@ class Client
 		Server&					server;
 		struct sockaddr_in		address;
 		socklen_t				addr_len;
+		Request					*req;
 //		Client(); //impossible because no Server reference is provided
 //		Client& operator = (const Client& other); //server is a reference, cant be copied with assignment operator, so this makes 0 sense
 		int						fd;
 	public:
-		int	handleRequest();
-		int	getFd();
+		void	handleResponse(int code);
+		int		handleRequest();
+		int		getFd();
 		Client(Server& server);
 		Client(const Client& other);
 		~Client();

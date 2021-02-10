@@ -14,46 +14,203 @@
 
 #include "includes/Request.hpp"
 #include "includes/Utilities.hpp"
+#include "includes/Exception.hpp"
 
-Request::Request() {}
+Request::Request() : done(false), status_line("") {}
 
-Request::Request(const std::string& requestMethod, const std::string &file_path) : method(requestMethod), path(file_path) {}
+Request::Request(const Request& other) {
 
-Request::Request(const Request& other) : method(other.method), path(other.path) {}
+	*this = other;
+}
 
 Request& Request::operator = (const Request& other)
 {
 	if (this != &other)
 	{
-		this->method = other.method;
-		this->path = other.path;
+		this->done = other.done;
+		this->status_line = other.status_line;
+		this->lines = other.lines;
 	}
 	return (*this);
 }
 
 Request::~Request() {}
 
-void Request::saveRequest(std::vector<std::string> &lines) {
+int Request::isStatusLine(const std::string &line) {
+
+	size_t i = 0;
+
+	// Search method
+	while (i < line.length()) {
+
+		// Method is at least 1 letter
+		if (line[i] == ' ' && i > 0)
+			break;
+
+			// First word is smaller than 3 letters or bigger than 7 letters
+		else if (line[i] == ' ' && (i < 2 || i > 7))
+			return 0;
+
+		// Not an uppercase letter
+		if (line[i] < 'A' || line[i] > 'Z')
+			return 0;
+		i++;
+	}
+	// No spaces found
+	if (line[i] == '\0')
+		return 0;
+
+	// Find start of path
+	while (line[i] != '\0') {
+		if (line[i] == '/')
+			break;
+		// Not a valid path
+		if (line[i] != ' ')
+			return 0;
+		i++;
+	}
+
+	// No path found
+	if (line[i] == '\0')
+		return 0;
+
+	// Find end of path
+	while (line[i] != '\0') {
+		if (line[i] == 'H')
+			break;
+			// Invalid character in path
+		else if (line[i] < 20 || line[i] >= 127)
+			return 0;
+		i++;
+	}
+	// No HTTP version found or no space between path and http version
+	if (line[i] == '\0' || line[i - 1] != ' ')
+		return 0;
+
+	// Version doesn't start with HTTP/
+	if (line.substr(i, 5) != "HTTP/")
+		return 0;
+	i += 5;
+
+	bool    dot = false;
+
+	while (line[i] != '\0' && line[i] != '\r') {
+		// Not a valid version number
+		if (line[i] == ' ')
+			break;
+		if ((line[i] < '0' || line[i] > '9') && line[i] != '.')
+			return 0;
+		else if (line[i] == '.') {
+			// Can't have more than 2 dots or have the dot not surrounded by numbers
+			if (dot || line[i - 1] < '0' || line[i - 1] > '9' || line[i + 1] < '0' || line[i + 1] > '9')
+				return 0;
+			dot = true;
+		}
+		i++;
+	}
+	// No dot found
+	if (!dot)
+		return 0;
+
+	while (line[i] == ' ')
+		i++;
+
+	// Has something after the HTTP version
+	if (line[i] != '\0' && line[i] != '\r')
+		return 0;
+
+	return 1;
+}
+
+void Request::parseLine(std::string line) {
+
+	if (line == "\r") {
+		if (this->status_line == "")
+			return;
+		else if (this->status_line != "" && this->lines.size() == 0)
+			throw(ft::reqException(400));
+		else if (this->status_line != "" && this->lines.size() > 0) {
+
+			int	end_pos_method = this->status_line.find(' ');
+			int start_pos_path = end_pos_method;
+
+			while (this->status_line[start_pos_path] == ' ')
+				start_pos_path++;
+
+			// Set end_pos_path to character before the \r\0 and remove whitespaces
+			int end_pos_path = this->status_line.length() - 2;
+			while (this->status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			// Move back to first character before HTTP/1.1
+			end_pos_path -= 8;
+
+			// Remove white spaces and up 1 to get character right after path
+			while (this->status_line[end_pos_path] == ' ')
+				end_pos_path--;
+			end_pos_path++;
+
+			this->method = this->status_line.substr(0, end_pos_method);
+			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
+			this->done = true;
+
+			this->splitRequest();
+			this->printRequest();
+
+			return;
+		}
+	}
+	else if (isStatusLine(line)) {
+		if (this->status_line == "") {
+
+			int start = line.length() - 1;
+
+			while (line[start] == ' ' || (line[start] >= 10 && line[start] <= 13))
+				start--;
+
+			int end = start;
+
+			while (line[start] != ' ')
+				start--;
+
+			if (line.substr(start + 1, end - start) != "HTTP/1.1")
+				throw(ft::reqException(505));
+			this->status_line = line;
+		}
+		return;
+	}
+	else if (line.find(':') != std::string::npos) {
+		if (this->status_line == "")
+			throw(ft::reqException(400));
+
+		this->lines.push_back(line);
+		return;
+	}
+	if (this->status_line != "")
+		return;
+	throw(ft::reqException(400));
+}
+
+void Request::splitRequest(void) {
 
 	std::vector<std::string>::iterator	header_end;
 
 	// Get position of empty line between header and body
-	for (header_end = lines.begin(); header_end != lines.end(); header_end++) {
+	for (header_end = this->lines.begin(); header_end != this->lines.end(); header_end++) {
 		if (*header_end == "\r")
 			break;
 	}
 
 	// Place header values inside headers attribute
-	for (std::vector<std::string>::iterator it = lines.begin(); it != header_end; it++) {
+	for (std::vector<std::string>::iterator it = this->lines.begin(); it != header_end; it++) {
 		if ((*it).find(':') != std::string::npos) {
 			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it);
 			this->headers.push_back(keyval);
 		}
 	}
 
-	// If a body exists, place lines inside body attribute
-	if (header_end != lines.end() && ++header_end != lines.end()) {
-		for (std::vector<std::string>::iterator it = header_end; it != lines.end(); it++)
+	// If a body exists, place this->lines inside body attribute
+	if (header_end != this->lines.end() && ++header_end != this->lines.end()) {
+		for (std::vector<std::string>::iterator it = header_end; it != this->lines.end(); it++)
 			this->body.push_back(*it);
 	}
 }
@@ -76,5 +233,6 @@ void	Request::printRequest(void) const {
 	}
 }
 
+bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method; }
 std::string		Request::get_path() const { return this->path; }
