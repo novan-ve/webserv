@@ -13,14 +13,15 @@
 #include <iostream>
 #include <vector>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 
-Response::Response(Request *request, int code) : req(request), response_code(code) {
-
+Response::Response(Request *request, int code) : req(request), response_code(code)
+{
 	this->status_codes[200] = "200 OK";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
@@ -43,7 +44,8 @@ Response& Response::operator = (const Response& other)
 
 Response::~Response() {}
 
-std::string Response::getBodyLength(void) const {
+std::string Response::getBodyLength(void) const
+{
 
 	std::string			result = "";
 	int 				total = 0;
@@ -59,8 +61,8 @@ std::string Response::getBodyLength(void) const {
 	return result;
 }
 
-void	Response::setBodyError(void) {
-
+void	Response::setBodyError(void)
+{
 	this->body.push_back("<html>\n");
 	this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>\n");
 	this->body.push_back("<body>\n");
@@ -70,19 +72,16 @@ void	Response::setBodyError(void) {
 	this->body.push_back("</html>\n");
 }
 
-void	Response::setContentType(std::string path) {
-
-	if (path == "/")
-		path = "/index.html";
-	
-	size_t		pos = path.find_last_of('.');
+void	Response::setContentType(std::string path)
+{
+	size_t		pos = this->path.find_last_of('.');
 
 	if (pos == std::string::npos) {
 		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
 		return;
 	}
 
-	std::string	ext = path.substr(pos + 1, path.length() - pos - 1);
+	std::string	ext = this->path.substr(pos + 1, path.length() - pos - 1);
 	std::string type;
 
 	if (ext == "html" || ext == "css" || ext == "csv" || ext == "xml")
@@ -107,16 +106,16 @@ void	Response::setContentType(std::string path) {
 	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", type));
 }
 
-void	Response::readPath(void) {
+void	Response::readPath(void)
+{
+	this->path = this->req->get_path();
 
-	std::string		path = this->req->get_path();
+	if (this->path == "/")
+		this->path = "/index.html";
 
-	if (path == "/")
-		path = "/index.html";
+	this->path.insert(0, "./html");
 
-	path.insert(0, "./html");
-
-	int fd = open(path.c_str(), O_RDONLY);
+	int fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1) {
 		this->response_code = 404;
 		return;
@@ -129,8 +128,19 @@ void	Response::readPath(void) {
 		(*it).append("\n");
 }
 
-void	Response::composeResponse(void) {
+void	Response::setModified(void)
+{
+	struct stat	result;
 
+	if (stat(path.c_str(), &result) == 0) {
+
+		std::string	modTime = ft::getTime(result.st_mtim.tv_sec);
+		this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", modTime));
+	}
+}
+
+void	Response::composeResponse(void)
+{
 	if (this->response_code == 200)
 		this->readPath();
 
@@ -151,6 +161,7 @@ void	Response::composeResponse(void) {
 	else {
 		this->setContentType(this->req->get_path());
 		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
+		this->setModified();
 		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "keep-alive"));
 	}
 }
@@ -177,8 +188,8 @@ void	Response::sendResponse(int fd) const
 		throw std::runtime_error("Error: Could not send request to the client");
 }
 
-void	Response::printResponse(void) const {
-
+void	Response::printResponse(void) const
+{
 	// Print values for debugging
 	std::cout << std::endl << "Response:" << std::endl;
 	std::cout << "  Headers:" << std::endl;

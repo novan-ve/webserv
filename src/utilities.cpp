@@ -111,8 +111,8 @@ namespace ft
 		return (keyval);
 	}
 
-	std::string getTime(void) {
-
+	std::string getTime(time_t sec = 0)
+	{
 		struct timeval	tv;
 		struct tm		tm;
 		char 			buf[64];
@@ -120,6 +120,9 @@ namespace ft
 		ft::memset(buf, '\0', 64);
 
 		gettimeofday(&tv, NULL);
+
+		if (sec != 0)
+			tv.tv_sec = sec;
 
 		tm.tm_sec = tv.tv_sec % 60;
 
