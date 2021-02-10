@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/08 14:10:04 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/10 15:18:05 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ void	Parse::parse()
 				it++;
 				this->children.push(Parse(*child, childrenTokens));
 			}
+			else if (!body && child)
+				throw std::runtime_error("Error: no body encountered for property that expects a body");
 			it++;
 		}
 		else
