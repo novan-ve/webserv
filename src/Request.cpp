@@ -6,15 +6,15 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:17:31 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 12:52:16 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
 #include "includes/Request.hpp"
-#include "includes/Utilities.hpp"
 #include "includes/Exception.hpp"
+#include "Utilities.hpp"
 
 Request::Request() : done(false), status_line("") {}
 
@@ -36,90 +36,28 @@ Request& Request::operator = (const Request& other)
 
 Request::~Request() {}
 
-int Request::isStatusLine(const std::string &line) {
-
-	size_t i = 0;
-
-	// Search method
-	while (i < line.length()) {
-
-		// Method is at least 1 letter
-		if (line[i] == ' ' && i > 0)
-			break;
-
-			// First word is smaller than 3 letters or bigger than 7 letters
-		else if (line[i] == ' ' && (i < 2 || i > 7))
-			return 0;
-
-		// Not an uppercase letter
-		if (line[i] < 'A' || line[i] > 'Z')
-			return 0;
-		i++;
-	}
-	// No spaces found
-	if (line[i] == '\0')
-		return 0;
-
-	// Find start of path
-	while (line[i] != '\0') {
-		if (line[i] == '/')
-			break;
-		// Not a valid path
-		if (line[i] != ' ')
-			return 0;
-		i++;
-	}
-
-	// No path found
-	if (line[i] == '\0')
-		return 0;
-
-	// Find end of path
-	while (line[i] != '\0') {
-		if (line[i] == 'H')
-			break;
-			// Invalid character in path
-		else if (line[i] < 20 || line[i] >= 127)
-			return 0;
-		i++;
-	}
-	// No HTTP version found or no space between path and http version
-	if (line[i] == '\0' || line[i - 1] != ' ')
-		return 0;
-
-	// Version doesn't start with HTTP/
-	if (line.substr(i, 5) != "HTTP/")
-		return 0;
-	i += 5;
-
-	bool    dot = false;
-
-	while (line[i] != '\0' && line[i] != '\r') {
-		// Not a valid version number
-		if (line[i] == ' ')
-			break;
-		if ((line[i] < '0' || line[i] > '9') && line[i] != '.')
-			return 0;
-		else if (line[i] == '.') {
-			// Can't have more than 2 dots or have the dot not surrounded by numbers
-			if (dot || line[i - 1] < '0' || line[i - 1] > '9' || line[i + 1] < '0' || line[i + 1] > '9')
-				return 0;
-			dot = true;
-		}
-		i++;
-	}
-	// No dot found
-	if (!dot)
-		return 0;
-
-	while (line[i] == ' ')
-		i++;
-
-	// Has something after the HTTP version
-	if (line[i] != '\0' && line[i] != '\r')
-		return 0;
-
-	return 1;
+//true if line is status_line, false otherwise
+bool Request::isStatusLine(const std::string &line)
+{
+	if (!line.size())
+		return (false);
+	std::vector<std::string>	parts = ft::split(line, " ");
+	if (parts.size() != 3)
+		return (false);
+	if (parts[0].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ") != std::string::npos)
+		return (false);
+	if (parts[2].substr(0, 5) != "HTTP/")
+		return (false);
+	size_t slash_pos = parts[2].find('/');
+	std::vector<std::string>	version = ft::split(parts[2].substr(slash_pos + 1, parts[2].size()), ".");
+	if (version.size() != 2)
+		return (false);
+	if (version[0].find_first_not_of("0123456789") != std::string::npos)
+		return (false);
+	size_t carriage_return = version[1].find_first_not_of("0123456789");
+	if (carriage_return != version[1].size() - 1 || version[1][carriage_return] != '\r')
+		return (false);
+	return (true);
 }
 
 void Request::parseLine(std::string line) {
