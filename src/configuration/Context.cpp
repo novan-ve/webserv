@@ -32,7 +32,7 @@ Context *Context::key_server(const std::list<std::string>& args)
 {
 	std::cout << "CREATE_SERVER CALLED" << std::endl;
 	if (args.size())
-		throw std::runtime_error("Error: Arguments provided to 'server'");
+		throw ft::runtime_error("Error: Arguments provided to 'server'");
 	Server *elem = new Server(*this);
 	WebServer& parent = dynamic_cast<WebServer&>(*this);
 	parent.servers[elem->_server_fd] = elem;
@@ -45,7 +45,7 @@ Context	*Context::key_location(const std::list<std::string>& args)
 {
 	std::cout << "CREATE_LOCATION CALLED" << std::endl;
 	if (args.size() != 1)
-		throw std::runtime_error("Error: Not the right amount of arguments given to 'location'");
+		throw ft::runtime_error("Error: Not the right amount of arguments given to 'location'");
 	Location *elem = new Location(*this);
 	Server& parent = dynamic_cast<Server&>(*this);
 	parent.locations[args.back()] = elem;
@@ -57,7 +57,7 @@ Context *Context::key_listen(const std::list<std::string>& args)
 {
 	std::cout << "LISTEN" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	// else if (args.size() == 1)
 	// {
 	// 	std::vector<std::string>	host_port = ft::split(args.back(), ":");
@@ -72,7 +72,7 @@ Context *Context::key_server_name(const std::list<std::string>& args)
 {
 	std::cout << "SERVER_NAME" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -80,7 +80,7 @@ Context *Context::key_client_max_body_size(const std::list<std::string>& args)
 {
 	std::cout << "MAX_CLIENT_BODY_SIZE" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -88,7 +88,7 @@ Context *Context::key_autoindex(const std::list<std::string>& args)
 {
 	std::cout << "AUTOINDEX" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -96,7 +96,7 @@ Context *Context::key_index(const std::list<std::string>& args)
 {
 	std::cout << "INDEX" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -104,7 +104,7 @@ Context *Context::key_error_page(const std::list<std::string>& args)
 {
 	std::cout << "ERROR_PAGE" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -112,7 +112,7 @@ Context *Context::key_limit_except(const std::list<std::string>& args)
 {
 	std::cout << "LIMIT_EXCEPT" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -120,7 +120,7 @@ Context *Context::key_root(const std::list<std::string>& args)
 {
 	std::cout << "ROOT" << std::endl;
 	if (!args.size())
-		throw std::runtime_error("Error: No arguments given to 'listen'");
+		throw ft::runtime_error("Error: No arguments given to 'listen'");
 	return (NULL);
 }
 
@@ -153,7 +153,7 @@ Context::~Context()
 		else if (dynamic_cast<Location *>(children[i]))
 			delete dynamic_cast<Location*>(children[i]);
 		else
-			throw std::runtime_error("Error: Unrecognized parser-Context type");
+			throw ft::runtime_error("Error: Unrecognized parser-Context type");
 	}
 	children.clear();
 }

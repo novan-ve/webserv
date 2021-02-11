@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/09 19:58:48 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:48:45 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "Utilities.hpp"
+#include "Exception.hpp"
 
 int		main(int argc, char **argv)
 {
@@ -27,7 +28,7 @@ int		main(int argc, char **argv)
 		WebServer	webserv(argv[1]);
 		webserv.run();
 	}
-	catch (std::exception& e)
+	catch (ft::runtime_error& e)
 	{
 		std::cerr << e.what() << std::endl;
 		return (1);

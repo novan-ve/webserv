@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/09 19:58:11 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:47:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include "Exception.hpp"
 
 namespace ft
 {
@@ -46,7 +47,7 @@ namespace ft
 		{
 			size_t num = base.find(number[i]);
 			if (num == std::string::npos)
-				throw std::runtime_error("Error: string is not a number");
+				throw ft::runtime_error("Error: string is not a number");
 			res = res * base.size() + num;
 		}
 		sign += (!sign);

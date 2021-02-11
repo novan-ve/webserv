@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/10 18:45:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 void	WebServer::deleteClient(int fd)
 {
 	if (!this->clients.count(fd))
-		throw std::runtime_error("Could not delete client, not in 'clients'");
+		throw ft::runtime_error("Could not delete client, not in 'clients'");
 	delete this->clients[fd];
 	this->clients.erase(fd);
 	FD_CLR(fd, &this->sockets);
@@ -78,7 +78,7 @@ void	WebServer::run()
 		size_t		max_fd = ft::max(ft::max_element(this->servers), ft::max_element(this->clients)) + 1;
 		this->set_sockets = this->sockets;
 		if ((fds_ready = select(max_fd, &this->set_sockets, NULL, NULL, NULL)) == -1)
-			throw std::runtime_error("Error: select() returned an error");
+			throw ft::runtime_error("Error: select() returned an error");
 		if (fds_ready == 0) //no pending connections/requests
 		{
 			std::cout << "No connection, sleeping for 3 seconds" << std::endl;
@@ -112,6 +112,6 @@ void	WebServer::handle_args(std::list<std::string>	args)
 	std::cout << "ARGS" << std::endl;
 	ft::print_iteration(args.begin(), args.end());
 	if (args.size())
-		throw std::runtime_error("Error: Configuration error encountered in 'webserver'");
+		throw ft::runtime_error("Error: Configuration error encountered in 'webserver'");
 	return ;
 }

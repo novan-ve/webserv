@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 12:04:00 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 15:16:53 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define ENUM_STRING_HPP
 
 #include <string>
-#include <stdexcept>
+#include "Exception.hpp"
 #include <vector>
 #include <iostream>
 
@@ -53,14 +53,14 @@ class EnumString
 				if (str == names[i])
 					return Enum(i);
 			}
-			throw std::runtime_error("Error: Conversion from str to id failed in EnumString::toID()");
+			throw ft::runtime_error("Error: Conversion from str to id failed in EnumString::toID()");
 		}
 
 		std::string		toString(Enum id)
 		{
 			if (id >= 0 && id < names.size())
 				return (names[id]);
-			throw std::runtime_error("Error: Conversion from id to str failed in EnumString::toString()");
+			throw ft::runtime_error("Error: Conversion from id to str failed in EnumString::toString()");
 		}
 };
 

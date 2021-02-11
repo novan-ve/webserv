@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/09 18:49:54 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <fcntl.h>
-#include <stdexcept>
+#include "Exception.hpp"
 #include <vector>
 
 #include "Server.hpp"
@@ -35,11 +35,11 @@ Server::Server(Context& parent) : Context(parent)
 
 	// Create socket file descriptor
 	if ((this->_server_fd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
-		throw std::runtime_error("Error: Creation of socket failed");
+		throw ft::runtime_error("Error: Creation of socket failed");
 
 	// Forcefully attach socket to port
 	if (setsockopt(this->_server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
-		throw std::runtime_error("Error: Failed to set socket options");
+		throw ft::runtime_error("Error: Failed to set socket options");
 
 	// Assign transport address
 	this->_address.sin_family = AF_INET;
@@ -49,15 +49,15 @@ Server::Server(Context& parent) : Context(parent)
 
 	// Attach socket to transport address
 	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address), sizeof( this->_address )) == -1)
-		throw std::runtime_error("Error: binding server-socket to a port failed");
+		throw ft::runtime_error("Error: binding server-socket to a port failed");
 
 	if (listen(this->_server_fd, 10 ) == -1)
-		throw std::runtime_error("Error: could not set server-socket to listening mode");
+		throw ft::runtime_error("Error: could not set server-socket to listening mode");
 	std::cout << "SERVER CREATED!" << std::endl;
 
 	//Set the resulting socketfd to be non blocking
 	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
+		throw ft::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
 }
 
 Server::Server(const Server &src)
@@ -87,6 +87,6 @@ void	Server::handle_args(std::list<std::string>	args)
 	std::cout << "Server ARGS: ";
 	ft::print_iteration(args.begin(), args.end());
 	if (args.size())
-		throw std::runtime_error("Error: Configuration error encountered in 'server'");
+		throw ft::runtime_error("Error: Configuration error encountered in 'server'");
 	return ;
 }

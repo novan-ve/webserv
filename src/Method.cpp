@@ -6,12 +6,12 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 20:24:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 14:00:51 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Method.hpp"
-#include <stdexcept>
+#include "Exception.hpp"
 #include <string>
 #include <vector>
 

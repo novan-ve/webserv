@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/10 15:18:05 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 #include <string>
 #include <queue>
 #include <algorithm>
-#include <stdexcept>
+#include "Exception.hpp"
 #include <iostream>
 
 Parse::Parse(Context& context, std::list<std::string> tokens) : context(context), tokens(tokens) {}
@@ -59,22 +59,22 @@ void	Parse::parse()
 			{
 				std::cout << "BODY ENCOUNTERED" << std::endl;
 				if (!child)
-					throw std::runtime_error("Error: unexpected body encountered in config-parse");
+					throw ft::runtime_error("Error: unexpected body encountered in config-parse");
 				it++;
 				childrenTokens.clear();
 				std::list<std::string>::iterator	end = this->endOfBlock(it, tokens.end());
 				if (end == tokens.end())
-					throw std::runtime_error("Error: Unclosed block in configuration");
+					throw ft::runtime_error("Error: Unclosed block in configuration");
 				childrenTokens.splice(childrenTokens.begin(), this->tokens, it--, end);
 				it++;
 				this->children.push(Parse(*child, childrenTokens));
 			}
 			else if (!body && child)
-				throw std::runtime_error("Error: no body encountered for property that expects a body");
+				throw ft::runtime_error("Error: no body encountered for property that expects a body");
 			it++;
 		}
 		else
-			throw std::runtime_error("Error: unrecognized keyword in config-parser");
+			throw ft::runtime_error("Error: unrecognized keyword in config-parser");
 	}
 	while (this->children.size())
 	{

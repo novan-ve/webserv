@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/08 14:09:49 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Configuration::Configuration(char *config, WebServer& webserv) : webserv(webserv
 		config = (char *)DEFAULT_CONFIG;
 	this->fd = open(config, O_RDONLY);
 	if (this->fd == -1 || read(this->fd, NULL, 0) == -1)
-		throw std::runtime_error("Error: Failed to open config file for reading");
+		throw ft::runtime_error("Error: Failed to open config file for reading");
 }
 
 void	strip_comments(std::string& config)

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/08 16:11:18 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,7 @@ void	Response::sendResponse(int fd) const
 		response.append(*it);
 
 	if (send(fd, response.c_str(), response.length(), 0) < 0)
-		throw std::runtime_error("Error: Could not send request to the client");
+		throw ft::runtime_error("Error: Could not send request to the client");
 }
 
 void	Response::printResponse(void) const

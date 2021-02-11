@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:18:30 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Client::Client(Server& server) : server(server), req(NULL)
 {
 	this->fd = accept(server._server_fd, reinterpret_cast<struct sockaddr*>(&this->address), &this->addr_len);
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
-		throw std::runtime_error("Error: Could not set client-socket to O_NONBLOCK");
+		throw ft::runtime_error("Error: Could not set client-socket to O_NONBLOCK");
 }
 
 int		Client::getFd()

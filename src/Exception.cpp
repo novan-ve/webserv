@@ -6,11 +6,11 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/09 20:03:43 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:44:56 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:47:18 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/Exception.hpp"
+#include "Exception.hpp"
 
 namespace ft {
 
