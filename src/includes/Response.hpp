@@ -24,23 +24,29 @@ class Response : public Message
 		Response& operator = (const Response& other);
 		~Response();
 
-		std::string	getBodyLength(void) const;
-		void		setBodyError(void);
-		void		setContentType(std::string path);
-		void		setModified(void);
-		void		readPath(void);
-
-		void		composeResponse(void);
-		void		sendResponse(int fd) const;
-		void		printResponse(void) const;
+		void	sendResponse(int fd) const;
+		void	printResponse(void) const;
+		void	composeResponse(void);
 
 	private:
-		Response();
 		Request*					req;
 		std::map<int, std::string>	status_codes;
 		std::string					status_line;
-		int							response_code;
 		std::string					path;
+		int							response_code;
+
+		void	checkPath(void);
+
+		void	setStatusLine(void);
+		void	setServer(void);
+		void	setDate(void);
+		void	setContentType(void);
+		void	setBody(void);
+		void	setBodyError(void);
+		void	setContentLen(void);
+		void	setModified(void);
+
+		Response();
 };
 
 #endif
