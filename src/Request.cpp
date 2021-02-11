@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 12:52:16 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 14:04:46 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,8 @@ bool Request::isStatusLine(const std::string &line)
 {
 	if (!line.size())
 		return (false);
-	std::vector<std::string>	parts = ft::split(line, " ");
-	if (parts.size() != 3)
+	std::vector<std::string>	parts = ft::split(line, " \r", "\r");
+	if (parts.size() != 4)
 		return (false);
 	if (parts[0].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ") != std::string::npos)
 		return (false);
@@ -54,8 +54,9 @@ bool Request::isStatusLine(const std::string &line)
 		return (false);
 	if (version[0].find_first_not_of("0123456789") != std::string::npos)
 		return (false);
-	size_t carriage_return = version[1].find_first_not_of("0123456789");
-	if (carriage_return != version[1].size() - 1 || version[1][carriage_return] != '\r')
+	if (version[1].find_first_not_of("0123456789") != std::string::npos)
+		return (false);
+	if (parts[3] != "\r")
 		return (false);
 	return (true);
 }
