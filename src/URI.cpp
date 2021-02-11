@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 17:37:34 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 16:21:57 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 16:42:45 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,14 +213,14 @@ void	URI::set_uri(std::string uri)
 		else if (match == -1)
 		{
 			nextpart = part + 1;
-			for (; nextpart < separators.size(); nextpart++)
+			for (; nextpart < (ssize_t)separators.size(); nextpart++)
 			{
 				end = ft::first_of_group(uri, separators[nextpart], start, match);
 				if (match != -1)
 					break ;
 			}
 			//no separator was found
-			if (nextpart == separators.size())
+			if (nextpart == (ssize_t)separators.size())
 				break ;
 		}
 		if (end == std::string::npos)

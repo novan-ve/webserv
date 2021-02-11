@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 14:04:46 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 17:48:22 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,31 +39,65 @@ Request::~Request() {}
 //true if line is status_line, false otherwise
 bool Request::isStatusLine(const std::string &line)
 {
-	if (!line.size())
+	size_t i = 0;
+	if (!line.size() || line.size() >= 8000)
 		return (false);
-	std::vector<std::string>	parts = ft::split(line, " \r", "\r");
-	if (parts.size() != 4)
+	std::vector<std::string>	parts = ft::split(line, " \r", " \r");
+	//First part has to be METHOD
+	if (parts[i++].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ") != std::string::npos)
 		return (false);
-	if (parts[0].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ") != std::string::npos)
+//	std::cout << "METHOD IS ONLY CAPS\n";
+	//Has to have atleast one space
+	if (parts[i++] != " ")
 		return (false);
-	if (parts[2].substr(0, 5) != "HTTP/")
+//	std::cout << "SEPARATED BY SPACE\n";
+	//Skip over all spaces
+	for (; parts[i] == " "; i++) {}
+	//request-target has to start with '/'
+	// if (parts[i][0] != '/')
+	// 	return (false);
+	//Request-line has to end on carriage return
+	size_t end = parts.size() - 1;
+	if (parts[end--] != "\r")
 		return (false);
-	size_t slash_pos = parts[2].find('/');
-	std::vector<std::string>	version = ft::split(parts[2].substr(slash_pos + 1, parts[2].size()), ".");
+//	std::cout << "ENDS ON CARRIAGE RETURN\n";
+	//Skip over all spaces that are at the end of the request-line
+	for (;end > 0 && parts[end] == " "; end--) {}
+	//Check if the version consists of HTTP/[0-9][0-9]
+	if (parts[end].substr(0, 5) != "HTTP/")
+		return (false);
+//	std::cout << "PROTOCOL IS 'HTTP/'\n";
+	std::vector<std::string>	version = ft::split(parts[end].substr(5, parts[end].size()), ".");
 	if (version.size() != 2)
 		return (false);
+//	std::cout << "VERSION SIZE OF 2 ([0-9]\\.[0-9])\n";
 	if (version[0].find_first_not_of("0123456789") != std::string::npos)
 		return (false);
 	if (version[1].find_first_not_of("0123456789") != std::string::npos)
 		return (false);
-	if (parts[3] != "\r")
+//	std::cout << "VERSION IS ONLY NUMBERS\n";
+
+	//Protocol has to have a minimum of one space before it
+	if (parts[--end] != " ")
 		return (false);
+//	std::cout << "PROTOCOL SEPARATED FROM REQUEST-TARGET BY SPACE\n";
+	if (i >= end)
+		return (false);
+	//Skip over all spaces preceding Protocol
+	for (;end > i && parts[end] == " "; end--) {}
+
+	//concatenate every part of the request-target together
+	std::string request_target;
+	for (--end; i < end; i++)
+		request_target += parts[i];
+	
 	return (true);
 }
 
 void Request::parseLine(std::string line) {
 
-	if (line == "\r") {
+	if (line == "\r")
+	{
 		if (this->status_line == "")
 			return;
 		else if (this->status_line != "" && this->lines.size() == 0)
@@ -98,9 +132,10 @@ void Request::parseLine(std::string line) {
 			return;
 		}
 	}
-	else if (isStatusLine(line)) {
-		if (this->status_line == "") {
-
+	else if (isStatusLine(line))
+	{
+		if (this->status_line == "")
+		{
 			int start = line.length() - 1;
 
 			while (line[start] == ' ' || (line[start] >= 10 && line[start] <= 13))
@@ -117,7 +152,8 @@ void Request::parseLine(std::string line) {
 		}
 		return;
 	}
-	else if (line.find(':') != std::string::npos) {
+	else if (line.find(':') != std::string::npos)
+	{
 		if (this->status_line == "")
 			throw(ft::reqException("Error: Key Value pair found while expecting Status Line", 400));
 
