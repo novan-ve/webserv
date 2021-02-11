@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 17:37:34 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/08 13:44:12 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 16:21:57 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,11 +197,13 @@ void	URI::set_uri(std::string uri)
 	size_t start = 0;
 	size_t end = 0;
 	size_t part = 0;
+	ssize_t nextpart;
 	bool begun = false;
 	this->str = uri;
 	this->parts = std::vector<std::string>(6, std::string());
 	for (; part < separators.size() && start < uri.size(); part++)
 	{
+		nextpart = -1;
 		int match = -1;
 		end = ft::first_of_group(uri, separators[part], start, match);
 		if (match != -1)
@@ -209,11 +211,24 @@ void	URI::set_uri(std::string uri)
 		if (match == -1 && !begun)
 			continue ;
 		else if (match == -1)
-			kitkat ;
+		{
+			nextpart = part + 1;
+			for (; nextpart < separators.size(); nextpart++)
+			{
+				end = ft::first_of_group(uri, separators[nextpart], start, match);
+				if (match != -1)
+					break ;
+			}
+			//no separator was found
+			if (nextpart == separators.size())
+				break ;
+		}
 		if (end == std::string::npos)
 			end = uri.size();
 		this->parts[part] = uri.substr(start, end - start);
 		start = end + separators[part][match].size();
+		if (nextpart != -1)
+			part = nextpart;
 		if (match == 1)
 			part++;
 	}
