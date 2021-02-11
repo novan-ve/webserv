@@ -44,36 +44,98 @@ Response& Response::operator = (const Response& other)
 
 Response::~Response() {}
 
-std::string Response::getBodyLength(void) const
+void	Response::sendResponse(int fd) const
 {
+	std::string response;
 
-	std::string			result = "";
-	int 				total = 0;
+	// Copy status line into response
+	response.append(this->status_line + "\r\n");
 
+	// Copy headers into response
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
+		response.append((*it).first + ": " + (*it).second + "\r\n");
+
+	// Copy newline into response to seperate headers and body
+	response.append("\r\n");
+
+	// Copy body into response
 	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		total += (*it).size();
+		response.append(*it + "\r\n");
 
-	while (total != 0) {
-		result.insert(result.begin(), static_cast<char>(total % 10 + '0'));
-		total /= 10;
+	if (send(fd, response.c_str(), response.length(), 0) < 0)
+		throw ft::runtime_error("Error: Could not send request to the client");
+}
+
+void	Response::printResponse(void) const
+{
+	// Print values for debugging
+	std::cout << std::endl << "Response:" << std::endl;
+	std::cout << "  Headers:" << std::endl;
+	std::cout << "\t" << this->status_line << "\r" << std::endl;
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
+		std::cout << "\t" << it->first << ": " << it->second << "\r" << std::endl;
+	}
+	std::cout << "  Body:" << std::endl;
+	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+		std::cout << "\t" << *it << "\r" << std::endl;
+	std::cout << std::endl;
+}
+
+void	Response::composeResponse(void)
+{
+	this->checkPath();
+
+	this->setStatusLine();
+	this->setServer();
+	this->setDate();
+	this->setContentType();
+	this->setBody();
+	this->setContentLen();
+	this->setModified();
+}
+
+void	Response::checkPath(void)
+{
+	if (this->response_code != 200)
+		return;
+	this->path = this->req->get_path();
+
+	if (this->path == "/")
+		this->path = "/index.html";
+
+	this->path.insert(0, "./html");
+
+	int fd = open(this->path.c_str(), O_RDONLY);
+	if (fd == -1) {
+		this->response_code = 404;
+		return;
+	}
+	close(fd);
+}
+
+void	Response::setStatusLine(void)
+{
+	this->status_line.append("HTTP/1.1 ");
+	this->status_line.append(this->status_codes[this->response_code]);
+}
+
+void	Response::setServer(void)
+{
+	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
+}
+
+void	Response::setDate(void)
+{
+	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
+}
+
+void	Response::setContentType()
+{
+	if (this->response_code != 200) {
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
+		return;
 	}
 
-	return result;
-}
-
-void	Response::setBodyError(void)
-{
-	this->body.push_back("<html>\n");
-	this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>\n");
-	this->body.push_back("<body>\n");
-	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>\n");
-	this->body.push_back("<center><hr>webserv/1.0</center>\n");
-	this->body.push_back("</body>\n");
-	this->body.push_back("</html>\n");
-}
-
-void	Response::setContentType(std::string path)
-{
 	size_t		pos = this->path.find_last_of('.');
 
 	if (pos == std::string::npos) {
@@ -106,30 +168,53 @@ void	Response::setContentType(std::string path)
 	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", type));
 }
 
-void	Response::readPath(void)
+void	Response::setBody(void)
 {
-	this->path = this->req->get_path();
-
-	if (this->path == "/")
-		this->path = "/index.html";
-
-	this->path.insert(0, "./html");
-
-	int fd = open(this->path.c_str(), O_RDONLY);
-	if (fd == -1) {
-		this->response_code = 404;
+	if (this->response_code != 200) {
+		this->setBodyError();
 		return;
 	}
 
+	int fd = open(this->path.c_str(), O_RDONLY);
+	if (fd == -1)
+		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
+
 	this->body = ft::get_lines(fd);
 	close(fd);
+}
 
-	for (std::vector<std::string>::iterator it = this->body.begin(); it != body.end(); it++)
-		(*it).append("\n");
+void	Response::setBodyError(void)
+{
+	this->body.push_back("<html>");
+	this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>");
+	this->body.push_back("<body>");
+	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>");
+	this->body.push_back("<center><hr>webserv/1.0</center>");
+	this->body.push_back("</body>");
+	this->body.push_back("</html>");
+}
+
+void	Response::setContentLen(void)
+{
+	std::string			length = "";
+	int 				total = 0;
+
+	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+		total += (*it).size();
+
+	while (total != 0) {
+		length.insert(length.begin(), static_cast<char>(total % 10 + '0'));
+		total /= 10;
+	}
+
+	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", length));
 }
 
 void	Response::setModified(void)
 {
+	if (this->response_code != 200)
+		return;
+
 	struct stat	result;
 
 	if (stat(path.c_str(), &result) == 0) {
@@ -137,68 +222,4 @@ void	Response::setModified(void)
 		std::string	modTime = ft::getTime(result.st_mtim.tv_sec);
 		this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", modTime));
 	}
-}
-
-void	Response::composeResponse(void)
-{
-	if (this->response_code == 200)
-		this->readPath();
-
-	this->status_line.append("HTTP/1.1 ");
-	this->status_line.append(this->status_codes[this->response_code]);
-
-	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
-	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
-
-	if (this->response_code != 200) {
-
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
-		this->setBodyError();
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
-		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "close"));
-
-	}
-	else {
-		this->setContentType(this->req->get_path());
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", this->getBodyLength()));
-		this->setModified();
-		this->headers.push_back(std::make_pair<std::string, std::string>("Connection", "keep-alive"));
-	}
-}
-
-void	Response::sendResponse(int fd) const
-{
-	std::string response;
-
-	// Copy status line into response
-	response.append(this->status_line + "\n");
-
-	// Copy headers into response
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
-		response.append((*it).first + ": " + (*it).second + "\n");
-
-	// Copy newline into response to seperate headers and body
-	response.append("\n");
-
-	// Copy body into response
-	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		response.append(*it);
-
-	if (send(fd, response.c_str(), response.length(), 0) < 0)
-		throw ft::runtime_error("Error: Could not send request to the client");
-}
-
-void	Response::printResponse(void) const
-{
-	// Print values for debugging
-	std::cout << std::endl << "Response:" << std::endl;
-	std::cout << "  Headers:" << std::endl;
-	std::cout << "\t" << this->status_line << std::endl;
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
-		std::cout << "\t" << it->first << ": " << it->second << std::endl;
-	}
-	std::cout << "  Body:" << std::endl;
-	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		std::cout << "\t" << *it;
-	std::cout << std::endl;
 }

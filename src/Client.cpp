@@ -70,7 +70,6 @@ int		Client::handleRequest()
 			return 1;
 		}
 	}
-	std::cout << "If you read this, something went wrong in Client::handleRequest()" << std::endl;
 	return 1;
 }
 
