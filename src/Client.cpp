@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/10 18:21:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:18:30 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ int		Client::handleRequest()
 				return 0;
 		}
 		catch (ft::reqException &e) {
+			std::cout << e.what() << std::endl;
 			this->handleResponse(e.getCode());
 			return 1;
 		}

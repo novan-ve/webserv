@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 18:01:00 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 10:17:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,7 @@ void Request::parseLine(std::string line) {
 		if (this->status_line == "")
 			return;
 		else if (this->status_line != "" && this->lines.size() == 0)
-			throw(ft::reqException(400));
+			throw(ft::reqException("invalid status_line", 400));
 		else if (this->status_line != "" && this->lines.size() > 0) {
 
 			int	end_pos_method = this->status_line.find(' ');
@@ -173,21 +173,21 @@ void Request::parseLine(std::string line) {
 				start--;
 
 			if (line.substr(start + 1, end - start) != "HTTP/1.1")
-				throw(ft::reqException(505));
+				throw(ft::reqException("Error: unsupported Protocol/ProtocolVersion", 505));
 			this->status_line = line;
 		}
 		return;
 	}
 	else if (line.find(':') != std::string::npos) {
 		if (this->status_line == "")
-			throw(ft::reqException(400));
+			throw(ft::reqException("Error: Key Value pair found while expecting Status Line", 400));
 
 		this->lines.push_back(line);
 		return;
 	}
 	if (this->status_line != "")
 		return;
-	throw(ft::reqException(400));
+	throw(ft::reqException("Error: Otherwise ill-formatted request encountered", 400));
 }
 
 void Request::splitRequest(void) {
