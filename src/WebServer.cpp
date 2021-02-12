@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 01:24:01 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,53 +57,85 @@ bool	WebServer::newClientAdded()
 	for (std::map<int, Server*>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
 	{
 		Server*	server = it->second;
-		if (!FD_ISSET(server->_server_fd, &this->set_sockets))
+		if (!FD_ISSET(server->_server_fd, &this->set_read_sockets))
 			continue ;
 		new_client_added = true;
 		new_client = new Client(*server);
 		client_fd = new_client->getFd();
 		this->clients[client_fd] = new_client;
-		FD_CLR(server->_server_fd, &this->set_sockets);
+		FD_CLR(server->_server_fd, &this->set_read_sockets);
 		FD_SET(client_fd, &this->sockets);
 	}
 	return (new_client_added);
 }
 
+
+
 void	WebServer::run()
 {
-	int		fds_ready;
+	int					fds_ready;
+	std::vector<int>	closed_clients;
+
 	while (1)
 	{
+		closed_clients.clear();
 		std::cout << "I AM RUNNING" << std::endl;
 		size_t		max_fd = ft::max(ft::max_element(this->servers), ft::max_element(this->clients)) + 1;
-		this->set_sockets = this->sockets;
-		if ((fds_ready = select(max_fd, &this->set_sockets, NULL, NULL, NULL)) == -1)
+		this->set_read_sockets = this->sockets;
+		this->set_write_sockets = this->sockets;
+		if ((fds_ready = select(max_fd, &this->set_read_sockets, &set_write_sockets, NULL, NULL)) == -1)
 			throw ft::runtime_error("Error: select() returned an error");
-		if (fds_ready == 0) //no pending connections/requests
-		{
-			std::cout << "No connection, sleeping for 3 seconds" << std::endl;
-			continue ;
-		}
 		while (this->newClientAdded()) //new connection has priority
 		{
 			std::cout << "NEW CLIENT ADDED" << std::endl;
-
 			fds_ready--;
 		}
+		//loop through all the clients
 		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
 		{
-			Client *client = it->second;
-
-			if (!FD_ISSET(it->first, &this->set_sockets))
+			int fd = it->first;
+			std::cout << "CLIENT FD: " << fd << std::endl;
+			if (FD_ISSET(fd, &this->set_read_sockets))
 			{
+				//create the request if it doesn't exist.
+				if (!requests.count(fd))
+					requests.insert(std::pair<int, Request>(fd, Request()));
+				requests[fd].process(fd);
+				if (requests[fd].get_done())
+				{
+					responses[fd] = Response();
+					responses[fd].setRequest(requests[fd]);
+					responses[fd].composeResponse();
+					responses[fd].printResponse();
+					requests.erase(fd);
+					std::cout << "RESPONSE MADE, WAITING FOR CLIENT.." << std::endl;
+				}
+				FD_CLR(fd, &this->set_read_sockets);
 				it++;
-				continue ;
 			}
-			if (client->handleRequest())
-				this->deleteClient((it++)->first);
+			//if write_set, send the response
+			else if (FD_ISSET(fd, &this->set_write_sockets) && responses.count(fd))
+			{
+				std::cout << "CLIENT IS READY FOR RESPONSE" << std::endl;
+				responses[fd].sendResponse(fd);
+				if (responses[fd].get_status_code() != 200)
+					closed_clients.push_back(fd);
+				responses.erase(fd);
+				FD_CLR(fd, &this->set_write_sockets);
+				it++;
+			}
 			else
 				it++;
+			std::cout << "CHECKING NEXT CLIENT" << std::endl;
 		}
+		//delete all clients that requested Connection: close or whose requests were erroneous
+		std::cout << "CLOSING CLIENTS" << std::endl;
+		for (size_t i = 0; i < closed_clients.size(); i++)
+		{
+			delete clients[closed_clients[i]];
+			clients.erase(closed_clients[i]);
+		}
+		std::cout << "END OF RUN LOOP BODY\n";
 	}
 }
 

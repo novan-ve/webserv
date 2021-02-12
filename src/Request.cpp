@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 17:48:22 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 01:02:52 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@
 #include "includes/Exception.hpp"
 #include "Utilities.hpp"
 
-Request::Request() : done(false), status_line("") {}
+Request::Request() : done(false), status_line(""), status_code(200) {}
 
-Request::Request(const Request& other) {
-
+Request::Request(const Request& other)
+{
 	*this = other;
 }
 
@@ -30,8 +30,21 @@ Request& Request::operator = (const Request& other)
 		this->done = other.done;
 		this->status_line = other.status_line;
 		this->lines = other.lines;
+		this->status_code = other.status_code;
+		this->path = other.path;
 	}
 	return (*this);
+}
+
+void	Request::process(int fd)
+{
+	std::vector <std::string> lines_read = ft::get_lines(fd);
+
+	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
+	{
+		std::cout << "REQUEST: " << *it << std::endl;
+		this->done = parseLine(*it);
+	}
 }
 
 Request::~Request() {}
@@ -94,16 +107,19 @@ bool Request::isStatusLine(const std::string &line)
 	return (true);
 }
 
-void Request::parseLine(std::string line) {
-
+bool	Request::parseLine(std::string line)
+{
 	if (line == "\r")
 	{
 		if (this->status_line == "")
-			return;
+			return false;
 		else if (this->status_line != "" && this->lines.size() == 0)
-			throw(ft::reqException("invalid status_line", 400));
-		else if (this->status_line != "" && this->lines.size() > 0) {
-
+		{
+			this->status_code = 400;
+			return (true);
+		}
+		else if (this->status_line != "" && this->lines.size() > 0)
+		{
 			int	end_pos_method = this->status_line.find(' ');
 			int start_pos_path = end_pos_method;
 
@@ -124,12 +140,11 @@ void Request::parseLine(std::string line) {
 
 			this->method = this->status_line.substr(0, end_pos_method);
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
-			this->done = true;
 
 			this->splitRequest();
 			this->printRequest();
 
-			return;
+			return (true);
 		}
 	}
 	else if (isStatusLine(line))
@@ -147,22 +162,28 @@ void Request::parseLine(std::string line) {
 				start--;
 
 			if (line.substr(start + 1, end - start) != "HTTP/1.1")
-				throw(ft::reqException("Error: unsupported Protocol/ProtocolVersion", 505));
+			{
+				this->status_code = 505;
+				return (true);
+			}
 			this->status_line = line;
 		}
-		return;
+		return (false);
 	}
 	else if (line.find(':') != std::string::npos)
 	{
 		if (this->status_line == "")
-			throw(ft::reqException("Error: Key Value pair found while expecting Status Line", 400));
-
+		{
+			this->status_code = 400;
+			return (true);
+		}
 		this->lines.push_back(line);
-		return;
+		return (false);
 	}
 	if (this->status_line != "")
-		return;
-	throw(ft::reqException("Error: Otherwise ill-formatted request encountered", 400));
+		return (false);
+	this->status_code = 400;
+	return (true);
 }
 
 void Request::splitRequest(void) {
@@ -211,3 +232,4 @@ void	Request::printRequest(void) const {
 bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method; }
 std::string		Request::get_path() const { return this->path; }
+int				Request::get_status_code() const { return this->status_code; }

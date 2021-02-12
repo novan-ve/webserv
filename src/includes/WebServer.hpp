@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:51:18 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/11 21:58:10 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include "Client.hpp"
 # include "Server.hpp"
 # include "Context.hpp"
+# include "Request.hpp"
+# include "Response.hpp"
 
 # include <vector>
 # include <map>
@@ -36,8 +38,11 @@ class WebServer : public Context
 		WebServer();
 		std::map<int, Server*>	servers;
 		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once, when it's deleted
+		std::map<int, Request>	requests;
+		std::map<int, Response>	responses;
 		fd_set					sockets; //contain all sockets
-		fd_set					set_sockets; //first: copy of sockets, after select(): contains only sockets with activity
+		fd_set					set_read_sockets; //first: copy of sockets, after select(): contains only sockets that can be read from
+		fd_set					set_write_sockets; //first: copy of sockets, after select(): contains only sockets that can be written to
 
 		void	deleteClient(int fd);
 //		Server&	newServer();
