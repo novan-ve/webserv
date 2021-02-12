@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 17:36:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 14:27:30 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 01:23:30 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,30 @@
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdlib>
+#include <errno.h>
+#include <string.h>
 
 #include "includes/Exception.hpp"
 #include "includes/Response.hpp"
 
 //Client::Client() {}
 
-Client::Client(Server& server) : server(server), req(NULL)
+Client::Client(Server& server) : server(server)
 {
-	this->fd = accept(server._server_fd, reinterpret_cast<struct sockaddr*>(&this->address), &this->addr_len);
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1)
+	ft::memset(&this->address, '\0', sizeof(this->address));
+	this->addr_len = sizeof(this->address);
+	this->fd = accept(server._server_fd, (struct sockaddr*)&this->address, &this->addr_len);
+	if (this->fd == -1)
+	{
+		std::cout << strerror(errno) << std::endl;
+		throw ft::runtime_error("Error: failed to open a new client connection");
+	}
+	if (fcntl(this->fd, F_SETFL, O_NONBLOCK) == -1)
+	{
+		std::cout << strerror(errno) << std::endl;
 		throw ft::runtime_error("Error: Could not set client-socket to O_NONBLOCK");
+	}
 }
 
 int		Client::getFd()
@@ -32,49 +45,19 @@ int		Client::getFd()
 	return (this->fd);
 }
 
-void	Client::handleResponse(int code) {
+// void	Client::handleResponse(int code) {
 
-	Response	resp(this->req, code);
+// 	Response	resp(this->req, code);
 
-	resp.composeResponse();
-	resp.printResponse();
-	resp.sendResponse(this->fd);
+// 	resp.composeResponse();
+// 	resp.printResponse();
+// 	resp.sendResponse(this->fd);
 
-	if (this->req) {
-		delete this->req;
-		this->req = NULL;
-	}
-}
-
-int		Client::handleRequest()
-{
-	std::vector <std::string> lines_read = ft::get_lines(this->fd);
-
-	if (!this->req)
-		req = new Request;
-
-	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end(); it++) {
-		std::cout << "REQUEST: " << *it << std::endl;
-		try
-		{
-			req->parseLine(*it);
-			if (req->get_done())
-			{
-				this->handleResponse(200);
-				return 0;
-			}
-			if (lines_read.size() == 1)
-				return 0;
-		}
-		catch (ft::reqException &e)
-		{
-			std::cout << e.what() << std::endl;
-			this->handleResponse(e.getCode());
-			return 1;
-		}
-	}
-	return 1;
-}
+// 	if (this->req) {
+// 		delete this->req;
+// 		this->req = NULL;
+// 	}
+// }
 
 Client::Client(const Client& other) : server(other.server), address(other.address), addr_len(other.addr_len), fd(other.fd) {}
 

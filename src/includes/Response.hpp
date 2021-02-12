@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 19:18:31 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 00:52:08 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class Response : public Message
 {
 	public:
-		Response(Request *request, int code);
+		Response();
 		Response(const Response& other);
 		Response& operator = (const Response& other);
 		~Response();
@@ -27,9 +27,11 @@ class Response : public Message
 		void	sendResponse(int fd) const;
 		void	printResponse(void) const;
 		void	composeResponse(void);
+		void	setRequest(Request& req);
+		int		get_status_code() const;
 
 	private:
-		Request*					req;
+		Request						req;
 		std::map<int, std::string>	status_codes;
 		std::string					status_line;
 		std::string					path;
@@ -45,8 +47,6 @@ class Response : public Message
 		void	setBodyError(void);
 		void	setContentLen(void);
 		void	setModified(void);
-
-		Response();
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 01:01:14 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 
-Response::Response(Request *request, int code) : req(request), response_code(code)
+Response::Response()
 {
 	this->status_codes[200] = "200 OK";
 	this->status_codes[400] = "400 Bad Request";
@@ -28,8 +28,19 @@ Response::Response(Request *request, int code) : req(request), response_code(cod
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
-Response::Response(const Response& other) : req(other.req), status_line(other.status_line),
+Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
 											response_code(other.response_code) {}
+
+void	Response::setRequest(Request& req)
+{
+	this->req = req;
+	this->response_code = req.get_status_code();
+}
+
+int		Response::get_status_code() const
+{
+	return (this->response_code);
+}
 
 Response& Response::operator = (const Response& other)
 {
@@ -38,6 +49,7 @@ Response& Response::operator = (const Response& other)
 		this->req = other.req;
 		this->status_line = other.status_line;
 		this->response_code = other.response_code;
+		this->status_codes = other.status_codes;
 	}
 	return (*this);
 }
@@ -98,7 +110,7 @@ void	Response::checkPath(void)
 {
 	if (this->response_code != 200)
 		return;
-	this->path = this->req->get_path();
+	this->path = this->req.get_path();
 
 	if (this->path == "/")
 		this->path = "/index.html";
@@ -108,6 +120,7 @@ void	Response::checkPath(void)
 	int fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1) {
 		this->response_code = 404;
+		close(fd);
 		return;
 	}
 	close(fd);
@@ -115,6 +128,7 @@ void	Response::checkPath(void)
 
 void	Response::setStatusLine(void)
 {
+	std::cout << "RESPONSE CODE: " << this->response_code << std::endl;
 	this->status_line.append("HTTP/1.1 ");
 	this->status_line.append(this->status_codes[this->response_code]);
 }
@@ -175,6 +189,7 @@ void	Response::setBody(void)
 		return;
 	}
 
+	std::cout << "BODY PATH: " << this->path << std::endl;
 	int fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1)
 		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
