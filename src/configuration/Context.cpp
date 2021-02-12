@@ -36,7 +36,7 @@ Context *Context::key_server(const std::list<std::string>& args)
 	Server *elem = new Server(*this);
 	WebServer& parent = dynamic_cast<WebServer&>(*this);
 	parent.servers[elem->_server_fd] = elem;
-	FD_SET(elem->_server_fd, &parent.sockets);
+	FD_SET(elem->_server_fd, &parent.read_sockets);
 	this->children.push_back(elem);
 	return (elem);
 }

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 21:58:10 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/12 12:18:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,12 @@ class WebServer : public Context
 		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once, when it's deleted
 		std::map<int, Request>	requests;
 		std::map<int, Response>	responses;
-		fd_set					sockets; //contain all sockets
-		fd_set					set_read_sockets; //first: copy of sockets, after select(): contains only sockets that can be read from
-		fd_set					set_write_sockets; //first: copy of sockets, after select(): contains only sockets that can be written to
+		fd_set					read_sockets; //contain all sockets that need to be read from
+		fd_set					write_sockets; //contains all sockets that need to be written to
 
 		void	deleteClient(int fd);
 //		Server&	newServer();
-		bool	newClientAdded();
+		bool	newClientAdded(fd_set& read_set);
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
 	public:
