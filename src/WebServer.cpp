@@ -6,12 +6,14 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/12 12:27:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/13 13:41:01 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #include "Client.hpp"
 #include "WebServer.hpp"
@@ -46,12 +48,14 @@ void	WebServer::deleteClient(int fd)
 		throw ft::runtime_error("Could not delete client, not in 'clients'");
 	delete this->clients[fd];
 	this->clients.erase(fd);
+	this->requests.erase(fd);
+	this->responses.erase(fd);
 	FD_CLR(fd, &this->read_sockets);
+	FD_CLR(fd, &this->write_sockets);
 }
 
-bool	WebServer::newClientAdded(fd_set& read_set)
+void	WebServer::addNewClients(fd_set& read_set)
 {
-	bool				new_client_added = false;
 	int					client_fd;
 	Client				*new_client;
 
@@ -60,19 +64,15 @@ bool	WebServer::newClientAdded(fd_set& read_set)
 		Server*	server = it->second;
 		if (!FD_ISSET(server->_server_fd, &read_set))
 			continue ;
-		new_client_added = true;
 		new_client = new Client(*server);
 		client_fd = new_client->getFd();
 		this->clients[client_fd] = new_client;
-		FD_CLR(server->_server_fd, &read_set);
 		FD_SET(client_fd, &this->read_sockets);
 	}
-	return (new_client_added);
 }
 
 void	WebServer::run()
 {
-	int					fds_ready;
 	std::vector<int>	closed_clients;
 	fd_set				read_set;
 	fd_set				write_set;
@@ -84,14 +84,13 @@ void	WebServer::run()
 		size_t		max_fd = ft::max(ft::max_element(this->servers), ft::max_element(this->clients)) + 1;
 		read_set = this->read_sockets;
 		write_set = this->write_sockets;
-		if ((fds_ready = select(max_fd, &read_set, &write_set, NULL, NULL)) == -1)
-			throw ft::runtime_error("Error: select() returned an error");
-		std::cout << "FDS_READY: " << fds_ready << std::endl;
-		while (this->newClientAdded(read_set)) //new connection has priority
+		if (select(max_fd, &read_set, &write_set, NULL, NULL) == -1)
 		{
-//			std::cout << "NEW CLIENT ADDED" << std::endl;
-			fds_ready--;
+			std::cerr << strerror(errno) << std::endl;
+			throw ft::runtime_error("Error: select() returned an error");
 		}
+		sleep(1);
+		this->addNewClients(read_set);
 		//loop through all the clients
 		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
 		{
@@ -99,36 +98,44 @@ void	WebServer::run()
 //			std::cout << "CLIENT FD: " << fd << std::endl;
 			if (FD_ISSET(fd, &read_set))
 			{
+				std::cout << "CLIENT IS READY FOR READING" << std::endl;
 				//create the request if it doesn't exist.
-				if (!requests.count(fd))
-					requests.insert(std::pair<int, Request>(fd, Request()));
-				requests[fd].process(fd);
-				if (requests[fd].get_done())
+				if (!requests[fd].size())
+					requests[fd].push(Request());
+				Request& current_request = requests[fd].front();
+				current_request.process(fd);
+				if (current_request.get_done())
 				{
-					responses[fd] = Response();
-					responses[fd].setRequest(requests[fd]);
-					responses[fd].composeResponse();
-					responses[fd].printResponse();
-					requests.erase(fd);
+					std::cout << "REQUEST IS DONE!!!!!" << std::endl;
+					responses[fd].push(Response());
+					Response& current_response = responses[fd].back();
+					current_response.setRequest(requests[fd].front());
+					current_response.composeResponse();
+					current_response.printResponse();
+					requests[fd].pop();
+					if (requests[fd].empty())
+						FD_CLR(fd, &this->read_sockets);
 					FD_SET(fd, &this->write_sockets);
-					FD_CLR(fd, &this->read_sockets);
+//					FD_CLR(fd, &this->read_sockets);
 //					std::cout << "RESPONSE MADE, WAITING FOR CLIENT.." << std::endl;
 				}
-				it++;
 			}
 			//if write_set, send the response
-			else if (FD_ISSET(fd, &write_set) && responses.count(fd))
+			else if (FD_ISSET(fd, &write_set))
 			{
 				std::cout << "CLIENT IS READY FOR RESPONSE" << std::endl;
-				responses[fd].sendResponse(fd);
-				if (responses[fd].get_status_code() != 200)
+				Response& current_response = responses[fd].front();
+				current_response.sendResponse(fd);
+				if (current_response.get_status_code() != 200)
 					closed_clients.push_back(fd);
-				responses.erase(fd);
-				FD_CLR(fd, &this->write_sockets);
-				it++;
+				responses[fd].pop();
+				if (responses[fd].empty())
+				{
+					FD_CLR(fd, &this->write_sockets);
+					FD_SET(fd, &this->read_sockets);
+				}
 			}
-			else
-				it++;
+			it++;
 //			std::cout << "CHECKING NEXT CLIENT" << std::endl;
 		}
 		//delete all clients that requested Connection: close or whose requests were erroneous
@@ -136,8 +143,7 @@ void	WebServer::run()
 		for (size_t i = 0; i < closed_clients.size(); i++)
 		{
 			std::cout << "DELETING CLIENT: " << closed_clients[i] << std::endl;
-			delete clients[closed_clients[i]];
-			clients.erase(closed_clients[i]);
+			this->deleteClient(closed_clients[i]);
 		}
 		std::cout << "END OF RUN LOOP BODY\n";
 	}
