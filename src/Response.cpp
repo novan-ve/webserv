@@ -215,7 +215,7 @@ void	Response::setContentLen(void)
 	int 				total = 0;
 
 	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		total += (*it).size();
+		total += (*it).size() + 2;
 
 	while (total != 0) {
 		length.insert(length.begin(), static_cast<char>(total % 10 + '0'));
