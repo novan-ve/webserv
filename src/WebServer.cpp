@@ -89,7 +89,6 @@ void	WebServer::run()
 			std::cerr << strerror(errno) << std::endl;
 			throw ft::runtime_error("Error: select() returned an error");
 		}
-		sleep(1);
 		this->addNewClients(read_set);
 		//loop through all the clients
 		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
