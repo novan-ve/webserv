@@ -36,6 +36,7 @@ class Response : public Message
 		std::string					status_line;
 		std::string					path;
 		int							response_code;
+		bool						isDir;
 
 		void	checkMethod(void);
 		void	checkPath(void);
@@ -48,6 +49,7 @@ class Response : public Message
 		void	setBodyError(void);
 		void	listDirectory(void);
 		void	setContentLen(void);
+		void	setLocation(void);
 		void	setModified(void);
 };
 

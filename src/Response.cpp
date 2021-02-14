@@ -22,9 +22,10 @@
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 
-Response::Response()
+Response::Response() : isDir(false)
 {
 	this->status_codes[200] = "200 OK";
+	this->status_codes[301] = "301 Moved Permanently";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
 	this->status_codes[405] = "405 Method Not Allowed";
@@ -32,7 +33,7 @@ Response::Response()
 }
 
 Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
-											response_code(other.response_code) {}
+											response_code(other.response_code), isDir(other.isDir) {}
 
 void	Response::setRequest(Request& req)
 {
@@ -53,6 +54,7 @@ Response& Response::operator = (const Response& other)
 		this->status_line = other.status_line;
 		this->response_code = other.response_code;
 		this->status_codes = other.status_codes;
+		this->isDir = other.isDir;
 	}
 	return (*this);
 }
@@ -109,14 +111,17 @@ void	Response::composeResponse(void)
 	this->setContentType();
 	this->setBody();
 	this->setContentLen();
+	this->setLocation();
 	this->setModified();
 }
 
 void	Response::checkMethod(void)
 {
+	if (this->response_code != 200)
+		return;
+
 	std::string methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
 
-	std::cout << "method: " << this->req.get_method() << std::endl;
 	for (int i = 0; i < 8; i++)
 	{
 		if (!this->req.get_method().compare(methods[i]))
@@ -131,9 +136,7 @@ void	Response::checkPath(void)
 		return;
 	this->path = this->req.get_path();
 
-	if (this->path == "/")
-		this->path = "/index.html";
-
+	// ********************** Change to contents of root key from config **********************
 	this->path.insert(0, "./html");
 
 	int fd = open(this->path.c_str(), O_RDONLY);
@@ -143,6 +146,43 @@ void	Response::checkPath(void)
 		return;
 	}
 	close(fd);
+
+	struct stat s;
+	if (stat(this->path.c_str(), &s) == 0)
+	{
+		if ( s.st_mode & S_IFDIR )
+		{
+			// ********************** Change to contents of index key from config **********************
+			std::vector<std::string>	index;
+			index.push_back("index.html");
+			index.push_back("index.htm");
+			index.push_back("index.php");
+
+			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
+			{
+				fd = open((this->path + *it).c_str(), O_RDONLY);
+				if (fd != -1) {
+					this->path += *it;
+					close(fd);
+					return;
+				}
+			}
+
+			// ********************** Change to autoindex key from config **********************
+			bool	autoindex = true;
+
+			if (autoindex)
+			{
+				this->isDir = true;
+				if (this->path[this->path.length() - 1] != '/')
+					this->response_code = 301;
+			}
+			else
+				this->response_code = 404;
+		}
+	}
+	else
+		ft::runtime_error("Error: stat failed in Response::checkPath");
 }
 
 void	Response::setStatusLine(void)
@@ -170,22 +210,12 @@ void	Response::setDate(void)
 
 void	Response::setContentType()
 {
-	if (this->response_code != 200) {
+	if (this->response_code != 200 || this->isDir) {
 		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
 		return;
 	}
 
 	size_t		pos = this->path.find_last_of('.');
-
-	struct stat s;
-	if (stat(path.c_str(), &s) != 0)
-		throw ft::runtime_error("Stat failed in Response::setContentType()");
-
-	if ( s.st_mode & S_IFDIR )
-	{
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
-		return;
-	}
 
 	if (pos == std::string::npos) {
 		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
@@ -223,22 +253,21 @@ void	Response::setBody(void)
 		this->setBodyError();
 		return;
 	}
-	struct stat s;
-	if (stat(path.c_str(), &s) == 0) {
 
-		if ( s.st_mode & S_IFDIR )
-			this->listDirectory();
-		else if ( s.st_mode & S_IFREG ) {
+	std::cout << "BODY PATH: " << this->path << std::endl;
 
-			std::cout << "BODY PATH: " << this->path << std::endl;
-			int fd = open(this->path.c_str(), O_RDONLY);
-			if (fd == -1)
-				ft::runtime_error("Error: Response can't open previously checked file in setBody()");
-
-			this->body = ft::get_lines(fd);
-			close(fd);
-		}
+	if (this->isDir)
+	{
+		this->listDirectory();
+		return;
 	}
+
+	int fd = open(this->path.c_str(), O_RDONLY);
+	if (fd == -1)
+		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
+
+	this->body = ft::get_lines(fd);
+	close(fd);
 }
 
 void	Response::setBodyError(void)
@@ -262,8 +291,7 @@ void	Response::listDirectory(void)
 	std::vector<std::string>	files;
 	std::string					full_path = this->req.get_path();
 
-	if (full_path[full_path.length() - 1] == '/')
-		full_path.resize(full_path.find_last_not_of('/') + 1);
+	full_path.resize(full_path.find_last_not_of('/') + 1);
 
 	this->body.push_back("<html>");
 	this->body.push_back("<head><title>Index of " + full_path + "</title></head>");
@@ -337,23 +365,30 @@ void	Response::setContentLen(void)
 	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", length));
 }
 
+void	Response::setLocation(void)
+{
+	if (this->response_code != 301)
+		return;
+
+	std::cout << "Pre" << this->req.get_path() << "Post" << std::endl;
+	std::string location = "http://" + this->req.get_header("Host") + this->req.get_path() + "/";
+	this->headers.push_back(std::make_pair<std::string, std::string>("Location", location));
+}
+
 void	Response::setModified(void)
 {
-	if (this->response_code != 200)
+	if (this->response_code != 200 || this->isDir)
 		return;
 
 	struct stat	result;
 
-	if (stat(path.c_str(), &result) == 0)
+	if (stat(this->path.c_str(), &result) == 0)
 	{
-		if ( result.st_mode & S_IFREG )
-		{
-			struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
-			char		buf[64];
+		struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
+		char		buf[64];
 
-			ft::memset(buf, '\0', 64);
-			strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
-			this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", std::string(buf)));
-		}
+		ft::memset(buf, '\0', 64);
+		strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
+		this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", std::string(buf)));
 	}
 }
