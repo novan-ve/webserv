@@ -45,6 +45,7 @@ class Response : public Message
 		void	setContentType(void);
 		void	setBody(void);
 		void	setBodyError(void);
+		void	listDirectory(void);
 		void	setContentLen(void);
 		void	setModified(void);
 };

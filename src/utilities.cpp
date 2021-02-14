@@ -145,13 +145,10 @@ namespace ft
 		return (keyval);
 	}
 
-	std::string getTime(time_t sec = 0)
+	struct tm getTime(time_t sec = 0)
 	{
 		struct timeval	tv;
 		struct tm		tm;
-		char 			buf[64];
-
-		ft::memset(buf, '\0', 64);
 
 		gettimeofday(&tv, NULL);
 
@@ -220,8 +217,6 @@ namespace ft
 		// Set correct weekday
 		tm.tm_wday = (tm.tm_year * 365 + tm.tm_yday + ((year - 1900) / 4)) % 7;
 
-		strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
-
-		return std::string(buf);
+		return tm;
 	}
 }

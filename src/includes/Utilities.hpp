@@ -70,7 +70,7 @@ namespace ft
 	unsigned short	htons(unsigned short x);
 
 
-	std::string					getTime(time_t sec = 0);
+	struct tm					getTime(time_t sec = 0);
 
 	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
 	std::pair<std::string, std::string>	get_keyval(std::string raw, char delimiter = ':');

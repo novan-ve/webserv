@@ -14,8 +14,10 @@
 #include <vector>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
@@ -73,6 +75,8 @@ void	Response::sendResponse(int fd) const
 	// Copy body into response
 	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
 		response.append(*it + "\r\n");
+
+	//response.append("\r\n");
 
 	if (send(fd, response.c_str(), response.length(), 0) < 0)
 		throw ft::runtime_error("Error: Could not send request to the client");
@@ -140,7 +144,13 @@ void	Response::setServer(void)
 
 void	Response::setDate(void)
 {
-	this->headers.push_back(std::make_pair<std::string, std::string>("Date", ft::getTime()));
+	struct tm 	tm = ft::getTime();
+	char		buf[64];
+
+	ft::memset(buf, '\0', 64);
+	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
+
+	this->headers.push_back(std::make_pair<std::string, std::string>("Date", std::string(buf)));
 }
 
 void	Response::setContentType()
@@ -151,6 +161,16 @@ void	Response::setContentType()
 	}
 
 	size_t		pos = this->path.find_last_of('.');
+
+	struct stat s;
+	if (stat(path.c_str(), &s) != 0)
+		throw ft::runtime_error("Stat failed in Response::setContentType()");
+
+	if ( s.st_mode & S_IFDIR )
+	{
+		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
+		return;
+	}
 
 	if (pos == std::string::npos) {
 		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
@@ -188,14 +208,22 @@ void	Response::setBody(void)
 		this->setBodyError();
 		return;
 	}
+	struct stat s;
+	if (stat(path.c_str(), &s) == 0) {
 
-	std::cout << "BODY PATH: " << this->path << std::endl;
-	int fd = open(this->path.c_str(), O_RDONLY);
-	if (fd == -1)
-		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
+		if ( s.st_mode & S_IFDIR )
+			this->listDirectory();
+		else if ( s.st_mode & S_IFREG ) {
 
-	this->body = ft::get_lines(fd);
-	close(fd);
+			std::cout << "BODY PATH: " << this->path << std::endl;
+			int fd = open(this->path.c_str(), O_RDONLY);
+			if (fd == -1)
+				ft::runtime_error("Error: Response can't open previously checked file in setBody()");
+
+			this->body = ft::get_lines(fd);
+			close(fd);
+		}
+	}
 }
 
 void	Response::setBodyError(void)
@@ -206,6 +234,75 @@ void	Response::setBodyError(void)
 	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>");
 	this->body.push_back("<center><hr>webserv/1.0</center>");
 	this->body.push_back("</body>");
+	this->body.push_back("</html>");
+}
+
+void	Response::listDirectory(void)
+{
+	struct stat 				result;
+	struct dirent				*entry;
+	char						buf[64];
+	std::vector<std::string>	filenames;
+	std::vector<std::string>	dirs;
+	std::vector<std::string>	files;
+	std::string					full_path = this->req.get_path();
+
+	if (full_path[full_path.length() - 1] == '/')
+		full_path.resize(full_path.find_last_not_of('/') + 1);
+
+	this->body.push_back("<html>");
+	this->body.push_back("<head><title>Index of " + full_path + "</title></head>");
+	this->body.push_back("<body>");
+	this->body.push_back("<h1>Index of " + full_path + "</h1><hr><pre><a href=\"..\">../</a>");
+
+	DIR *dir = opendir(this->path.c_str());
+	if (dir == NULL)
+		throw ft::runtime_error("Error: opendir in Response::listDirectory failed");
+
+	if (this->path[this->path.length() - 1] != '/')
+		this->path.append("/");
+
+	while ((entry = readdir(dir)) != NULL)
+		filenames.insert(filenames.begin(), std::string(entry->d_name));
+	closedir(dir);
+	for (std::vector<std::string>::iterator it = filenames.begin(); it != filenames.end(); it++)
+	{
+		if (*it == "." || *it == "..")
+			continue;
+		if (stat((this->path + *it).c_str(), &result) == 0)
+		{
+			struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
+
+			ft::memset(buf, '\0', 64);
+			strftime(buf, sizeof(buf), "%d-%b-%Y %H:%M", &tm);
+
+			if ( result.st_mode & S_IFDIR )
+			{
+				dirs.push_back("<a href=\"" + this->req.get_path());
+				if (this->req.get_path()[this->req.get_path().length() - 1] != '/')
+					dirs.back().append("/");
+				dirs.back().append(*it + "/\">" + *it + "/</a>");
+				dirs.back().append(std::string(50 - (*it).length(), ' ') + std::string(buf));
+				dirs.back().append(std::string(19, ' ') + "-");
+			}
+			else if ( result.st_mode & S_IFREG )
+			{
+				files.push_back("<a href=\"" + this->req.get_path());
+				if (this->req.get_path()[this->req.get_path().length() - 1] != '/')
+					files.back().append("/");
+				files.back().append(*it + "\">" + *it + "</a>");
+				files.back().append(std::string(51 - (*it).length(), ' ') + std::string(buf));
+				files.back().append(std::string(20 - ft::itos(result.st_size).length(), ' '));
+				files.back().append(ft::itos(result.st_size));
+			}
+		}
+	}
+	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); it++)
+		this->body.push_back(*it);
+	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+		this->body.push_back(*it);
+
+	this->body.push_back("</pre><hr></body>");
 	this->body.push_back("</html>");
 }
 
@@ -232,9 +329,16 @@ void	Response::setModified(void)
 
 	struct stat	result;
 
-	if (stat(path.c_str(), &result) == 0) {
+	if (stat(path.c_str(), &result) == 0)
+	{
+		if ( result.st_mode & S_IFREG )
+		{
+			struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
+			char		buf[64];
 
-		std::string	modTime = ft::getTime(result.st_mtim.tv_sec);
-		this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", modTime));
+			ft::memset(buf, '\0', 64);
+			strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
+			this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", std::string(buf)));
+		}
 	}
 }
