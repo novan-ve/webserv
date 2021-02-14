@@ -37,6 +37,7 @@ class Response : public Message
 		std::string					path;
 		int							response_code;
 
+		void	checkMethod(void);
 		void	checkPath(void);
 
 		void	setStatusLine(void);

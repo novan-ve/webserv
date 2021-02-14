@@ -27,6 +27,7 @@ Response::Response()
 	this->status_codes[200] = "200 OK";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
+	this->status_codes[405] = "405 Method Not Allowed";
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
@@ -99,6 +100,7 @@ void	Response::printResponse(void) const
 
 void	Response::composeResponse(void)
 {
+	this->checkMethod();
 	this->checkPath();
 
 	this->setStatusLine();
@@ -108,6 +110,19 @@ void	Response::composeResponse(void)
 	this->setBody();
 	this->setContentLen();
 	this->setModified();
+}
+
+void	Response::checkMethod(void)
+{
+	std::string methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+
+	std::cout << "method: " << this->req.get_method() << std::endl;
+	for (int i = 0; i < 8; i++)
+	{
+		if (!this->req.get_method().compare(methods[i]))
+			return;
+	}
+	this->response_code = 405;
 }
 
 void	Response::checkPath(void)

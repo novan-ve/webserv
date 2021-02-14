@@ -31,6 +31,7 @@ Request& Request::operator = (const Request& other)
 		this->status_line = other.status_line;
 		this->lines = other.lines;
 		this->status_code = other.status_code;
+		this->method = other.method;
 		this->path = other.path;
 	}
 	return (*this);
