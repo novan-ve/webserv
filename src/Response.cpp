@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/12 01:01:14 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 17:51:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
+#include "Server.hpp"
 
-Response::Response()
+Response::Response() : location_block(NULL)
 {
 	this->status_codes[200] = "200 OK";
 	this->status_codes[400] = "400 Bad Request";
@@ -29,7 +30,7 @@ Response::Response()
 }
 
 Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
-											response_code(other.response_code) {}
+											response_code(other.response_code), location_block(other.location_block) {}
 
 void	Response::setRequest(Request& req)
 {
@@ -50,6 +51,7 @@ Response& Response::operator = (const Response& other)
 		this->status_line = other.status_line;
 		this->response_code = other.response_code;
 		this->status_codes = other.status_codes;
+		this->location_block = other.location_block;
 	}
 	return (*this);
 }
@@ -223,6 +225,16 @@ void	Response::setContentLen(void)
 	}
 
 	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", length));
+}
+
+void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
+{
+//	Server*	matching_server_name = NULL;
+
+	for (std::map<Server*, std::vector<std::string> >::const_iterator it = server_names.begin(); it != server_names.end(); it++)
+	{
+
+	}
 }
 
 void	Response::setModified(void)

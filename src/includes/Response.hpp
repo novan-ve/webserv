@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/12 00:52:08 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 17:51:23 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,10 @@
 
 # include <map>
 # include "Request.hpp"
+//# include "WebServer.hpp"
+# include "Location.hpp"
+
+class Server;
 
 class Response : public Message
 {
@@ -29,6 +33,7 @@ class Response : public Message
 		void	composeResponse(void);
 		void	setRequest(Request& req);
 		int		get_status_code() const;
+		void	location_match(const std::map<Server*, std::vector<std::string> >& server_names);
 
 	private:
 		Request						req;
@@ -36,6 +41,7 @@ class Response : public Message
 		std::string					status_line;
 		std::string					path;
 		int							response_code;
+		Location*					location_block;
 
 		void	checkPath(void);
 

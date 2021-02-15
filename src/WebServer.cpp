@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:06:56 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 17:50:45 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	for (size_t i = 0 ; i < this->children.size(); i++)
 	{
 		Server *current_server =  reinterpret_cast<Server*>(this->children[i]);
+		this->server_names[current_server] = this->properties.server_names;
 		current_server->init();
 		FD_SET(current_server->_server_fd, &this->read_sockets);
 		this->servers[current_server->_server_fd] = current_server;
@@ -55,8 +56,6 @@ void	WebServer::deleteClient(int fd)
 		throw ft::runtime_error("Could not delete client, not in 'clients'");
 	delete this->clients[fd];
 	this->clients.erase(fd);
-	this->requests.erase(fd);
-	this->responses.erase(fd);
 	FD_CLR(fd, &this->read_sockets);
 	FD_CLR(fd, &this->write_sockets);
 }
@@ -134,6 +133,7 @@ void	WebServer::run()
 				current_response.sendResponse(fd);
 				if (current_response.get_status_code() != 200)
 					closed_clients.push_back(fd);
+				current_response.location_match(this->server_names);
 				responses[fd].pop();
 				if (responses[fd].empty())
 				{
@@ -153,13 +153,4 @@ void	WebServer::run()
 		}
 		std::cout << "END OF RUN LOOP BODY\n";
 	}
-}
-
-void	WebServer::handle_args(std::list<std::string>	args)
-{
-	std::cout << "ARGS" << std::endl;
-	ft::print_iteration(args.begin(), args.end());
-	if (args.size())
-		throw ft::runtime_error("Error: Configuration error encountered in 'webserver'");
-	return ;
 }
