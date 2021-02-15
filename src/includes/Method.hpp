@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:32:14 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/06 15:17:57 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 14:43:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ enum	e_method
 	PUT,
 	DELETE,
 	TRACE,
-	CONNECT
+	CONNECT,
+	E_METHOD_END
 };
 
 class	Method : public EnumString<e_method>

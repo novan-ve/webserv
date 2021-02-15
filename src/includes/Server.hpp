@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:51:42 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 18:36:46 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 # include "Request.hpp"
 # include "Location.hpp"
 
-# define PORT 8080
+//# define PORT 8080
 
 class Server : public Context
 {
@@ -34,6 +34,7 @@ class Server : public Context
 		Server( const Server &src );
 		Server&	operator=( const Server &rhs );
 		~Server();
+		void	init();
 
 		void	startListening( void );
 		int		acceptNewClient();

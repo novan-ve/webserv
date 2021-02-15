@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/13 13:02:34 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 17:43:34 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "Context.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
+# include "Properties.hpp"
 
 # include <queue>
 # include <vector>
@@ -37,12 +38,16 @@ class WebServer : public Context
 		friend class Context;
 
 		WebServer();
-		std::map<int, Server*>	servers;
-		std::map<int, Client*>	clients; //has to be pointer so the destructor only gets called once, when it's deleted
-		std::map<int, std::queue<Request> >	requests;
-		std::map<int, std::queue<Response> >	responses;
-		fd_set					read_sockets; //contain all sockets that need to be read from
-		fd_set					write_sockets; //contains all sockets that need to be written to
+		std::map<int, Server*>							servers;
+		std::map<int, Client*>							clients; //has to be pointer so the destructor only gets called once, when it's deleted
+
+		//could be moved to run() probably
+		std::map<int, std::queue<Request> >				requests;
+		std::map<int, std::queue<Response> >			responses;
+
+		fd_set											read_sockets; //contain all sockets that need to be read from
+		fd_set											write_sockets; //contains all sockets that need to be written to
+		std::map<Server*, std::vector<std::string> >	server_names;
 
 		void	deleteClient(int fd);
 //		Server&	newServer();
@@ -50,13 +55,12 @@ class WebServer : public Context
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
 	public:
+
 		WebServer(char *config_path);
 		WebServer(const WebServer& other);
 		void	run();
 		WebServer& operator = (const WebServer& other);
 		~WebServer();
-
-		void		handle_args(std::list<std::string> args);
 };
 
 #endif

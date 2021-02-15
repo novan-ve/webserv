@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:59:01 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 18:37:24 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Context
 		Properties					properties;
 		std::vector<Context*>		children;
 	public:
+		const Properties& get_properties();
 		std::vector<std::string>	keywords;
 		Context	*parse_keyword(std::string key, std::list<std::string> args);
 		Context();

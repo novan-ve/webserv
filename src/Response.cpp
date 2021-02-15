@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/12 01:01:14 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:25:35 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,10 @@
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
+#include "Server.hpp"
+#include "Properties.hpp"
 
-Response::Response() : isDir(false)
+Response::Response() : location_block(NULL), isDir(false)
 {
 	this->status_codes[200] = "200 OK";
 	this->status_codes[301] = "301 Moved Permanently";
@@ -33,7 +35,7 @@ Response::Response() : isDir(false)
 }
 
 Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
-											response_code(other.response_code), isDir(other.isDir) {}
+											response_code(other.response_code), location_block(other.location_block), isDir(other.isDir) {}
 
 void	Response::setRequest(Request& req)
 {
@@ -54,6 +56,7 @@ Response& Response::operator = (const Response& other)
 		this->status_line = other.status_line;
 		this->response_code = other.response_code;
 		this->status_codes = other.status_codes;
+		this->location_block = other.location_block;
 		this->isDir = other.isDir;
 	}
 	return (*this);
@@ -69,8 +72,8 @@ void	Response::sendResponse(int fd) const
 	response.append(this->status_line + "\r\n");
 
 	// Copy headers into response
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
-		response.append((*it).first + ": " + (*it).second + "\r\n");
+	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
+		response.append(it->first + ": " + it->second + "\r\n");
 
 	// Copy newline into response to seperate headers and body
 	response.append("\r\n");
@@ -91,7 +94,7 @@ void	Response::printResponse(void) const
 	std::cout << std::endl << "Response:" << std::endl;
 	std::cout << "  Headers:" << std::endl;
 	std::cout << "\t" << this->status_line << "\r" << std::endl;
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
+	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
 		std::cout << "\t" << it->first << ": " << it->second << "\r" << std::endl;
 	}
 	std::cout << "  Body:" << std::endl;
@@ -194,7 +197,7 @@ void	Response::setStatusLine(void)
 
 void	Response::setServer(void)
 {
-	this->headers.push_back(std::make_pair<std::string, std::string>("Server", "webserv/1.0"));
+	this->headers["Server"] = "webserv/1.0";
 }
 
 void	Response::setDate(void)
@@ -205,20 +208,22 @@ void	Response::setDate(void)
 	ft::memset(buf, '\0', 64);
 	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
 
-	this->headers.push_back(std::make_pair<std::string, std::string>("Date", std::string(buf)));
+	this->headers["Date"] = std::string(buf);
 }
 
 void	Response::setContentType()
 {
-	if (this->response_code != 200 || this->isDir) {
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/html"));
+	if (this->response_code != 200 || this->isDir)
+	{
+		this->headers["Content-Type"] = "text/html";
 		return;
 	}
 
 	size_t		pos = this->path.find_last_of('.');
 
-	if (pos == std::string::npos) {
-		this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", "text/plain"));
+	if (pos == std::string::npos)
+	{
+		this->headers["Content-Type"] = "text/plain";
 		return;
 	}
 
@@ -244,7 +249,7 @@ void	Response::setContentType()
 	else
 		type = "application/octet-stream";
 
-	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Type", type));
+	this->headers["Content-Type"] = type;
 }
 
 void	Response::setBody(void)
@@ -362,8 +367,21 @@ void	Response::setContentLen(void)
 		total /= 10;
 	}
 
-	this->headers.push_back(std::make_pair<std::string, std::string>("Content-Length", length));
+	this->headers["Content-Length"] = length;
 }
+
+// void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
+// {
+// 	Server*	matching_server_name;
+// 	std::vector<Server *>	best_match;
+// 	std::pair<bool, bool>	ip_port_match;
+
+// 	for (std::map<Server*, std::vector<std::string> >::const_iterator it = server_names.begin(); it != server_names.end(); it++)
+// 	{
+// 		std::pair<bool, bool>	current_match;
+// 		const Properties& server_properties = it->first->get_properties();
+// 	}
+// }
 
 void	Response::setLocation(void)
 {
@@ -372,7 +390,7 @@ void	Response::setLocation(void)
 
 	std::cout << "Pre" << this->req.get_path() << "Post" << std::endl;
 	std::string location = "http://" + this->req.get_header("Host") + this->req.get_path() + "/";
-	this->headers.push_back(std::make_pair<std::string, std::string>("Location", location));
+	this->headers["Location"] = location;
 }
 
 void	Response::setModified(void)
@@ -389,6 +407,6 @@ void	Response::setModified(void)
 
 		ft::memset(buf, '\0', 64);
 		strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
-		this->headers.push_back(std::make_pair<std::string, std::string>("Last-Modified", std::string(buf)));
+		this->headers["Last-Modified"] = std::string(buf);
 	}
 }

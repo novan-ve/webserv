@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/12 01:02:52 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:26:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -208,8 +208,8 @@ void Request::splitRequest(void) {
 	// Place header values inside headers attribute
 	for (std::vector<std::string>::iterator it = this->lines.begin(); it != header_end; it++) {
 		if ((*it).find(':') != std::string::npos) {
-			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it);
-			this->headers.push_back(keyval);
+			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it, ": ");
+			this->headers.insert(keyval);
 		}
 	}
 
@@ -225,7 +225,7 @@ void	Request::printRequest(void) const {
 	std::cout << std::endl << "Request:" << std::endl;
 	std::cout << "  Headers:" << std::endl;
 	std::cout << "\t" << this->method << " " << this->path << " HTTP/1.1" << std::endl;
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
+	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
 	if (this->body.size()) {
@@ -242,10 +242,10 @@ bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method; }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
-std::string		Request::get_header(const std::string &key) const {
 
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin();
-		it != this->headers.end(); it++)
+std::string		Request::get_header(const std::string &key) const
+{
+	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
 	{
 		// Get rid of the \r and return
 		if (it->first == key)

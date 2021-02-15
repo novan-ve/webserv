@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/09 14:22:55 by novan-ve      ########   odam.nl          #
+#    Updated: 2021/02/15 14:31:04 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,6 +49,7 @@ SRC =	main.cpp \
 		URI.cpp \
 		Client.cpp \
 		Server.cpp \
+		Method.cpp \
 		Request.cpp \
 		Response.cpp \
 		get_lines.cpp \
