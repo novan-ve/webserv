@@ -140,6 +140,8 @@ Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 	};
 	static std::map<std::string, Context::keyword_func>	functions(pairs, pairs + (sizeof(pairs) / sizeof(std::pair<std::string, Context::keyword_func>)));
 
+	if (!functions.count(key))
+		throw ft::runtime_error("Error: unrecognized keyword in config-parser");
 	return ((this->*(functions[key]))(args));
 }
 
