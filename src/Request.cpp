@@ -31,7 +31,10 @@ Request& Request::operator = (const Request& other)
 		this->status_line = other.status_line;
 		this->lines = other.lines;
 		this->status_code = other.status_code;
+		this->method = other.method;
 		this->path = other.path;
+		this->headers = other.headers;
+		this->body = other.body;
 	}
 	return (*this);
 }
@@ -39,6 +42,12 @@ Request& Request::operator = (const Request& other)
 void	Request::process(int fd)
 {
 	std::vector <std::string> lines_read = ft::get_lines(fd);
+
+	if (lines_read.size() == 0)
+	{
+		this->status_code = 400;
+		this->done = true;
+	}
 
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
 	{
@@ -233,3 +242,14 @@ bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method; }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
+std::string		Request::get_header(const std::string &key) const {
+
+	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin();
+		it != this->headers.end(); it++)
+	{
+		// Get rid of the \r and return
+		if (it->first == key)
+			return it->second.substr(0, it->second.length() - 1);
+	}
+	return "";
+}
