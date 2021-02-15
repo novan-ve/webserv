@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 18:45:25 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:22:41 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,9 @@ class Response : public Message
 		std::string					path;
 		int							response_code;
 		Location*					location_block;
+		bool						isDir;
 
+		void	checkMethod(void);
 		void	checkPath(void);
 
 		void	setStatusLine(void);
@@ -51,7 +53,9 @@ class Response : public Message
 		void	setContentType(void);
 		void	setBody(void);
 		void	setBodyError(void);
+		void	listDirectory(void);
 		void	setContentLen(void);
+		void	setLocation(void);
 		void	setModified(void);
 };
 

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 19:15:40 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:25:35 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,24 +14,28 @@
 #include <vector>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include "includes/Response.hpp"
 #include "includes/Utilities.hpp"
 #include "Server.hpp"
 #include "Properties.hpp"
 
-Response::Response() : location_block(NULL)
+Response::Response() : location_block(NULL), isDir(false)
 {
 	this->status_codes[200] = "200 OK";
+	this->status_codes[301] = "301 Moved Permanently";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
+	this->status_codes[405] = "405 Method Not Allowed";
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
 Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
-											response_code(other.response_code), location_block(other.location_block) {}
+											response_code(other.response_code), location_block(other.location_block), isDir(other.isDir) {}
 
 void	Response::setRequest(Request& req)
 {
@@ -53,6 +57,7 @@ Response& Response::operator = (const Response& other)
 		this->response_code = other.response_code;
 		this->status_codes = other.status_codes;
 		this->location_block = other.location_block;
+		this->isDir = other.isDir;
 	}
 	return (*this);
 }
@@ -77,6 +82,8 @@ void	Response::sendResponse(int fd) const
 	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
 		response.append(*it + "\r\n");
 
+	//response.append("\r\n");
+
 	if (send(fd, response.c_str(), response.length(), 0) < 0)
 		throw ft::runtime_error("Error: Could not send request to the client");
 }
@@ -98,6 +105,7 @@ void	Response::printResponse(void) const
 
 void	Response::composeResponse(void)
 {
+	this->checkMethod();
 	this->checkPath();
 
 	this->setStatusLine();
@@ -106,7 +114,23 @@ void	Response::composeResponse(void)
 	this->setContentType();
 	this->setBody();
 	this->setContentLen();
+	this->setLocation();
 	this->setModified();
+}
+
+void	Response::checkMethod(void)
+{
+	if (this->response_code != 200)
+		return;
+
+	std::string methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (!this->req.get_method().compare(methods[i]))
+			return;
+	}
+	this->response_code = 405;
 }
 
 void	Response::checkPath(void)
@@ -115,9 +139,7 @@ void	Response::checkPath(void)
 		return;
 	this->path = this->req.get_path();
 
-	if (this->path == "/")
-		this->path = "/index.html";
-
+	// ********************** Change to contents of root key from config **********************
 	this->path.insert(0, "./html");
 
 	int fd = open(this->path.c_str(), O_RDONLY);
@@ -127,6 +149,43 @@ void	Response::checkPath(void)
 		return;
 	}
 	close(fd);
+
+	struct stat s;
+	if (stat(this->path.c_str(), &s) == 0)
+	{
+		if ( s.st_mode & S_IFDIR )
+		{
+			// ********************** Change to contents of index key from config **********************
+			std::vector<std::string>	index;
+			index.push_back("index.html");
+			index.push_back("index.htm");
+			index.push_back("index.php");
+
+			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
+			{
+				fd = open((this->path + *it).c_str(), O_RDONLY);
+				if (fd != -1) {
+					this->path += *it;
+					close(fd);
+					return;
+				}
+			}
+
+			// ********************** Change to autoindex key from config **********************
+			bool	autoindex = true;
+
+			if (autoindex)
+			{
+				this->isDir = true;
+				if (this->path[this->path.length() - 1] != '/')
+					this->response_code = 301;
+			}
+			else
+				this->response_code = 404;
+		}
+	}
+	else
+		ft::runtime_error("Error: stat failed in Response::checkPath");
 }
 
 void	Response::setStatusLine(void)
@@ -143,12 +202,18 @@ void	Response::setServer(void)
 
 void	Response::setDate(void)
 {
-	this->headers["Date"] = ft::getTime();
+	struct tm 	tm = ft::getTime();
+	char		buf[64];
+
+	ft::memset(buf, '\0', 64);
+	strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
+
+	this->headers["Date"] = std::string(buf);
 }
 
 void	Response::setContentType()
 {
-	if (this->response_code != 200)
+	if (this->response_code != 200 || this->isDir)
 	{
 		this->headers["Content-Type"] = "text/html";
 		return;
@@ -195,6 +260,13 @@ void	Response::setBody(void)
 	}
 
 	std::cout << "BODY PATH: " << this->path << std::endl;
+
+	if (this->isDir)
+	{
+		this->listDirectory();
+		return;
+	}
+
 	int fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1)
 		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
@@ -211,6 +283,74 @@ void	Response::setBodyError(void)
 	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>");
 	this->body.push_back("<center><hr>webserv/1.0</center>");
 	this->body.push_back("</body>");
+	this->body.push_back("</html>");
+}
+
+void	Response::listDirectory(void)
+{
+	struct stat 				result;
+	struct dirent				*entry;
+	char						buf[64];
+	std::vector<std::string>	filenames;
+	std::vector<std::string>	dirs;
+	std::vector<std::string>	files;
+	std::string					full_path = this->req.get_path();
+
+	full_path.resize(full_path.find_last_not_of('/') + 1);
+
+	this->body.push_back("<html>");
+	this->body.push_back("<head><title>Index of " + full_path + "</title></head>");
+	this->body.push_back("<body>");
+	this->body.push_back("<h1>Index of " + full_path + "</h1><hr><pre><a href=\"..\">../</a>");
+
+	DIR *dir = opendir(this->path.c_str());
+	if (dir == NULL)
+		throw ft::runtime_error("Error: opendir in Response::listDirectory failed");
+
+	if (this->path[this->path.length() - 1] != '/')
+		this->path.append("/");
+
+	while ((entry = readdir(dir)) != NULL)
+		filenames.insert(filenames.begin(), std::string(entry->d_name));
+	closedir(dir);
+	for (std::vector<std::string>::iterator it = filenames.begin(); it != filenames.end(); it++)
+	{
+		if (*it == "." || *it == "..")
+			continue;
+		if (stat((this->path + *it).c_str(), &result) == 0)
+		{
+			struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
+
+			ft::memset(buf, '\0', 64);
+			strftime(buf, sizeof(buf), "%d-%b-%Y %H:%M", &tm);
+
+			if ( result.st_mode & S_IFDIR )
+			{
+				dirs.push_back("<a href=\"" + this->req.get_path());
+				if (this->req.get_path()[this->req.get_path().length() - 1] != '/')
+					dirs.back().append("/");
+				dirs.back().append(*it + "/\">" + *it + "/</a>");
+				dirs.back().append(std::string(50 - (*it).length(), ' ') + std::string(buf));
+				dirs.back().append(std::string(19, ' ') + "-");
+			}
+			else if ( result.st_mode & S_IFREG )
+			{
+				files.push_back("<a href=\"" + this->req.get_path());
+				if (this->req.get_path()[this->req.get_path().length() - 1] != '/')
+					files.back().append("/");
+				files.back().append(*it + "\">" + *it + "</a>");
+				files.back().append(std::string(51 - (*it).length(), ' ') + std::string(buf));
+				files.back().append(std::string(20 - ft::itos(result.st_size).length(), ' '));
+				files.back().append(ft::itos(result.st_size));
+			}
+		}
+	}
+	for (std::vector<std::string>::iterator it = dirs.begin(); it != dirs.end(); it++)
+		this->body.push_back(*it);
+	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+		this->body.push_back(*it);
+
+	this->body.push_back("</pre><hr></body>");
 	this->body.push_back("</html>");
 }
 
@@ -243,16 +383,30 @@ void	Response::setContentLen(void)
 // 	}
 // }
 
+void	Response::setLocation(void)
+{
+	if (this->response_code != 301)
+		return;
+
+	std::cout << "Pre" << this->req.get_path() << "Post" << std::endl;
+	std::string location = "http://" + this->req.get_header("Host") + this->req.get_path() + "/";
+	this->headers["Location"] = location;
+}
+
 void	Response::setModified(void)
 {
-	if (this->response_code != 200)
+	if (this->response_code != 200 || this->isDir)
 		return;
 
 	struct stat	result;
 
-	if (stat(path.c_str(), &result) == 0)
+	if (stat(this->path.c_str(), &result) == 0)
 	{
-		std::string	modTime = ft::getTime(result.st_mtim.tv_sec);
-		this->headers["Last-Modified"] = modTime;
+		struct tm 	tm = ft::getTime(result.st_mtim.tv_sec);
+		char		buf[64];
+
+		ft::memset(buf, '\0', 64);
+		strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", &tm);
+		this->headers["Last-Modified"] = std::string(buf);
 	}
 }

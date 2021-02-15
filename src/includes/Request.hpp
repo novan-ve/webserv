@@ -35,6 +35,7 @@ class Request : public Message
 		std::string	get_method(void) const;
 		std::string	get_path(void) const;
 		int			get_status_code() const;
+		std::string get_header(const std::string &key) const;
 
 	private:
 //		int							fd;

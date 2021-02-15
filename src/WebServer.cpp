@@ -131,7 +131,7 @@ void	WebServer::run()
 				std::cout << "CLIENT IS READY FOR RESPONSE" << std::endl;
 				Response& current_response = responses[fd].front();
 				current_response.sendResponse(fd);
-				if (current_response.get_status_code() != 200)
+				if (current_response.get_status_code() == 400 || current_response.get_status_code() == 505)
 					closed_clients.push_back(fd);
 //				current_response.location_match(this->server_names);
 				responses[fd].pop();
