@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 14:16:49 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/13 13:02:34 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:09:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include "Context.hpp"
 # include "Request.hpp"
 # include "Response.hpp"
+# include "Properties.hpp"
 
 # include <queue>
 # include <vector>

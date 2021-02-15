@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:10:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,10 @@ Server::Server(Context& parent) : Context(parent)
 	this->keywords.push_back("server_name");
 	this->keywords.push_back("error_page");
 	this->keywords.push_back("client_max_body_size");
+}
+
+void	Server::init()
+{
 	int 	opt = 1;
 
 	// Create socket file descriptor

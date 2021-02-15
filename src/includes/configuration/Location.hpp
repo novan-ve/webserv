@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:51:13 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:16:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,12 @@
 class Location : public Context
 {
 	public:
-//		Location();
 		~Location();
 		Location(Context& parent);
 		Location(const Location& other);
-		void		handle_args(std::list<std::string> args);
+	private:
+//		Location();
+//		Location& operator = (const Location& other);
 };
 
 #endif

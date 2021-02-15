@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:47:31 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:44:48 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,22 @@ namespace ft
 		}
 		sign += (!sign);
 		return (res * sign);
+	}
+
+	size_t stoul(std::string number, const std::string base = "0123456789")
+	{
+		size_t res = 0;
+
+		if (!number.size())
+			return (res);
+		for (size_t i = 0; i < number.size(); i++)
+		{
+			size_t num = base.find(number[i]);
+			if (num == std::string::npos)
+				throw ft::runtime_error("Error: string is not a number");
+			res = res * base.size() + num;
+		}
+		return (res);
 	}
 
 	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match)

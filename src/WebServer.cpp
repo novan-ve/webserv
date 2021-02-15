@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/13 13:41:01 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:06:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ WebServer::~WebServer()
 	for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end(); it++)
 		delete it->second;
 	this->clients.clear();
-	this->servers.clear();
+	this->servers.clear(); //deleted by Context destructor
 }
 
 WebServer::WebServer(char *config_path) : Context(), servers(), clients()
@@ -40,6 +40,13 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	FD_ZERO(&this->write_sockets);
 	Configuration	config(config_path, *this);
 	config.parse();
+	for (size_t i = 0 ; i < this->children.size(); i++)
+	{
+		Server *current_server =  reinterpret_cast<Server*>(this->children[i]);
+		current_server->init();
+		FD_SET(current_server->_server_fd, &this->read_sockets);
+		this->servers[current_server->_server_fd] = current_server;
+	}
 }
 
 void	WebServer::deleteClient(int fd)

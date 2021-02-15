@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 12:04:00 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:46:53 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 14:43:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,13 @@ class EnumString
 		const Enum			id;
 		const std::string	str;
 	protected:
-		EnumString() : str(), id() {} //fuck 42s coplien
+		EnumString() : id(), str() {} //fuck 42s coplien
 
 		EnumString(Enum id, const char *const names[], size_t len) : names(names, names + (len / sizeof(char *))), id(id), str(toString(id)) {}
 
 		EnumString(std::string str, const char *const names[], size_t len) : names(names, names + (len / sizeof(char *))), id(toId(str)), str(str) {}
 
-		EnumString(const EnumString& other) : names(other.names), str(other.str), id(other.id) {}
+		EnumString(const EnumString& other) : names(other.names), id(other.id), str(other.str) {}
 
 		EnumString& operator = (const EnumString& other)
 		{

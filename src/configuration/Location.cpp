@@ -6,12 +6,15 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:52:12 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 15:16:24 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 #include "Context.hpp"
+
+//impossible
+//Location::Location() {}
 
 //Location is a child Context of Server
 Location::Location(Context& parent) : Context(parent)
@@ -27,10 +30,16 @@ Location::~Location()
 	std::cout << "LOCATION DECONSTRUCTED" << std::endl;
 }
 
-Location::Location(const Location& other) : Context(other.parent) {}
+// Location& Location::operator = (const Location& other)
+// {
+// 	if (this != &other)
+// 	{
+// 		this->keywords = other.keywords;
+// 		this->parent = other.parent;
+// 		this->children = other.children;
+// 		this->properties = other.properties;
+// 	}
+// 	return (*this);
+// }
 
-void	Location::handle_args(std::list<std::string> args)
-{
-	std::cout << "Location ARGS: ";
-	ft::print_iteration(args.begin(), args.end());
-}
+Location::Location(const Location& other) : Context(other.parent) {}
