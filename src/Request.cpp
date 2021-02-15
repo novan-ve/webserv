@@ -43,6 +43,12 @@ void	Request::process(int fd)
 {
 	std::vector <std::string> lines_read = ft::get_lines(fd);
 
+	if (lines_read.size() == 0)
+	{
+		this->status_code = 400;
+		this->done = true;
+	}
+
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
 	{
 		std::cout << "REQUEST: " << *it << std::endl;
