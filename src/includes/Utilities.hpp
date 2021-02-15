@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:44:08 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 16:44:29 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,13 +68,13 @@ namespace ft
 
 	void	*memset(void *b, int c, size_t len);
 
-	unsigned short	htons(unsigned short x);
+	unsigned short	host_to_network_short(unsigned short x);
 
 
 	std::string					getTime(time_t sec = 0);
 
 	std::vector<std::string>	get_lines(int fd, size_t max_lines = std::numeric_limits<size_t>::max());
-	std::pair<std::string, std::string>	get_keyval(std::string raw, char delimiter = ':');
+	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter = ": ");
 
 	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match);
 	std::vector<std::string>	split(std::string raw, std::vector<std::string>& delim);

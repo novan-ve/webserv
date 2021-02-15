@@ -58,7 +58,7 @@ Context *Context::key_listen(const std::list<std::string>& args)
 	std::string ip_port = args.front();
 	if (ip_port.find(':') != std::string::npos)
 	{
-		std::pair<std::string, std::string>	keyval = ft::get_keyval(ip_port, ':');
+		std::pair<std::string, std::string>	keyval = ft::get_keyval(ip_port, ":");
 		for (size_t i = 0; i < keyval.second.size(); i++)
 			if (keyval.second[i] < '0' || keyval.second[i] > '9')
 				throw ft::runtime_error("Error: Invalid port given to 'listen'");

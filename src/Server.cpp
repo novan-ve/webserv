@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:10:11 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 16:45:39 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include "Exception.hpp"
 #include <vector>
+#include <arpa/inet.h>
 
 #include "Server.hpp"
 #include "Utilities.hpp"
@@ -47,8 +48,8 @@ void	Server::init()
 
 	// Assign transport address
 	this->_address.sin_family = AF_INET;
-	this->_address.sin_addr.s_addr = INADDR_ANY;
-	this->_address.sin_port = ft::htons(PORT);
+	this->_address.sin_addr.s_addr = (this->properties.ip_port.first == "0.0.0.0" || this->properties.ip_port.first == "localhost") ? INADDR_ANY : inet_addr(this->properties.ip_port.first.c_str());
+	this->_address.sin_port = ft::host_to_network_short(ft::stoi(this->properties.ip_port.second));
 	ft::memset(this->_address.sin_zero, '\0', sizeof(this->_address.sin_zero));
 
 	// Attach socket to transport address

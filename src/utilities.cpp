@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:44:48 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 16:44:06 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,19 +145,19 @@ namespace ft
 		return (b);
 	}
 
-	unsigned short	htons(unsigned short x)
+	unsigned short	host_to_network_short(unsigned short x)
 	{
 		return ((((x) >> 8) & 0xff ) | (((x) & 0xff) << 8));
 	}
 
-	std::pair<std::string, std::string>	get_keyval(std::string raw, char delimiter = ':')
+	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter = ": ")
 	{
 		std::pair<std::string, std::string>	keyval;
 		size_t	delim_pos = raw.find(delimiter);
 		if (delim_pos == std::string::npos)
 			return (keyval);
 		keyval.first = raw.substr(0, delim_pos);
-		keyval.second = raw.substr(delim_pos + 2, raw.size());
+		keyval.second = raw.substr(delim_pos + delimiter.size(), raw.size());
 		return (keyval);
 	}
 
