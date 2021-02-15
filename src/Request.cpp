@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 16:43:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:12:03 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,7 @@ void Request::splitRequest(void) {
 	for (std::vector<std::string>::iterator it = this->lines.begin(); it != header_end; it++) {
 		if ((*it).find(':') != std::string::npos) {
 			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it, ": ");
-			this->headers.push_back(keyval);
+			this->headers.insert(keyval);
 		}
 	}
 
@@ -216,7 +216,7 @@ void	Request::printRequest(void) const {
 	std::cout << std::endl << "Request:" << std::endl;
 	std::cout << "  Headers:" << std::endl;
 	std::cout << "\t" << this->method << " " << this->path << " HTTP/1.1" << std::endl;
-	for (std::vector<std::pair<std::string, std::string> >::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
+	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
 	if (this->body.size()) {

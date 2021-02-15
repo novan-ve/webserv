@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:08:13 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/02 20:16:05 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/15 19:16:13 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <map>
 
 //virtual base class for Response/Request
 class Message
@@ -26,7 +27,7 @@ class Message
 		Message& operator = (const Message& other);
 		virtual ~Message();
 	protected:
-		std::vector<std::pair<std::string, std::string> >	headers;
+		std::map<std::string, std::string>					headers;
 		std::vector<std::string>							body;
 };
 

@@ -38,6 +38,11 @@ Context *Context::key_server(const std::list<std::string>& args)
 	return (elem);
 }
 
+const Properties&	Context::get_properties()
+{
+	return (this->properties);
+}
+
 Context	*Context::key_location(const std::list<std::string>& args)
 {
 	std::cout << "CREATE_LOCATION CALLED" << std::endl;
