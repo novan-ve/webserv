@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:58:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 13:47:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 20:10:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ bool	Parse::collect_args(std::list<std::string>::iterator& it, std::list<std::st
 	return (body);
 }
 
-void	Parse::handle_body(Context* child, std::list<std::string>::iterator& it, std::list<std::string>& tokens)
+void	Parse::handle_body(std::queue<Parse>& children, Context* child, std::list<std::string>::iterator& it, std::list<std::string>& tokens)
 {
 	std::list<std::string>	childrenTokens;
 
@@ -63,12 +63,13 @@ void	Parse::handle_body(Context* child, std::list<std::string>::iterator& it, st
 		throw ft::runtime_error("Error: Unclosed block in configuration");
 	childrenTokens.splice(childrenTokens.begin(), this->tokens, it--, end);
 	it++;
-	this->children.push(Parse(*child, childrenTokens));
+	children.push(Parse(*child, childrenTokens));
 }
 
 void	Parse::parse()
 {
 	std::list<std::string>	args;
+	std::queue<Parse>		children;
 
 	std::cout << "TOKENS: ";
 	ft::print_iteration(tokens.begin(), tokens.end());
@@ -82,7 +83,7 @@ void	Parse::parse()
 			bool body = this->collect_args(it, tokens.end(), args);
 			child = context.parse_keyword(key, args);
 			if (body)
-				this->handle_body(child, it, tokens);
+				this->handle_body(children, child, it, tokens);
 			else if (!body && child)
 				throw ft::runtime_error("Error: no body encountered for property that expects a body");
 			it++;
@@ -90,10 +91,10 @@ void	Parse::parse()
 		else
 			throw ft::runtime_error("Error: unrecognized keyword in config-parser");
 	}
-	while (this->children.size())
+	while (children.size())
 	{
-		this->children.front().parse();
-		this->children.pop();
+		children.front().parse();
+		children.pop();
 	}
 }
 
