@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 12:04:19 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 14:57:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,14 +250,3 @@ bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method; }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
-
-std::string		Request::get_header(const std::string &key) const
-{
-	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
-	{
-		// Get rid of the \r and return
-		if (it->first == key)
-			return it->second.substr(0, it->second.length() - 1);
-	}
-	return "";
-}

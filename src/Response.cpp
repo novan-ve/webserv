@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 13:31:24 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 15:33:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ void	Response::setRequest(Request& req)
 {
 	this->req = req;
 	this->response_code = req.get_status_code();
-	this->headers = req.get_headers();
 }
 
 int		Response::get_status_code() const
@@ -376,10 +375,12 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 	Server*	matching_server_name = NULL;
 	std::vector<Server *>	best_match;
 	std::pair<int, bool>	ip_port_match;
-	std::string host = this->headers["Host"] + "/";
+	std::string host = this->req.get_header("Host") + "/";
 	URI	host_uri(host);
 	if (host_uri.get_host() == "localhost")
 		host_uri.set_host("127.0.0.1");
+	if (host_uri.get_port() == "")
+		host_uri.set_port("80");
 
 	ip_port_match.second = false;
 	ip_port_match.first = 0;
@@ -391,7 +392,7 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 		const Properties& server_properties = it->first->get_properties();
 
 //		std::cout << "RESPONSE HOST HEADER: " << this->headers["Host"] << std::endl;
-//		std::cout << "Server listen - " << server_properties.ip_port.first << ":" << server_properties.ip_port.second << std::endl;
+		std::cout << "Server listen - " << server_properties.ip_port.first << ":" << server_properties.ip_port.second << std::endl;
 //		std::cout << "Request - " << this->req.uri.get_uri() << " | " << this->req.uri.get_host() << ":" << this->req.uri.get_port() << std::endl;
 //		std::cout << "Host: " << host_uri.get_host() << ":" << host_uri.get_port() << std::endl;
 
@@ -399,7 +400,7 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 			current_match.second = true;
 		else
 		{
-//			std::cout << "Port doesn't match" << std::endl;
+			std::cout << "Port doesn't match" << std::endl;
 			continue ; //port has to match explicitly
 		}
 
@@ -409,7 +410,7 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 			current_match.first = 1;
 		else
 		{
-//			std::cout << "IP doesn't match" << std::endl;
+			std::cout << "IP doesn't match" << std::endl;
 			continue ;
 		}
 
@@ -446,14 +447,14 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 
 	if (!server_block)
 	{
-//		std::cout << "No server-block found for request!" << std::endl;
+		std::cout << "No server-block found for request!" << std::endl;
 		return ;
 	}
-	// else
-	// {
-	// 	std::cout << "SERVER_BLOCK selected:" << std::endl;
-	// 	ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
-	// }
+	else
+	{
+		std::cout << "SERVER_BLOCK selected:" << std::endl;
+		ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
+	}
 
 //	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
 //	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;

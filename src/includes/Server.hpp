@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 01:58:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 15:08:14 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ class Server : public Context
 		Server( const Server &src );
 		Server&	operator=( const Server &rhs );
 		~Server();
-		void	init();
+		bool	init();
 
 		void	startListening( void );
 		int		acceptNewClient();

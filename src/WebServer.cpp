@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 11:46:14 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 15:09:12 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,14 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	{
 		Server *current_server =  reinterpret_cast<Server*>(this->children[i]);
 		this->server_names[current_server] = this->properties.server_names;
-		current_server->init();
-		FD_SET(current_server->_server_fd, &this->read_sockets);
-		this->servers[current_server->_server_fd] = current_server;
+		if (current_server->init())
+		{
+			FD_SET(current_server->_server_fd, &this->read_sockets);
+			this->servers[current_server->_server_fd] = current_server;
+		}
 	}
+	if (this->servers.empty())
+		throw ft::runtime_error("Error: All of the specified servers failed to initialize");
 }
 
 void	WebServer::deleteClient(int fd)
