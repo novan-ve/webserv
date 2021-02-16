@@ -176,7 +176,7 @@ Context *Context::key_limit_except(const std::list<std::string>& args)
 	for (std::map<std::string, bool>::iterator it = this->properties.accepted_methods.begin(); it != this->properties.accepted_methods.end(); it++)
 		it->second = false;
 	for (std::list<std::string>::const_iterator it = args.begin(); it != args.end(); it++)
-		this->properties.accepted_methods[Method(*it).str] = true;
+		this->properties.accepted_methods[Method(*it).get_str()] = true;
 	return (NULL);
 }
 

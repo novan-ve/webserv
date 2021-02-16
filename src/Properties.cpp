@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 09:37:47 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:28:16 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:18:59 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ Properties::Properties() :
 	accepted_methods(), error_pages(), client_max_body_size(1000000)
 {
 	for (size_t i = 0; i < E_METHOD_END; i++)
-		accepted_methods[Method((e_method)i).str] = true;
-	this->index.push_back("index.html");	
+		accepted_methods[Method((e_method)i).get_str()] = true;
+	this->index.push_back("index.html");
 }
 
 Properties::Properties(const Properties& other) :

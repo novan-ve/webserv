@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 15:09:12 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:02:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 void	WebServer::deleteClient(int fd)
 {
 	if (!this->clients.count(fd))
-		throw ft::runtime_error("Could not delete client, not in 'clients'");
+		throw ft::runtime_error("Error: Could not delete client, not in 'clients'");
 	delete this->clients[fd];
 	this->clients.erase(fd);
 	FD_CLR(fd, &this->read_sockets);

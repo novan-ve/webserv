@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 15:33:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:32:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -456,16 +456,16 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 		ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
 	}
 
-//	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
-//	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;
-	std::string uri_target = this->req.uri.get_path();
+	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
+	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;
+	std::string uri_target = "/" + this->req.uri.get_path();
 	std::string location_path = "";
 
 	for (std::map<std::string, Location*>::iterator it = server_block->locations.begin(); it != server_block->locations.end() && !this->location_block; it++)
 	{
 		std::string location = it->first;
-//		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
-		if (uri_target.size() + 1 >= it->first.size() && "/" + uri_target.substr(0, location.size()) == location)
+		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
+		if (uri_target.size() >= it->first.size() && uri_target.substr(0, location.size()) == location)
 		{
 //			std::cout << location << " is a match!" << std::endl;
 			location_path = location;

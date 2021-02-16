@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 15:01:17 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:19:37 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,10 @@ class Request : public Message
 		bool						done;
 		std::string 				status_line;
 		std::vector<std::string>	lines;
-		std::string					method;
+//		std::string					method;
 		std::string					path;
 		int							status_code;
+		Method						method;
 };
 
 #endif
