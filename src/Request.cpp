@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 02:15:19 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 12:04:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ Request& Request::operator = (const Request& other)
 		this->path = other.path;
 		this->headers = other.headers;
 		this->body = other.body;
+		this->uri = other.uri;
 	}
 	return (*this);
 }
@@ -188,7 +189,11 @@ bool	Request::parseLine(std::string line)
 			this->status_code = 400;
 			return (true);
 		}
-		this->lines.push_back(line);
+		size_t carriage_return = line.find_last_of('\r');
+		if (carriage_return != std::string::npos && carriage_return + 1 == line.size())
+			this->lines.push_back(line.substr(0, line.size() - 1));
+		else
+			this->lines.push_back(line);
 		return (false);
 	}
 	if (this->status_line != "")
@@ -209,7 +214,8 @@ void Request::splitRequest(void) {
 
 	// Place header values inside headers attribute
 	for (std::vector<std::string>::iterator it = this->lines.begin(); it != header_end; it++) {
-		if ((*it).find(':') != std::string::npos) {
+		if ((*it).find(':') != std::string::npos)
+		{
 			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it, ": ");
 			this->headers.insert(keyval);
 		}

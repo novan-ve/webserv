@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 02:16:11 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 13:31:24 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ void	Response::setRequest(Request& req)
 {
 	this->req = req;
 	this->response_code = req.get_status_code();
+	this->headers = req.get_headers();
 }
 
 int		Response::get_status_code() const
@@ -370,37 +371,52 @@ void	Response::setContentLen(void)
 	this->headers["Content-Length"] = length;
 }
 
-void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
+Server*	Response::server_match(const std::map<Server*, std::vector<std::string> >& server_names)
 {
-	Server* server_block = NULL;
-
 	Server*	matching_server_name = NULL;
 	std::vector<Server *>	best_match;
 	std::pair<int, bool>	ip_port_match;
+	std::string host = this->headers["Host"] + "/";
+	URI	host_uri(host);
+	if (host_uri.get_host() == "localhost")
+		host_uri.set_host("127.0.0.1");
 
 	ip_port_match.second = false;
 	ip_port_match.first = 0;
+
+	//gather information;
 	for (std::map<Server*, std::vector<std::string> >::const_iterator it = server_names.begin(); it != server_names.end(); it++)
 	{
 		std::pair<int, bool>	current_match;
 		const Properties& server_properties = it->first->get_properties();
 
-		//if server_name matches explicitly
-		if ((std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->headers["Host"]) != server_properties.server_names.end()) || 
-			(std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end()))
-			matching_server_name = it->first;
+//		std::cout << "RESPONSE HOST HEADER: " << this->headers["Host"] << std::endl;
+//		std::cout << "Server listen - " << server_properties.ip_port.first << ":" << server_properties.ip_port.second << std::endl;
+//		std::cout << "Request - " << this->req.uri.get_uri() << " | " << this->req.uri.get_host() << ":" << this->req.uri.get_port() << std::endl;
+//		std::cout << "Host: " << host_uri.get_host() << ":" << host_uri.get_port() << std::endl;
 
-		if (this->req.uri.get_port() == server_properties.ip_port.second)
+		if (this->req.uri.get_port() == server_properties.ip_port.second || host_uri.get_port() == server_properties.ip_port.second)
 			current_match.second = true;
 		else
+		{
+//			std::cout << "Port doesn't match" << std::endl;
 			continue ; //port has to match explicitly
+		}
 
-		if (this->req.uri.get_host() == server_properties.ip_port.first || this->headers["Host"] == server_properties.ip_port.first)
+		if (this->req.uri.get_host() == server_properties.ip_port.first || host_uri.get_host() == server_properties.ip_port.first)
 			current_match.first = 2;
-		else if (server_properties.ip_port.first == "0.0.0.0")
+		else if (server_properties.ip_port.first == "0.0.0.0") //"any ip" matches, but is less explicit
 			current_match.first = 1;
 		else
+		{
+//			std::cout << "IP doesn't match" << std::endl;
 			continue ;
+		}
+
+		//if server_name matches explicitly
+		if ((std::find(server_properties.server_names.begin(), server_properties.server_names.end(), host_uri.get_host()) != server_properties.server_names.end()) || 
+			(std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end()))
+			matching_server_name = it->first;
 
 		if (current_match.first > ip_port_match.first)
 		{
@@ -411,18 +427,57 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 		else if (current_match.first == ip_port_match.first)
 			best_match.push_back(it->first);
 	}
-	if (best_match.size() > 1 && (matching_server_name == NULL || matching_server_name->get_properties().ip_port.second != this->req.uri.get_port()))
-		server_block = best_match[0];
-	else if (best_match.size() > 1)
-		server_block = matching_server_name;
+
+	//choose
+	if (best_match.empty())
+	{
+//		std::cout << "NO SERVERS MATCHING REQUEST!!" << std::endl;
+		return (NULL);
+	}
+	if (best_match.size() == 1 || (best_match.size() > 1 && matching_server_name == NULL))
+		return (best_match[0]);
+	else
+		return (matching_server_name);
+}
+
+void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
+{
+	Server* server_block = this->server_match(server_names);
 
 	if (!server_block)
+	{
+//		std::cout << "No server-block found for request!" << std::endl;
 		return ;
-
-	// for (std::vector<std::string>::reverse_iterator it = server_block->locations.begin(); it != server_block->locations.end(); it++)
+	}
+	// else
 	// {
-		
+	// 	std::cout << "SERVER_BLOCK selected:" << std::endl;
+	// 	ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
 	// }
+
+//	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
+//	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;
+	std::string uri_target = this->req.uri.get_path();
+	std::string location_path = "";
+
+	for (std::map<std::string, Location*>::iterator it = server_block->locations.begin(); it != server_block->locations.end() && !this->location_block; it++)
+	{
+		std::string location = it->first;
+//		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
+		if (uri_target.size() + 1 >= it->first.size() && "/" + uri_target.substr(0, location.size()) == location)
+		{
+//			std::cout << location << " is a match!" << std::endl;
+			location_path = location;
+			this->location_block = it->second;
+		}
+	}
+	if (!this->location_block)
+	{
+		std::cout << "No matching location block!" << std::endl;
+		return ;
+	}
+	else
+		std::cout << "Location block matching is: " << location_path << std::endl;
 }
 
 void	Response::setLocation(void)

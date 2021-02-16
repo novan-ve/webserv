@@ -50,7 +50,8 @@ Context	*Context::key_location(const std::list<std::string>& args)
 		throw ft::runtime_error("Error: Not the right amount of arguments given to 'location'");
 	Location *elem = new Location(*this);
 	Server& parent = dynamic_cast<Server&>(*this);
-	parent.locations[args.back()] = elem;
+	std::string path = args.back();
+	parent.locations[path] = elem;
 	this->children.push_back(elem);
 	return (elem);
 }
