@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 16:44:06 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:14:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,16 @@
 #include <string>
 #include <algorithm>
 #include "Exception.hpp"
+#include "Utilities.hpp"
 
 namespace ft
 {
-	std::string	itos(int num, const std::string base = "0123456789")
+	bool	size_compare::operator () (const std::string& a, const std::string& b) const
+	{
+		return (a.size() > b.size());
+	}
+
+	std::string	itos(int num, const std::string base)
 	{
 		size_t size = (num <= 0);
 		num *= ((num >= 0) + (num >= 0) - 1);
@@ -36,7 +42,7 @@ namespace ft
 		return (number);
 	}
 
-	int stoi(std::string number, const std::string base = "0123456789")
+	int stoi(std::string number, const std::string base)
 	{
 		int res = 0;
 
@@ -54,7 +60,7 @@ namespace ft
 		return (res * sign);
 	}
 
-	size_t stoul(std::string number, const std::string base = "0123456789")
+	size_t stoul(std::string number, const std::string base)
 	{
 		size_t res = 0;
 
@@ -106,7 +112,7 @@ namespace ft
 		return (tokens);
 	}
 
-	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim = "")
+	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim)
 	{
 		std::vector<std::string>	tokens;
 		size_t	end;
@@ -150,7 +156,7 @@ namespace ft
 		return ((((x) >> 8) & 0xff ) | (((x) & 0xff) << 8));
 	}
 
-	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter = ": ")
+	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)
 	{
 		std::pair<std::string, std::string>	keyval;
 		size_t	delim_pos = raw.find(delimiter);
@@ -161,7 +167,7 @@ namespace ft
 		return (keyval);
 	}
 
-	struct tm getTime(time_t sec = 0)
+	struct tm getTime(time_t sec)
 	{
 		struct timeval	tv;
 		struct tm		tm;

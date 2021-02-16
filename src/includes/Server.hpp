@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:30:08 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 18:36:46 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 01:58:44 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include "Utilities.hpp"
 # include "Request.hpp"
 # include "Location.hpp"
+# include "Utilities.hpp"
 
 //# define PORT 8080
 
@@ -41,7 +42,7 @@ class Server : public Context
 
 		void	handle_args(std::list<std::string> args);
 
-		std::map<std::string, Location*>	locations;
+		std::map<std::string, Location*, ft::size_compare>	locations;
 		int									_server_fd;
 
 	private:

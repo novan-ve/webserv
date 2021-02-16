@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 19:25:35 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:16:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -370,18 +370,60 @@ void	Response::setContentLen(void)
 	this->headers["Content-Length"] = length;
 }
 
-// void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
-// {
-// 	Server*	matching_server_name;
-// 	std::vector<Server *>	best_match;
-// 	std::pair<bool, bool>	ip_port_match;
+void	Response::location_match(const std::map<Server*, std::vector<std::string> >& server_names)
+{
+	Server* server_block = NULL;
 
-// 	for (std::map<Server*, std::vector<std::string> >::const_iterator it = server_names.begin(); it != server_names.end(); it++)
-// 	{
-// 		std::pair<bool, bool>	current_match;
-// 		const Properties& server_properties = it->first->get_properties();
-// 	}
-// }
+	Server*	matching_server_name = NULL;
+	std::vector<Server *>	best_match;
+	std::pair<int, bool>	ip_port_match;
+
+	ip_port_match.second = false;
+	ip_port_match.first = 0;
+	for (std::map<Server*, std::vector<std::string> >::const_iterator it = server_names.begin(); it != server_names.end(); it++)
+	{
+		std::pair<int, bool>	current_match;
+		const Properties& server_properties = it->first->get_properties();
+
+		//if server_name matches explicitly
+		if ((std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->headers["Host"]) != server_properties.server_names.end()) || 
+			(std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end()))
+			matching_server_name = it->first;
+
+		if (this->req.uri.get_port() == server_properties.ip_port.second)
+			current_match.second = true;
+		else
+			continue ; //port has to match explicitly
+
+		if (this->req.uri.get_host() == server_properties.ip_port.first || this->headers["Host"] == server_properties.ip_port.first)
+			current_match.first = 2;
+		else if (server_properties.ip_port.first == "0.0.0.0")
+			current_match.first = 1;
+		else
+			continue ;
+
+		if (current_match.first > ip_port_match.first)
+		{
+			best_match.clear();
+			ip_port_match = current_match;
+			best_match.push_back(it->first);
+		}
+		else if (current_match.first == ip_port_match.first)
+			best_match.push_back(it->first);
+	}
+	if (best_match.size() > 1 && (matching_server_name == NULL || matching_server_name->get_properties().ip_port.second != this->req.uri.get_port()))
+		server_block = best_match[0];
+	else if (best_match.size() > 1)
+		server_block = matching_server_name;
+
+	if (!server_block)
+		return ;
+
+	// for (std::vector<std::string>::reverse_iterator it = server_block->locations.begin(); it != server_block->locations.end(); it++)
+	// {
+		
+	// }
+}
 
 void	Response::setLocation(void)
 {

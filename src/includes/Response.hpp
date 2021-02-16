@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 19:22:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 00:21:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ class Response : public Message
 		void	composeResponse(void);
 		void	setRequest(Request& req);
 		int		get_status_code() const;
-//		void	location_match(const std::map<Server*, std::vector<std::string> >& server_names);
+		void	location_match(const std::map<Server*, std::vector<std::string> >& server_names);
 
 	private:
 		Request						req;

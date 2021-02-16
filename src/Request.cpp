@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 19:26:42 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:15:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@
 #include "includes/Exception.hpp"
 #include "Utilities.hpp"
 
-Request::Request() : done(false), status_line(""), status_code(200) {}
+Request::Request() : uri(""), done(false), status_line(""), status_code(200) {}
 
-Request::Request(const Request& other)
+Request::Request(const Request& other) : uri(other.uri)
 {
 	*this = other;
 }
@@ -149,7 +149,9 @@ bool	Request::parseLine(std::string line)
 
 			this->method = this->status_line.substr(0, end_pos_method);
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
-
+			this->uri = URI(path);
+			if (this->uri.get_port() == "" && this->uri.get_scheme() == "HTTP")
+				this->uri.set_port("80");
 			this->splitRequest();
 			this->printRequest();
 

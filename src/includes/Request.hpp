@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 23:52:03 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:12:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include "Message.hpp"
 # include "Method.hpp"
+# include "URI.hpp"
+
 # include <utility>
 
 class Request : public Message
@@ -36,6 +38,7 @@ class Request : public Message
 		std::string	get_path(void) const;
 		int			get_status_code() const;
 		std::string get_header(const std::string &key) const;
+		URI							uri;
 
 	private:
 //		int							fd;

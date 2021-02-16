@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 18:45:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 00:21:09 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ void	WebServer::run()
 				current_response.sendResponse(fd);
 				if (current_response.get_status_code() == 400 || current_response.get_status_code() == 505)
 					closed_clients.push_back(fd);
-//				current_response.location_match(this->server_names);
+				current_response.location_match(this->server_names);
 				responses[fd].pop();
 				if (responses[fd].empty())
 				{
