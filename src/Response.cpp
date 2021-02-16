@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:32:49 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 17:28:58 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,13 +123,10 @@ void	Response::checkMethod(void)
 	if (this->response_code != 200)
 		return;
 
-	std::string methods[] = {"GET", "HEAD", "POST", "PUT", "DELETE", "CONNECT", "OPTIONS", "TRACE"};
+	std::map<std::string, bool>	accepted_methods = this->location_block->get_properties().accepted_methods;
 
-	for (int i = 0; i < 8; i++)
-	{
-		if (!this->req.get_method().compare(methods[i]))
-			return;
-	}
+	if (accepted_methods[this->req.get_method()])
+		return ;
 	this->response_code = 405;
 }
 
@@ -137,15 +134,18 @@ void	Response::checkPath(void)
 {
 	if (this->response_code != 200)
 		return;
-	this->path = this->req.get_path();
+	if (!this->location_block)
+		return ;
+	this->path = "/" + this->req.uri.get_path();
 
-	// ********************** Change to contents of root key from config **********************
-	this->path.insert(0, "./html");
+	this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
+
+	std::cout << "final path: " << this->path << std::endl;
 
 	int fd = open(this->path.c_str(), O_RDONLY);
-	if (fd == -1) {
+	if (fd == -1)
+	{
 		this->response_code = 404;
-		close(fd);
 		return;
 	}
 	close(fd);
@@ -157,14 +157,13 @@ void	Response::checkPath(void)
 		{
 			// ********************** Change to contents of index key from config **********************
 			std::vector<std::string>	index;
-			index.push_back("index.html");
-			index.push_back("index.htm");
-			index.push_back("index.php");
+			index = this->location_block->get_properties().index;
 
 			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
 			{
 				fd = open((this->path + *it).c_str(), O_RDONLY);
-				if (fd != -1) {
+				if (fd != -1)
+				{
 					this->path += *it;
 					close(fd);
 					return;
@@ -172,7 +171,7 @@ void	Response::checkPath(void)
 			}
 
 			// ********************** Change to autoindex key from config **********************
-			bool	autoindex = true;
+			bool	autoindex = this->location_block->get_properties().auto_index;
 
 			if (autoindex)
 			{
@@ -254,7 +253,8 @@ void	Response::setContentType()
 
 void	Response::setBody(void)
 {
-	if (this->response_code != 200) {
+	if (this->response_code != 200)
+	{
 		this->setBodyError();
 		return;
 	}
@@ -272,6 +272,14 @@ void	Response::setBody(void)
 		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
 
 	this->body = ft::get_lines(fd);
+	size_t body_size = 0;
+	for (size_t i = 0; i < this->body.size(); i++)
+		body_size += this->body[i].size() + ((i + 1 == this->body.size()) ? 0 : 2);
+	if (body_size > this->location_block->get_properties().client_max_body_size)
+	{
+		this->response_code = 413;
+		this->setBodyError();
+	}
 	close(fd);
 }
 
@@ -456,15 +464,15 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 		ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
 	}
 
-	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
-	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;
+//	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;
+//	std::cout << "uri path: " << this->req.uri.get_path() << std::endl;
 	std::string uri_target = "/" + this->req.uri.get_path();
 	std::string location_path = "";
 
 	for (std::map<std::string, Location*>::iterator it = server_block->locations.begin(); it != server_block->locations.end() && !this->location_block; it++)
 	{
 		std::string location = it->first;
-		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
+//		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
 		if (uri_target.size() >= it->first.size() && uri_target.substr(0, location.size()) == location)
 		{
 //			std::cout << location << " is a match!" << std::endl;

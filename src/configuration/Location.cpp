@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:16:24 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:50:14 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 //Location::Location() {}
 
 //Location is a child Context of Server
-Location::Location(Context& parent) : Context(parent)
+Location::Location(Context& parent, const std::string& location) : Context(parent), location(location)
 {
 	this->keywords.push_back("limit_except");
 	this->keywords.push_back("root");
@@ -29,6 +29,16 @@ Location::~Location()
 {
 	std::cout << "LOCATION DECONSTRUCTED" << std::endl;
 }
+
+std::string	Location::get_location() const
+{
+	return (this->location);
+}
+
+// void		Location::set_location(const std::string& location)
+// {
+// 	this->location = location;
+// }
 
 // Location& Location::operator = (const Location& other)
 // {

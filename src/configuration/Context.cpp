@@ -48,7 +48,7 @@ Context	*Context::key_location(const std::list<std::string>& args)
 	std::cout << "CREATE_LOCATION CALLED" << std::endl;
 	if (args.size() != 1)
 		throw ft::runtime_error("Error: Not the right amount of arguments given to 'location'");
-	Location *elem = new Location(*this);
+	Location *elem = new Location(*this, args.back());
 	Server& parent = dynamic_cast<Server&>(*this);
 	std::string path = args.back();
 	parent.locations[path] = elem;
