@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 17:28:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 20:05:59 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,13 +132,13 @@ void	Response::checkMethod(void)
 
 void	Response::checkPath(void)
 {
-	if (this->response_code != 200)
-		return;
 	if (!this->location_block)
 		return ;
 	this->path = "/" + this->req.uri.get_path();
-
-	this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
+	if (this->path.size() >= this->location_block->get_location().size() && this->path.substr(0, this->location_block->get_location().size()) == this->location_block->get_location())
+		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
+	if (this->response_code != 200)
+		return;
 
 	std::cout << "final path: " << this->path << std::endl;
 
@@ -285,13 +285,32 @@ void	Response::setBody(void)
 
 void	Response::setBodyError(void)
 {
-	this->body.push_back("<html>");
-	this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>");
-	this->body.push_back("<body>");
-	this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>");
-	this->body.push_back("<center><hr>webserv/1.0</center>");
-	this->body.push_back("</body>");
-	this->body.push_back("</html>");
+	bool		error_page_found = false;
+	std::map<int, std::string>	error_pages = this->location_block->get_properties().error_pages;
+
+	if (error_pages.count(this->response_code))
+	{
+		std::string errorpage = this->location_block->get_properties().root + error_pages[this->response_code];
+		std::cout << "Custom error page for " << this->response_code << " is: " << errorpage << std::endl;
+
+		int fd = open(errorpage.c_str(), O_RDONLY);
+		if (fd != -1)
+		{
+			error_page_found = true;
+			this->body = ft::get_lines(fd);
+			close(fd);
+		}
+	}
+	if (!error_page_found)
+	{
+		this->body.push_back("<html>");
+		this->body.push_back("<head><title>" + this->status_codes[this->response_code] + "</title></head>");
+		this->body.push_back("<body>");
+		this->body.push_back("<center><h1>" + this->status_codes[this->response_code] + "</h1></center>");
+		this->body.push_back("<center><hr>webserv/1.0</center>");
+		this->body.push_back("</body>");
+		this->body.push_back("</html>");
+	}
 }
 
 void	Response::listDirectory(void)

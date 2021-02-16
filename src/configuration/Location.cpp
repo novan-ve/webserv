@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:50:14 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 19:30:38 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ Location::Location(Context& parent, const std::string& location) : Context(paren
 	this->keywords.push_back("limit_except");
 	this->keywords.push_back("root");
 	this->keywords.push_back("autoindex");
+	this->keywords.push_back("error_page");
 	std::cout << "LOCATION CREATED!" << std::endl;
 }
 
