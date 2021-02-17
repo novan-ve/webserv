@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 15:11:32 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/17 17:46:29 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ void	Response::printResponse(void) const
 
 void	Response::composeResponse(void)
 {
+//	this->checkRequestBody();
 	this->checkMethod();
 	this->checkPath();
 
@@ -119,12 +120,16 @@ void	Response::composeResponse(void)
 	this->setModified();
 }
 
+// void	Response::checkRequestBody(void)
+// {
+// 	if (!this->req.
+// }
+
 void	Response::checkMethod(void)
 {
 	if (this->response_code != 200)
 		return;
 
-	
 	std::map<std::string, bool>	accepted_methods;
 	if (this->location_block)
 		accepted_methods = this->location_block->get_properties().accepted_methods;
@@ -280,14 +285,6 @@ void	Response::setBody(void)
 		throw ft::runtime_error("Error: Response can't open previously checked file in setBody()");
 
 	this->body = ft::get_lines(fd);
-	size_t body_size = 0;
-	for (size_t i = 0; i < this->body.size(); i++)
-		body_size += this->body[i].size() + ((i + 1 == this->body.size()) ? 0 : 2);
-	if (this->location_block && body_size > this->location_block->get_properties().client_max_body_size)
-	{
-		this->response_code = 413;
-		this->setBodyError();
-	}
 	close(fd);
 }
 
@@ -420,6 +417,7 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 	if (host_uri.get_port() == "")
 		host_uri.set_port("80");
 
+	std::cout << "'host' of HOST field: " << host_uri.get_host() << std::endl;
 	ip_port_match.second = false;
 	ip_port_match.first = 0;
 
@@ -433,6 +431,13 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 		std::cout << "Server listen - " << server_properties.ip_port.first << ":" << server_properties.ip_port.second << std::endl;
 //		std::cout << "Request - " << this->req.uri.get_uri() << " | " << this->req.uri.get_host() << ":" << this->req.uri.get_port() << std::endl;
 //		std::cout << "Host: " << host_uri.get_host() << ":" << host_uri.get_port() << std::endl;
+
+		//if server_name matches explicitly
+		if ((std::find(server_properties.server_names.begin(), server_properties.server_names.end(), host_uri.get_host()) != server_properties.server_names.end()) || 
+			(std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end()))
+			matching_server_name = it->first;
+
+		std::cout << "Server with matching_server_name: " << (void*)matching_server_name << std::endl;
 
 		if (this->req.uri.get_port() == server_properties.ip_port.second || host_uri.get_port() == server_properties.ip_port.second)
 			current_match.second = true;
@@ -452,10 +457,6 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 			continue ;
 		}
 
-		//if server_name matches explicitly
-		if ((std::find(server_properties.server_names.begin(), server_properties.server_names.end(), host_uri.get_host()) != server_properties.server_names.end()) || 
-			(std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end()))
-			matching_server_name = it->first;
 
 		if (current_match.first > ip_port_match.first)
 		{
@@ -468,7 +469,7 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 	}
 
 	//choose
-	if (best_match.empty())
+	if (best_match.empty() && !matching_server_name)
 	{
 //		std::cout << "NO SERVERS MATCHING REQUEST!!" << std::endl;
 		return (NULL);

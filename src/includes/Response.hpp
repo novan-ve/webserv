@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 17:13:55 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/17 16:55:17 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Response : public Message
 		Location*					location_block;
 		bool						isDir;
 
+//		void	checkRequestBody(void);
 		void	checkMethod(void);
 		void	checkPath(void);
 
