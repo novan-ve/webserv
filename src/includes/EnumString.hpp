@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 12:04:00 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 14:43:44 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:27:13 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,17 @@ class EnumString
 	private:
 		std::vector<std::string>	names;
 	public:
-		const Enum			id;
-		const std::string	str;
+		const	Enum&			get_id() const
+		{
+			return (this->id);
+		}
+		const	std::string&	get_str() const
+		{
+			return (this->str);
+		}
 	protected:
+		Enum			id;
+		std::string		str;
 		EnumString() : id(), str() {} //fuck 42s coplien
 
 		EnumString(Enum id, const char *const names[], size_t len) : names(names, names + (len / sizeof(char *))), id(id), str(toString(id)) {}

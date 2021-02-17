@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 18:45:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:02:42 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,16 +44,20 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	{
 		Server *current_server =  reinterpret_cast<Server*>(this->children[i]);
 		this->server_names[current_server] = this->properties.server_names;
-		current_server->init();
-		FD_SET(current_server->_server_fd, &this->read_sockets);
-		this->servers[current_server->_server_fd] = current_server;
+		if (current_server->init())
+		{
+			FD_SET(current_server->_server_fd, &this->read_sockets);
+			this->servers[current_server->_server_fd] = current_server;
+		}
 	}
+	if (this->servers.empty())
+		throw ft::runtime_error("Error: All of the specified servers failed to initialize");
 }
 
 void	WebServer::deleteClient(int fd)
 {
 	if (!this->clients.count(fd))
-		throw ft::runtime_error("Could not delete client, not in 'clients'");
+		throw ft::runtime_error("Error: Could not delete client, not in 'clients'");
 	delete this->clients[fd];
 	this->clients.erase(fd);
 	FD_CLR(fd, &this->read_sockets);
@@ -115,6 +119,7 @@ void	WebServer::run()
 					responses[fd].push(Response());
 					Response& current_response = responses[fd].back();
 					current_response.setRequest(requests[fd].front());
+					current_response.location_match(this->server_names);
 					current_response.composeResponse();
 					current_response.printResponse();
 					requests[fd].pop();
@@ -133,7 +138,6 @@ void	WebServer::run()
 				current_response.sendResponse(fd);
 				if (current_response.get_status_code() == 400 || current_response.get_status_code() == 505)
 					closed_clients.push_back(fd);
-//				current_response.location_match(this->server_names);
 				responses[fd].pop();
 				if (responses[fd].empty())
 				{

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:10:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:16:19 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:50:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,12 @@ class Location : public Context
 {
 	public:
 		~Location();
-		Location(Context& parent);
+		Location(Context& parent, const std::string& location);
 		Location(const Location& other);
+		std::string	get_location() const;
+		// void		set_location(const std::string& location);
 	private:
+		std::string location;
 //		Location();
 //		Location& operator = (const Location& other);
 };

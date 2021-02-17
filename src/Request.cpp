@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 19:26:42 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:26:25 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,11 @@
 #include "includes/Request.hpp"
 #include "includes/Exception.hpp"
 #include "Utilities.hpp"
+#include "Method.hpp"
 
-Request::Request() : done(false), status_line(""), status_code(200) {}
+Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET) {}
 
-Request::Request(const Request& other)
+Request::Request(const Request& other) : uri(other.uri), method(other.method)
 {
 	*this = other;
 }
@@ -35,6 +36,7 @@ Request& Request::operator = (const Request& other)
 		this->path = other.path;
 		this->headers = other.headers;
 		this->body = other.body;
+		this->uri = other.uri;
 	}
 	return (*this);
 }
@@ -147,9 +149,18 @@ bool	Request::parseLine(std::string line)
 				end_pos_path--;
 			end_pos_path++;
 
-			this->method = this->status_line.substr(0, end_pos_method);
+			try
+			{
+				this->method = Method(this->status_line.substr(0, end_pos_method));
+			}
+			catch (ft::runtime_error& e)
+			{
+				this->status_code = 405;
+			}
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
-
+			this->uri = URI(path);
+			if (this->uri.get_port() == "" && this->uri.get_scheme() == "HTTP")
+				this->uri.set_port("80");
 			this->splitRequest();
 			this->printRequest();
 
@@ -186,7 +197,11 @@ bool	Request::parseLine(std::string line)
 			this->status_code = 400;
 			return (true);
 		}
-		this->lines.push_back(line);
+		size_t carriage_return = line.find_last_of('\r');
+		if (carriage_return != std::string::npos && carriage_return + 1 == line.size())
+			this->lines.push_back(line.substr(0, line.size() - 1));
+		else
+			this->lines.push_back(line);
 		return (false);
 	}
 	if (this->status_line != "")
@@ -207,7 +222,8 @@ void Request::splitRequest(void) {
 
 	// Place header values inside headers attribute
 	for (std::vector<std::string>::iterator it = this->lines.begin(); it != header_end; it++) {
-		if ((*it).find(':') != std::string::npos) {
+		if ((*it).find(':') != std::string::npos)
+		{
 			std::pair<std::string, std::string>	keyval = ft::get_keyval(*it, ": ");
 			this->headers.insert(keyval);
 		}
@@ -224,7 +240,7 @@ void	Request::printRequest(void) const {
 	// Print values for debugging
 	std::cout << std::endl << "Request:" << std::endl;
 	std::cout << "  Headers:" << std::endl;
-	std::cout << "\t" << this->method << " " << this->path << " HTTP/1.1" << std::endl;
+	std::cout << "\t" << this->method.get_str() << " " << this->path << " HTTP/1.1" << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
@@ -239,17 +255,6 @@ void	Request::printRequest(void) const {
 }
 
 bool			Request::get_done() const { return this->done; }
-std::string		Request::get_method() const { return this->method; }
+std::string		Request::get_method() const { return this->method.get_str(); }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
-
-std::string		Request::get_header(const std::string &key) const
-{
-	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
-	{
-		// Get rid of the \r and return
-		if (it->first == key)
-			return it->second.substr(0, it->second.length() - 1);
-	}
-	return "";
-}

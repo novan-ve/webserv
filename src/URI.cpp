@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 17:37:34 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 16:42:45 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:17:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,16 @@ URI::~URI() {}
 URI::URI(const URI& other) : str(other.str), parts(other.parts) {}
 
 URI::URI() {}
+
+URI& URI::operator = (const URI& other)
+{
+	if (this != &other)
+	{
+		this->str = other.str;
+		this->parts = other.parts;
+	}
+	return (*this);
+}
 
 void	URI::print_state()
 {

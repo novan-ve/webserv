@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 20:24:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 14:32:32 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 16:15:31 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,12 +34,11 @@ Method::Method(e_method id) : EnumString(id, names, sizeof(names)) {}
 
 Method&	Method::operator = (const Method& other)
 {
-	(void)other;
-	// if (this != &other)
-	// {
-	// 	this->id = other.id;
-	// 	this->str = other.str;
-	// }
+	if (this != &other)
+	{
+		this->id = other.id;
+		this->str = other.str;
+	}
 	return (*this);
 }
 

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 16:44:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 02:02:51 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,11 @@ namespace ft
 	std::vector<std::string>	split(std::string raw, std::vector<std::string>& delim);
 
 	std::vector<std::string>	split(std::string raw, std::string delim, std::string preserve_delim = "");
+
+	struct size_compare
+	{
+		bool	operator() (const std::string& a, const std::string& b) const;
+	};
 }
 
 #endif

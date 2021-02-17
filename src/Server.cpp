@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/15 16:45:39 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 15:19:11 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,11 @@ Server::Server(Context& parent) : Context(parent)
 	this->keywords.push_back("client_max_body_size");
 }
 
-void	Server::init()
+bool	Server::init()
 {
 	int 	opt = 1;
+
+	std::cout << "IP: " << this->properties.ip_port.first << " | PORT: " << this->properties.ip_port.second << std::endl;
 
 	// Create socket file descriptor
 	if ((this->_server_fd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
@@ -48,13 +50,18 @@ void	Server::init()
 
 	// Assign transport address
 	this->_address.sin_family = AF_INET;
-	this->_address.sin_addr.s_addr = (this->properties.ip_port.first == "0.0.0.0" || this->properties.ip_port.first == "localhost") ? INADDR_ANY : inet_addr(this->properties.ip_port.first.c_str());
+	if (this->properties.ip_port.first == "localhost")
+		this->properties.ip_port.first = "127.0.0.1";
+	this->_address.sin_addr.s_addr = (this->properties.ip_port.first == "0.0.0.0") ? INADDR_ANY : inet_addr(this->properties.ip_port.first.c_str());
 	this->_address.sin_port = ft::host_to_network_short(ft::stoi(this->properties.ip_port.second));
 	ft::memset(this->_address.sin_zero, '\0', sizeof(this->_address.sin_zero));
 
 	// Attach socket to transport address
 	if (bind(this->_server_fd, reinterpret_cast<struct sockaddr*>(&this->_address), sizeof( this->_address )) == -1)
-		throw ft::runtime_error("Error: binding server-socket to a port failed");
+	{
+//		throw ft::runtime_error("Error: binding server-socket to a port failed");
+		return false;
+	}
 
 	if (listen(this->_server_fd, 10 ) == -1)
 		throw ft::runtime_error("Error: could not set server-socket to listening mode");
@@ -63,6 +70,12 @@ void	Server::init()
 	//Set the resulting socketfd to be non blocking
 	if (fcntl(this->_server_fd, F_SETFL, O_NONBLOCK) == -1)
 		throw ft::runtime_error("Error: Could not set server-socket to O_NONBLOCK");
+
+	// for (std::map<std::string, Location*>::iterator it = this->locations.begin(); it != locations.end(); it++)
+	// {
+	// 	std::cout << "LOCATION: " << it->first << std::endl;
+	// }
+	return true;
 }
 
 Server::Server(const Server &src)

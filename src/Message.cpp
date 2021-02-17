@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/03 18:01:23 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/16 15:00:27 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,14 @@ Message& Message::operator = (const Message& other)
 		this->headers = other.headers;
 	}
 	return (*this);
+}
+
+std::string	Message::get_header(const std::string& key)
+{
+	if (this->headers.count(key))
+		return (this->headers[key]);
+	else
+		return "";
 }
 
 Message::~Message() {}
