@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 11:46:12 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/17 15:11:32 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,9 +124,12 @@ void	Response::checkMethod(void)
 	if (this->response_code != 200)
 		return;
 
-	std::map<std::string, bool>	accepted_methods = this->location_block->get_properties().accepted_methods;
+	
+	std::map<std::string, bool>	accepted_methods;
+	if (this->location_block)
+		accepted_methods = this->location_block->get_properties().accepted_methods;
 
-	if (accepted_methods[this->req.get_method()])
+	if (accepted_methods.count(this->req.get_method()) && accepted_methods[this->req.get_method()])
 		return ;
 	this->response_code = 405;
 }
@@ -136,7 +139,7 @@ void	Response::checkPath(void)
 	if (!this->location_block)
 		return ;
 	this->path = "/" + this->req.uri.get_path();
-	if (this->path.size() >= this->location_block->get_location().size() && this->path.substr(0, this->location_block->get_location().size()) == this->location_block->get_location())
+	if (this->location_block && this->path.size() >= this->location_block->get_location().size() && this->path.substr(0, this->location_block->get_location().size()) == this->location_block->get_location())
 		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
 	if (this->response_code != 200)
 		return;
@@ -158,7 +161,8 @@ void	Response::checkPath(void)
 		{
 			// ********************** Change to contents of index key from config **********************
 			std::vector<std::string>	index;
-			index = this->location_block->get_properties().index;
+			if (this->location_block)
+				index = this->location_block->get_properties().index;
 
 			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
 			{
@@ -172,7 +176,10 @@ void	Response::checkPath(void)
 			}
 
 			// ********************** Change to autoindex key from config **********************
-			bool	autoindex = this->location_block->get_properties().auto_index;
+			
+			bool	autoindex = false;
+			if (this->location_block)
+				autoindex = this->location_block->get_properties().auto_index;
 
 			if (autoindex)
 			{
@@ -276,7 +283,7 @@ void	Response::setBody(void)
 	size_t body_size = 0;
 	for (size_t i = 0; i < this->body.size(); i++)
 		body_size += this->body[i].size() + ((i + 1 == this->body.size()) ? 0 : 2);
-	if (body_size > this->location_block->get_properties().client_max_body_size)
+	if (this->location_block && body_size > this->location_block->get_properties().client_max_body_size)
 	{
 		this->response_code = 413;
 		this->setBodyError();
@@ -287,10 +294,13 @@ void	Response::setBody(void)
 void	Response::setBodyError(void)
 {
 	bool		error_page_found = false;
-	std::map<int, std::string>	error_pages = this->location_block->get_properties().error_pages;
+	std::map<int, std::string>	error_pages;
+	if (this->location_block)
+		error_pages = this->location_block->get_properties().error_pages;
 
 	if (error_pages.count(this->response_code))
 	{
+
 		std::string errorpage = this->location_block->get_properties().root + error_pages[this->response_code];
 		std::cout << "Custom error page for " << this->response_code << " is: " << errorpage << std::endl;
 
