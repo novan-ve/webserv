@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 11:13:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/17 11:46:12 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,7 +185,7 @@ void	Response::checkPath(void)
 		}
 	}
 	else
-		ft::runtime_error("Error: stat failed in Response::checkPath");
+		throw ft::runtime_error("Error: stat failed in Response::checkPath");
 }
 
 void	Response::setStatusLine(void)
@@ -270,7 +270,7 @@ void	Response::setBody(void)
 
 	int fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1)
-		ft::runtime_error("Error: Response can't open previously checked file in setBody()");
+		throw ft::runtime_error("Error: Response can't open previously checked file in setBody()");
 
 	this->body = ft::get_lines(fd);
 	size_t body_size = 0;
