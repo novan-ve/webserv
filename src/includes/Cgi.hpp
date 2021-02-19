@@ -26,11 +26,10 @@ public:
 	Cgi & operator=(const Cgi & rhs);
 	~Cgi();
 
-	int		execute(Request *req, std::string path, std::string host, std::string port);
+	void	execute(Request *req, std::string path, std::string host, std::string port);
 
 private:
 	void	set_env(Request *req, std::string path, std::string host, std::string port);
-	void	clear_all();
 
 	std::map<std::string, std::string>	_vars;
 	char								**_env;

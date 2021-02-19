@@ -286,7 +286,7 @@ void	Response::setBody(void)
 		this->headers["Content-Type"] == "application/x-httpd-php")
 	{
 		Cgi	c;
-		fd = c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
+		c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
 				 		this->location_block->get_properties().ip_port.second);
 		fd = open("/tmp/webserv", O_RDONLY);
 

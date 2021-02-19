@@ -38,17 +38,15 @@ Cgi &	Cgi::operator=(const Cgi & rhs)
 	return *this;
 }
 
-Cgi::~Cgi() {}
+Cgi::~Cgi() {
 
-void	Cgi::clear_all()
-{
-	for (unsigned long i = 0; i < this->_vars.size(); i++)
+	int		i = 0;
+
+	while (this->_env[i])
 	{
-		if (this->_env[i])
-		{
-			free(this->_env[i]);
-			this->_env[i] = 0;
-		}
+		free(this->_env[i]);
+		this->_env[i] = 0;
+		i++;
 	}
 	if (this->_env)
 	{
@@ -94,7 +92,6 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 		this->_env[i] = ft::strdup((it->first + "=" + it->second).c_str());
 		if (!this->_env[i])
 		{
-			i--;
 			for (int j = i - 1; j >= 0; j--)
 				free(this->_env[j]);
 			free(this->_env);
@@ -112,13 +109,12 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 	}
 }
 
-int		Cgi::execute(Request *req, std::string path, std::string host, std::string port)
+void	Cgi::execute(Request *req, std::string path, std::string host, std::string port)
 {
 	char	*args[3] = {&path[0], NULL, NULL};
 	pid_t	pid;
 	int 	ends[2];
 	int 	in_fd;
-	int 	out_fd = 0;
 	int 	status;
 
 	// Change to php-cgi path from config
@@ -140,18 +136,12 @@ int		Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	this->set_env(req, path, host, port);
 
 	if ((in_fd = open("/tmp/webserv", O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
-	{
-		this->clear_all();
 		throw ft::runtime_error("Error: open failed in Cgi::execute");
-	}
 
 	pipe(ends);
 
 	if ((pid = fork()) == -1)
-	{
-		this->clear_all();
 		throw ft::runtime_error("Error: fork failed in Cgi::execute");
-	}
 
 	if (pid == 0)
 	{
@@ -159,17 +149,11 @@ int		Cgi::execute(Request *req, std::string path, std::string host, std::string 
 		dup2(ends[0], 0);
 		dup2(in_fd, 1);
 		if ((execve(args[0], args, this->_env)) == -1)
-		{
-			this->clear_all();
 			throw ft::runtime_error("Error: execve failed in Cgi::execute");
-		}
 		std::cout << "This shouldn't be printed" << std::endl;
 	}
 	else
-	{
 		close(ends[0]);
-		out_fd = ends[1];
-	}
 
 	waitpid(0, &status, 0);
 	if (WIFEXITED(status))
@@ -180,8 +164,6 @@ int		Cgi::execute(Request *req, std::string path, std::string host, std::string 
 		free(args[0]);
 		free(args[1]);
 	}
-
-	this->clear_all();
-	return out_fd;
+	close(in_fd);
 }
 
