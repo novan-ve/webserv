@@ -281,7 +281,7 @@ void	Response::setBody(void)
 	int fd;
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php")
+		(this->req.get_path().length() > 4 && this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php"))
 	{
 		Cgi	c;
 		fd = c.execute(&req, this->path, this->server_name, this->location_block->get_properties().ip_port.second);
@@ -295,7 +295,7 @@ void	Response::setBody(void)
 	this->body = ft::get_lines(fd);
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php")
+		(this->req.get_path().length() > 4 && this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php"))
 		this->parseCgiHeaders();
 
 	size_t body_size = 0;
