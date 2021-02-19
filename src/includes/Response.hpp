@@ -42,6 +42,7 @@ class Response : public Message
 		std::string					status_line;
 		std::string					path;
 		int							response_code;
+		std::string 				server_name;
 		Location*					location_block;
 		bool						isDir;
 
@@ -55,6 +56,7 @@ class Response : public Message
 		void	setBody(void);
 		void	setBodyError(void);
 		void	listDirectory(void);
+		void	parseCgiHeaders(void);
 		void	setContentLen(void);
 		void	setLocation(void);
 		void	setModified(void);

@@ -23,6 +23,7 @@ HEADER =	Server.hpp \
 			EnumString.hpp \
 			Message.hpp \
 			Method.hpp \
+			Cgi.hpp \
 			Properties.hpp \
 			Request.hpp \
 			Response.hpp \
@@ -50,6 +51,7 @@ SRC =	main.cpp \
 		Client.cpp \
 		Server.cpp \
 		Method.cpp \
+		Cgi.cpp \
 		Request.cpp \
 		Response.cpp \
 		get_lines.cpp \
@@ -59,7 +61,7 @@ SRC =	main.cpp \
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)
 
-FLAGS = -Wall -Werror -Wextra -pedantic -std=c++98
+FLAGS = -Wall -Werror -Wextra -pedantic -std=c++98 -g -fsanitize=address
 
 ifdef DEBUG
 	FLAGS += -g -fsanitize=address

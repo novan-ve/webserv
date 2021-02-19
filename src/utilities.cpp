@@ -156,6 +156,37 @@ namespace ft
 		return ((((x) >> 8) & 0xff ) | (((x) & 0xff) << 8));
 	}
 
+	char    *strdup(const char *s1)
+	{
+		char	*p;
+		int		len = 0;
+		int		i = 0;
+
+		while (s1[i])
+		{
+			len++;
+			i++;
+		}
+		p = (char*)malloc((sizeof(char) * len) + 1);
+		if (p == 0)
+			return (NULL);
+		for (int j = 0; j < len; j++)
+			p[j] = s1[j];
+		p[len] = '\0';
+		return (p);
+	}
+
+	std::string	toUpperStr(const std::string& str)
+	{
+		std::string 	upperstr = "";
+
+		for (unsigned long i = 0; i < str.size(); i++)
+			upperstr.push_back(toupper(str[i]));
+
+		return upperstr;
+	}
+
+
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)
 	{
 		std::pair<std::string, std::string>	keyval;

@@ -27,6 +27,7 @@ class Message
 		Message& operator = (const Message& other);
 		virtual ~Message();
 		std::string get_header(const std::string& key);
+		std::string getBodyLen();
 	protected:
 		std::map<std::string, std::string>					headers;
 		std::vector<std::string>							body;

@@ -70,6 +70,10 @@ namespace ft
 
 	unsigned short	host_to_network_short(unsigned short x);
 
+	char    *strdup(const char *s1);
+
+	std::string toUpperStr(const std::string& str);
+
 
 	struct tm					getTime(time_t sec = 0);
 
