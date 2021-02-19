@@ -140,7 +140,7 @@ int		Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	args[2] = NULL;
 	this->set_env(req, path, host, port);
 
-	if ((in_fd = open("/tmp/webserv", O_WRONLY | O_CREAT, 0666)) == -1)
+	if ((in_fd = open("/tmp/webserv", O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
 	{
 		this->clear_all();
 		throw ft::runtime_error("Error: open failed in Cgi::execute");

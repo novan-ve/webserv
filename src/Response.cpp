@@ -246,6 +246,8 @@ void	Response::setContentType()
 		type = "application/" + ext;
 	else if (ext == "js")
 		type = "application/javascript";
+	else if (ext == "php")
+		type = "application/x-httpd-php";
 	else if (ext == "jpg" || ext == "jpeg")
 		type = "image/jpeg";
 	else if (ext == "gif" || ext == "png" || ext == "tiff")
@@ -281,7 +283,7 @@ void	Response::setBody(void)
 	int fd;
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		(this->req.get_path().length() > 4 && this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php"))
+		this->headers["Content-Type"] == "application/x-httpd-php")
 	{
 		Cgi	c;
 		fd = c.execute(&req, this->path, this->server_name, this->location_block->get_properties().ip_port.second);
@@ -295,7 +297,7 @@ void	Response::setBody(void)
 	this->body = ft::get_lines(fd);
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		(this->req.get_path().length() > 4 && this->req.get_path().substr(this->req.get_path().length() - 4, 4) == ".php"))
+		this->headers["Content-Type"] == "application/x-httpd-php")
 		this->parseCgiHeaders();
 
 	size_t body_size = 0;
@@ -417,7 +419,7 @@ void	Response::parseCgiHeaders(void)
 	while (it != this->body.end())
 	{
 		if ((*it).find(':') == std::string::npos)
-			return;
+			break;
 		std::pair<std::string, std::string> header = ft::get_keyval(*it, ": ");
 
 		// Make sure header is in title case
@@ -430,7 +432,7 @@ void	Response::parseCgiHeaders(void)
 		this->headers[header.first] = header.second;
 		it = this->body.erase(this->body.begin());
 	}
-	this->body.erase(this->body.begin(), this->body.begin() + 3);
+	this->body.erase(this->body.begin());
 }
 
 void	Response::setContentLen(void)
