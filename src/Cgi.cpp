@@ -75,8 +75,8 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 	this->_vars["REMOTE_USER"] = "";
 	this->_vars["REQUEST_METHOD"] = req->get_method();
 	this->_vars["REQUEST_URI"] = req->uri.get_uri();
-	this->_vars["SCRIPT_NAME"] = path.substr(2, path.length() - 2);
-	this->_vars["SCRIPT_FILENAME"] = path.substr(2, path.length() - 2);
+	this->_vars["SCRIPT_NAME"] = path;
+	this->_vars["SCRIPT_FILENAME"] = path;
 	this->_vars["SERVER_NAME"] = host;
 	this->_vars["SERVER_PORT"] = port;
 	this->_vars["SERVER_PROTOCOL"] = "HTTP/1.1";
@@ -114,28 +114,27 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 
 int		Cgi::execute(Request *req, std::string path, std::string host, std::string port)
 {
-	char	**args;
+	char	*args[3] = {&path[0], NULL, NULL};
 	pid_t	pid;
 	int 	ends[2];
 	int 	in_fd;
 	int 	out_fd = 0;
 	int 	status;
 
-	args = (char**)malloc((sizeof(char*)) * 3);
-	if (!args)
-		throw ft::runtime_error("Error: malloc fail in Cgi::execute");
-
 	// Change to php-cgi path from config
-	args[0] = ft::strdup("/usr/bin/php-cgi");
-	if (!args[0])
-		throw ft::runtime_error("Error: malloc failed in Cgi::execute");
-
-	args[1] = ft::strdup((path.substr(2, path.length() - 2)).c_str());
-	if (!args[1])
-		throw ft::runtime_error("Error: malloc failed in Cgi::execute");
+	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php")
+	{
+		args[0] = ft::strdup("/usr/bin/php-cgi");
+		if (!args[0])
+			throw ft::runtime_error("Error: malloc failed in Cgi::execute");
+		args[1] = ft::strdup(path.c_str());
+		if (!args[1])
+			throw ft::runtime_error("Error: malloc failed in Cgi::execute");
+	}
 
 	std::cout << "Args[0]: " << args[0] << std::endl;
-	std::cout << "Args[1]: " << args[1] << std::endl;
+	if (args[1] != NULL)
+		std::cout << "Args[1]: " << args[1] << std::endl;
 
 	args[2] = NULL;
 	this->set_env(req, path, host, port);
@@ -176,9 +175,11 @@ int		Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	if (WIFEXITED(status))
 		status = WEXITSTATUS(status);
 
-	free(args[0]);
-	free(args[1]);
-	free(args);
+	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php")
+	{
+		free(args[0]);
+		free(args[1]);
+	}
 
 	this->clear_all();
 	return out_fd;

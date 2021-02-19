@@ -286,8 +286,13 @@ void	Response::setBody(void)
 		this->headers["Content-Type"] == "application/x-httpd-php")
 	{
 		Cgi	c;
-		fd = c.execute(&req, this->path, this->server_name, this->location_block->get_properties().ip_port.second);
+		fd = c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
+				 		this->location_block->get_properties().ip_port.second);
 		fd = open("/tmp/webserv", O_RDONLY);
+
+		// Set default cgi content type to text/html
+		if (this->req.get_path().substr(0, 9) == "/cgi-bin/")
+			this->headers["Content-Type"] = "text/html";
 	}
 	else
 		fd = open(this->path.c_str(), O_RDONLY);
@@ -432,7 +437,8 @@ void	Response::parseCgiHeaders(void)
 		this->headers[header.first] = header.second;
 		it = this->body.erase(this->body.begin());
 	}
-	this->body.erase(this->body.begin());
+	if (this->body.front() == "\r" || this->body.front() == "")
+		this->body.erase(this->body.begin());
 }
 
 void	Response::setContentLen(void)
