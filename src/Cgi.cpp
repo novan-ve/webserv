@@ -100,13 +100,6 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 		i++;
 	}
 	this->_env[i] = 0;
-
-	i = 0;
-	while (this->_env[i])
-	{
-		std::cout << this->_env[i] << std::endl;
-		i++;
-	}
 }
 
 void	Cgi::execute(Request *req, std::string path, std::string host, std::string port)
@@ -145,15 +138,21 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 
 	if (pid == 0)
 	{
-		close(ends[1]);
-		dup2(ends[0], 0);
-		dup2(in_fd, 1);
+		if ((close(ends[1])) == -1)
+			throw ft::runtime_error("Error: close failed in Cgi::execute");
+		if ((dup2(ends[0], 0)) == -1)
+			throw ft::runtime_error("Error: dup2 failed in Cgi::execute");
+		if ((dup2(in_fd, 1)) == -1)
+			throw ft::runtime_error("Error: open failed in Cgi::execute");
 		if ((execve(args[0], args, this->_env)) == -1)
 			throw ft::runtime_error("Error: execve failed in Cgi::execute");
-		std::cout << "This shouldn't be printed" << std::endl;
+		throw ft::runtime_error("Error: something went wrong in Cgi::execute");
 	}
 	else
-		close(ends[0]);
+	{
+		if ((close(ends[0])) == -1)
+			throw ft::runtime_error("Error: close failed in Cgi::execute");
+	}
 
 	waitpid(0, &status, 0);
 	if (WIFEXITED(status))
