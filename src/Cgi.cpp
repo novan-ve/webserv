@@ -102,7 +102,7 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 	this->_env[i] = 0;
 }
 
-void	Cgi::execute(Request *req, std::string path, std::string host, std::string port)
+void	Cgi::execute(Request *req, std::string path, std::string host, std::string port, std::string phpcgi)
 {
 	char	*args[3] = {&path[0], NULL, NULL};
 	pid_t	pid;
@@ -111,9 +111,10 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	int 	status;
 
 	// Change to php-cgi path from config
-	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php")
+	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php" &&
+		!phpcgi.empty())
 	{
-		args[0] = ft::strdup("/usr/bin/php-cgi");
+		args[0] = ft::strdup((phpcgi).c_str());
 		if (!args[0])
 			throw ft::runtime_error("Error: malloc failed in Cgi::execute");
 		args[1] = ft::strdup(path.c_str());
@@ -158,7 +159,8 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	if (WIFEXITED(status))
 		status = WEXITSTATUS(status);
 
-	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php")
+	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php" &&
+		!phpcgi.empty())
 	{
 		free(args[0]);
 		free(args[1]);

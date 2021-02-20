@@ -190,6 +190,15 @@ Context *Context::key_root(const std::list<std::string>& args)
 	return (NULL);
 }
 
+Context *Context::key_php_cgi(const std::list<std::string>& args)
+{
+	std::cout << "PHP_CGI" << std::endl;
+	if (args.size() != 1)
+		throw ft::runtime_error("Error: Wrong amount of arguments given to 'php-cgi'");
+	this->properties.php_cgi = args.front();
+	return (NULL);
+}
+
 Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 {
 	const static std::pair<std::string, Context::keyword_func>	pairs[] = {
@@ -203,6 +212,7 @@ Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 		std::pair<std::string, Context::keyword_func>("limit_except", &Context::key_limit_except),
 		std::pair<std::string, Context::keyword_func>("root", &Context::key_root),
 		std::pair<std::string, Context::keyword_func>("error_page", &Context::key_error_page),
+		std::pair<std::string, Context::keyword_func>("php-cgi", &Context::key_php_cgi),
 	};
 	static std::map<std::string, Context::keyword_func>	functions(pairs, pairs + (sizeof(pairs) / sizeof(std::pair<std::string, Context::keyword_func>)));
 

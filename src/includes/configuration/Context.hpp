@@ -35,6 +35,7 @@ class Context
 		Context *key_limit_except(const std::list<std::string>& args);
 		Context *key_index(const std::list<std::string>& args);
 		Context *key_autoindex(const std::list<std::string>& args);
+		Context	*key_php_cgi(const std::list<std::string>& args);
 	protected:
 		Context&					parent;
 		Properties					properties;

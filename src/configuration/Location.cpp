@@ -23,6 +23,7 @@ Location::Location(Context& parent, const std::string& location) : Context(paren
 	this->keywords.push_back("root");
 	this->keywords.push_back("autoindex");
 	this->keywords.push_back("error_page");
+	this->keywords.push_back("php-cgi");
 	std::cout << "LOCATION CREATED!" << std::endl;
 }
 

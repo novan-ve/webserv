@@ -26,7 +26,7 @@ public:
 	Cgi & operator=(const Cgi & rhs);
 	~Cgi();
 
-	void	execute(Request *req, std::string path, std::string host, std::string port);
+	void	execute(Request *req, std::string path, std::string host, std::string port, std::string phpcgi);
 
 private:
 	void	set_env(Request *req, std::string path, std::string host, std::string port);

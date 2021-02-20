@@ -17,7 +17,8 @@ Properties::Properties() :
 	root(""),
 	ip_port(std::pair<std::string, std::string>("0.0.0.0", "80")),
 	server_names(), index(), auto_index(false),
-	accepted_methods(), error_pages(), client_max_body_size(1000000)
+	accepted_methods(), error_pages(), client_max_body_size(1000000),
+	php_cgi("")
 {
 	for (size_t i = 0; i < E_METHOD_END; i++)
 		accepted_methods[Method((e_method)i).get_str()] = true;
@@ -29,7 +30,7 @@ Properties::Properties(const Properties& other) :
 	server_names(other.server_names),
 	index(other.index), auto_index(other.auto_index),
 	accepted_methods(other.accepted_methods),
-	error_pages(other.error_pages), client_max_body_size(other.client_max_body_size) {}
+	error_pages(other.error_pages), client_max_body_size(other.client_max_body_size), php_cgi(other.php_cgi) {}
 
 Properties& Properties::operator = (const Properties& other)
 {
@@ -43,6 +44,7 @@ Properties& Properties::operator = (const Properties& other)
 		this->accepted_methods = other.accepted_methods;
 		this->error_pages = other.error_pages;
 		this->client_max_body_size = other.client_max_body_size;
+		this->php_cgi = other.php_cgi;
 	}
 	return (*this);
 }

@@ -284,11 +284,13 @@ void	Response::setBody(void)
 	int fd;
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		this->headers["Content-Type"] == "application/x-httpd-php")
+		(this->headers["Content-Type"] == "application/x-httpd-php" &&
+		!this->location_block->get_properties().php_cgi.empty()))
 	{
 		Cgi	c;
 		c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
-				 		this->location_block->get_properties().ip_port.second);
+				 		this->location_block->get_properties().ip_port.second,
+				 		this->location_block->get_properties().php_cgi);
 		fd = open("/tmp/webserv", O_RDONLY);
 
 		// Set default cgi content type to text/html
