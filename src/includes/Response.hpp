@@ -58,6 +58,7 @@ class Response : public Message
 		void	listDirectory(void);
 		void	parseCgiHeaders(void);
 		void	setContentLen(void);
+		void	setContentLang(void);
 		void	setLocation(void);
 		void	setModified(void);
 };

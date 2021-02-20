@@ -119,6 +119,7 @@ void	Response::composeResponse(void)
 	this->setContentType();
 	this->setBody();
 	this->setContentLen();
+	this->setContentLang();
 	this->setLocation();
 	this->setModified();
 }
@@ -444,6 +445,29 @@ void	Response::parseCgiHeaders(void)
 void	Response::setContentLen(void)
 {
 	this->headers["Content-Length"] = this->getBodyLen();
+}
+
+void	Response::setContentLang(void)
+{
+	size_t		html_pos;
+	size_t		lang_pos;
+	std::string lang;
+
+	for (std::vector<std::string>::iterator it = this->body.begin(); it != this->body.end(); it++)
+	{
+		html_pos = (*it).find("<html");
+		if (html_pos == std::string::npos)
+			continue;
+
+		lang_pos = (*it).find("lang", html_pos);
+		if (lang_pos != std::string::npos)
+		{
+			for (size_t i = lang_pos + 6; (*it)[i] != '"'; i++)
+				lang += (*it)[i];
+			this->headers["Content-Language"] = lang;
+			return;
+		}
+	}
 }
 
 Server*	Response::server_match(const std::map<Server*, std::vector<std::string> >& server_names)
