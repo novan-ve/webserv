@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 02:14:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/23 15:30:59 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,22 @@ namespace ft
 		for (--size; num ; num /= base.size(), size--)
 			number[size] = base[num % base.size()];
 		return (number);
+	}
+
+	std::string	base64decode(std::string input, std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+	{
+		size_t bits = input.size() * 6;
+		bits -= (((input.size() >= 1 && input[input.size() - 1] == '=') + (input.size() >= 2 && input[input.size() - 2] == '=')) * 8);
+		std::string output(bits / 8, '\0');
+		char encoded;
+
+		for (size_t i = 0; i < bits; i++)
+		{
+			if (i % 6 == 0)
+				encoded = (char)charset.find(input[i / 6]);
+			output[i / 8] = output[i / 8] * 2 + (encoded >> (5 - (i % 6)) & 1);
+		}
+		return (output);
 	}
 
 	int stoi(std::string number, const std::string base)
