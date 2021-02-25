@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/17 14:12:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 14:12:51 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/25 14:18:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ private:
 
 	std::map<std::string, std::string>	_vars;
 	char								**_env;
+	char								*args[3];
 };
 
 #endif

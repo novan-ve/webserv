@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 17:46:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/25 14:05:01 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -447,7 +447,7 @@ void	Response::parseCgiHeaders(void)
 		this->headers[header.first] = header.second;
 		it = this->body.erase(this->body.begin());
 	}
-	if (this->body.front() == "\r" || this->body.front() == "")
+	if (this->body.size() && (this->body.front() == "\r" || this->body.front() == ""))
 		this->body.erase(this->body.begin());
 }
 

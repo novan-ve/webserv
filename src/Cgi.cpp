@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/17 13:59:06 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 13:59:08 by novan-ve      ########   odam.nl         */
+/*   Updated: 2021/02/25 14:22:10 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@
 #include "Utilities.hpp"
 #include "Exception.hpp"
 
-Cgi::Cgi() {}
+Cgi::Cgi() {
+	ft::memset(this->args, (int)NULL, sizeof(args));
+}
 
 Cgi::Cgi(const Cgi & src)
 {
@@ -41,6 +43,9 @@ Cgi &	Cgi::operator=(const Cgi & rhs)
 Cgi::~Cgi() {
 
 	int		i = 0;
+
+	for (size_t i = 0; i < 3; i++)
+		free(args[i]);
 
 	while (this->_env[i])
 	{
@@ -104,29 +109,30 @@ void	Cgi::set_env(Request *req, std::string path, std::string host, std::string 
 
 void	Cgi::execute(Request *req, std::string path, std::string host, std::string port, std::string phpcgi)
 {
-	char	*args[3] = {&path[0], NULL, NULL};
 	pid_t	pid;
 	int 	ends[2];
 	int 	in_fd;
 	int 	status;
 
+	this->args[0] = ft::strdup(&path[0]);
 	// Change to php-cgi path from config
 	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php" &&
 		!phpcgi.empty())
 	{
-		args[0] = ft::strdup((phpcgi).c_str());
-		if (!args[0])
+		free(this->args[0]);
+		this->args[0] = ft::strdup((phpcgi).c_str());
+		if (!this->args[0])
 			throw ft::runtime_error("Error: malloc failed in Cgi::execute");
-		args[1] = ft::strdup(path.c_str());
-		if (!args[1])
+		this->args[1] = ft::strdup(path.c_str());
+		if (!this->args[1])
 			throw ft::runtime_error("Error: malloc failed in Cgi::execute");
 	}
 
-	std::cout << "Args[0]: " << args[0] << std::endl;
-	if (args[1] != NULL)
-		std::cout << "Args[1]: " << args[1] << std::endl;
+	std::cout << "Args[0]: " << this->args[0] << std::endl;
+	if (this->args[1] != NULL)
+		std::cout << "Args[1]: " << this->args[1] << std::endl;
 
-	args[2] = NULL;
+	this->args[2] = NULL;
 	this->set_env(req, path, host, port);
 
 	if ((in_fd = open("/tmp/webserv", O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
@@ -145,7 +151,7 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 			throw ft::runtime_error("Error: dup2 failed in Cgi::execute");
 		if ((dup2(in_fd, 1)) == -1)
 			throw ft::runtime_error("Error: open failed in Cgi::execute");
-		if ((execve(args[0], args, this->_env)) == -1)
+		if ((execve(this->args[0], this->args, this->_env)) == -1)
 			throw ft::runtime_error("Error: execve failed in Cgi::execute");
 		throw ft::runtime_error("Error: something went wrong in Cgi::execute");
 	}
@@ -159,12 +165,5 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	if (WIFEXITED(status))
 		status = WEXITSTATUS(status);
 
-	if (req->get_path().length() > 4 && req->get_path().substr(req->get_path().length() - 4, 4) == ".php" &&
-		!phpcgi.empty())
-	{
-		free(args[0]);
-		free(args[1]);
-	}
 	close(in_fd);
 }
-
