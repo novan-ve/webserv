@@ -38,4 +38,23 @@ std::string	Message::get_header(const std::string& key)
 		return "";
 }
 
+std::string Message::getBodyLen()
+{
+	std::string			length = "";
+	int 				total = 0;
+
+	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+		total += (*it).size() + 2;
+
+	if (total == 0)
+		length = "0";
+
+	while (total != 0) {
+		length.insert(length.begin(), static_cast<char>(total % 10 + '0'));
+		total /= 10;
+	}
+
+	return length;
+}
+
 Message::~Message() {}

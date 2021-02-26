@@ -36,7 +36,8 @@ class Request : public Message
 		bool		get_done(void) const;
 		std::string	get_method(void) const;
 		std::string	get_path(void) const;
-		int			get_status_code() const;
+		int			get_status_code(void) const;
+		std::map<std::string, std::string>& get_headers(void);
 		URI							uri;
 
 	private:

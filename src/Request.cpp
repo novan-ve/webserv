@@ -174,6 +174,7 @@ bool	Request::parseLine(std::string line)
 			else
 				this->status_code = 405;
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
+			std::cout << "Path: " << this->path << std::endl;
 			this->uri = URI(path);
 			if (this->uri.get_port() == "" && this->uri.get_scheme() == "HTTP")
 				this->uri.set_port("80");
@@ -274,3 +275,4 @@ bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method.get_str(); }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
+std::map<std::string, std::string>&	Request::get_headers() { return this->headers; }

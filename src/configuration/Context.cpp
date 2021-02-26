@@ -10,17 +10,18 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Context.hpp"
-#include "Properties.hpp"
 #include <utility>
 #include <list>
 #include <string>
 #include <vector>
 #include <map>
 
+#include "Context.hpp"
+#include "Properties.hpp"
 #include "Location.hpp"
 #include "Server.hpp"
 #include "WebServer.hpp"
+#include "Utilities.hpp"
 
 //Parent Context
 Context::Context() : parent(*this), properties() {}
@@ -180,6 +181,20 @@ Context *Context::key_limit_except(const std::list<std::string>& args)
 	return (NULL);
 }
 
+Context* Context::key_cgi_param(const std::list<std::string>& args)
+{
+	std::cout << "CGI_PARAM" << std::endl;
+
+	if (args.size() != 2)
+		throw ft::runtime_error("Error: Invalid amount of arguments given to 'cgi_param'");
+	if (!ft::onlyConsistsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ_"))
+		throw ft::runtime_error("Error: PARAM name does not consist of only upper_case");
+	std::string key = args.front();
+	std::string value = args.back();
+	this->properties.cgi_param[key] = value;
+	return (NULL);
+}
+
 //Might want to make sure that it's actually a path
 Context *Context::key_root(const std::list<std::string>& args)
 {
@@ -187,6 +202,15 @@ Context *Context::key_root(const std::list<std::string>& args)
 	if (args.size() != 1)
 		throw ft::runtime_error("Error: No arguments given to 'root'");
 	this->properties.root = args.front();
+	return (NULL);
+}
+
+Context *Context::key_php_cgi(const std::list<std::string>& args)
+{
+	std::cout << "PHP_CGI" << std::endl;
+	if (args.size() != 1)
+		throw ft::runtime_error("Error: Wrong amount of arguments given to 'php-cgi'");
+	this->properties.php_cgi = args.front();
 	return (NULL);
 }
 
@@ -203,6 +227,7 @@ Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 		std::pair<std::string, Context::keyword_func>("limit_except", &Context::key_limit_except),
 		std::pair<std::string, Context::keyword_func>("root", &Context::key_root),
 		std::pair<std::string, Context::keyword_func>("error_page", &Context::key_error_page),
+		std::pair<std::string, Context::keyword_func>("php-cgi", &Context::key_php_cgi),
 	};
 	static std::map<std::string, Context::keyword_func>	functions(pairs, pairs + (sizeof(pairs) / sizeof(std::pair<std::string, Context::keyword_func>)));
 

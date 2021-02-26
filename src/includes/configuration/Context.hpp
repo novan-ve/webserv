@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/05 18:35:46 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 18:37:24 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/26 12:36:40 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ class Context
 		Context *key_limit_except(const std::list<std::string>& args);
 		Context *key_index(const std::list<std::string>& args);
 		Context *key_autoindex(const std::list<std::string>& args);
+		Context	*key_php_cgi(const std::list<std::string>& args);
+		Context	*key_cgi_param(const std::list<std::string>& args);
 	protected:
 		Context&					parent;
 		Properties					properties;
