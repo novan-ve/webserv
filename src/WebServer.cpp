@@ -108,6 +108,7 @@ void	WebServer::run()
 
 	thisCopy = this;
 	signal(SIGINT, WebServer::closeSignal);
+	signal(SIGPIPE, Response::setSigpipe);
 
 	while (1)
 	{

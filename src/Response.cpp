@@ -26,6 +26,8 @@
 #include "Properties.hpp"
 #include "Cgi.hpp"
 
+bool g_sigpipe;
+
 Response::Response() : server_name(""), location_block(NULL), isDir(false)
 {
 	this->status_codes[200] = "200 OK";
@@ -69,9 +71,19 @@ Response& Response::operator = (const Response& other)
 
 Response::~Response() {}
 
-void	Response::sendResponse(int fd) const
+void	Response::setSigpipe(int)
+{
+	std::cout << "SIGPIPE received" << std::endl;
+	g_sigpipe = true;
+}
+
+Response*	responseCopy;
+void	Response::sendResponse(int fd)
 {
 	std::string response;
+
+	responseCopy = this;
+	g_sigpipe = false;
 
 	// Copy status line into response
 	response.append(this->status_line + "\r\n");
@@ -89,8 +101,10 @@ void	Response::sendResponse(int fd) const
 
 	//response.append("\r\n");
 
-	if (send(fd, response.c_str(), response.length(), 0) < 0)
-		throw ft::runtime_error("Error: Could not send request to the client");
+	if (send(fd, response.c_str(), response.length(), 0) < 0 && !g_sigpipe)
+			throw ft::runtime_error("Error: Could not send request to the client");
+	if (g_sigpipe)
+		responseCopy->response_code = 400;
 }
 
 void	Response::printResponse(void) const
