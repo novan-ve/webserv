@@ -10,17 +10,18 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Context.hpp"
-#include "Properties.hpp"
 #include <utility>
 #include <list>
 #include <string>
 #include <vector>
 #include <map>
 
+#include "Context.hpp"
+#include "Properties.hpp"
 #include "Location.hpp"
 #include "Server.hpp"
 #include "WebServer.hpp"
+#include "Utilities.hpp"
 
 //Parent Context
 Context::Context() : parent(*this), properties() {}
@@ -177,6 +178,20 @@ Context *Context::key_limit_except(const std::list<std::string>& args)
 		it->second = false;
 	for (std::list<std::string>::const_iterator it = args.begin(); it != args.end(); it++)
 		this->properties.accepted_methods[Method(*it).get_str()] = true;
+	return (NULL);
+}
+
+Context* Context::key_cgi_param(const std::list<std::string>& args)
+{
+	std::cout << "CGI_PARAM" << std::endl;
+
+	if (args.size() != 2)
+		throw ft::runtime_error("Error: Invalid amount of arguments given to 'cgi_param'");
+	if (!ft::onlyConsistsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ_"))
+		throw ft::runtime_error("Error: PARAM name does not consist of only upper_case");
+	std::string key = args.front();
+	std::string value = args.back();
+	this->properties.cgi_param[key] = value;
 	return (NULL);
 }
 

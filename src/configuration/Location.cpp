@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 19:30:38 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/26 13:34:19 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ Location::Location(Context& parent, const std::string& location) : Context(paren
 	this->keywords.push_back("autoindex");
 	this->keywords.push_back("error_page");
 	this->keywords.push_back("php-cgi");
+	this->keywords.push_back("cgi_param");
 	std::cout << "LOCATION CREATED!" << std::endl;
 }
 

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/16 02:14:33 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/26 12:35:23 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,6 +186,20 @@ namespace ft
 		return upperstr;
 	}
 
+	bool	isUpperStr(const std::string& str)
+	{
+		return (onlyConsistsOf(str, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	}
+
+	bool	isLowerStr(const std::string& str)
+	{
+		return (onlyConsistsOf(str, "abcdefghijklmnopqrstuvwxyz"));
+	}
+
+	bool	onlyConsistsOf(const std::string& str, std::string charset)
+	{
+		return (str.find_first_not_of(charset) == std::string::npos);
+	}
 
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)
 	{
