@@ -61,7 +61,7 @@ SRC =	main.cpp \
 OBJ := $(SRC:%.cpp=./obj/%.o)
 SRC := $(SRC:%=$(SRC_DIR)%)
 
-FLAGS = -Wall -Werror -Wextra -pedantic -std=c++98 -g -fsanitize=address
+FLAGS = -Wall -Werror -Wextra -pedantic -std=c++98
 
 ifdef DEBUG
 	FLAGS += -g -fsanitize=address
