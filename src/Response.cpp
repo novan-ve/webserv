@@ -29,10 +29,14 @@
 Response::Response() : server_name(""), location_block(NULL), isDir(false)
 {
 	this->status_codes[200] = "200 OK";
+	this->status_codes[201] = "201 Created";
+	this->status_codes[204] = "204 No Content";
 	this->status_codes[301] = "301 Moved Permanently";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[404] = "404 Not Found";
 	this->status_codes[405] = "405 Method Not Allowed";
+	this->status_codes[409] = "409 Conflict";
+	this->status_codes[413] = "413 Payload Too Large";
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
@@ -114,6 +118,8 @@ void	Response::composeResponse(void)
 	this->checkMethod();
 	this->checkPath();
 
+	this->handlePut();
+
 	this->setStatusLine();
 	this->setServer();
 	this->setDate();
@@ -151,7 +157,7 @@ void	Response::checkPath(void)
 	this->path = "/" + this->req.uri.get_path();
 	if (this->location_block && this->path.size() >= this->location_block->get_location().size() && this->path.substr(0, this->location_block->get_location().size()) == this->location_block->get_location())
 		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
-	if (this->response_code != 200)
+	if (this->response_code != 200 || (this->req.get_method() == "PUT" && this->req.get_headers().count("Content-Length")))
 		return;
 
 	std::cout << "final path: " << this->path << std::endl;
@@ -205,6 +211,61 @@ void	Response::checkPath(void)
 		throw ft::runtime_error("Error: stat failed in Response::checkPath");
 }
 
+void	Response::handlePut(void)
+{
+	if (this->response_code != 200 || this->req.get_method() != "PUT" || !this->req.get_headers().count("Content-Length"))
+		return;
+
+	// Check if requested path is a directory
+	if (this->path[this->path.length() - 1] == '/')
+	{
+		this->response_code = 409;
+		return;
+	}
+
+	// Check if files directory exist (e.g. /nonexistent/new.html)
+	int fd = open((this->path.substr(0, this->path.find_last_of('/'))).c_str(), O_RDONLY);
+	if (fd == -1)
+	{
+		this->response_code = 404;
+		return;
+	}
+	close(fd);
+
+	// Check if body is too large
+	size_t	bodylen = static_cast<size_t>(ft::stoi(this->req.getBodyLen()));
+	if (bodylen > this->location_block->get_properties().client_max_body_size)
+	{
+		this->response_code = 413;
+		return;
+	}
+
+	// Check if file exists
+	fd = open(this->path.c_str(), O_RDONLY);
+	if (fd == -1)
+		this->response_code = 201;
+	else
+		this->response_code = 204;
+	close(fd);
+
+	// Check if file is directory
+	if (this->response_code == 204)
+	{
+		struct stat	s;
+		if (stat(this->path.c_str(), &s) != 0)
+			throw ft::runtime_error("Error: stat failed in Response::handlePut");
+		if (s.st_mode & S_IFDIR) {
+			this->response_code = 409;
+			return;
+		}
+	}
+
+	fd = open(this->path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, 0644);
+	for (std::vector<std::string>::iterator it = req.get_body().begin(); it != req.get_body().end(); it++)
+		write(fd, (*it).c_str(), (*it).length());
+	close(fd);
+}
+
 void	Response::setStatusLine(void)
 {
 	std::cout << "RESPONSE CODE: " << this->response_code << std::endl;
@@ -230,6 +291,8 @@ void	Response::setDate(void)
 
 void	Response::setContentType()
 {
+	if (this->response_code == 201 || this->response_code == 204)
+		return;
 	if (this->response_code != 200 || this->isDir)
 	{
 		this->headers["Content-Type"] = "text/html";
@@ -273,6 +336,8 @@ void	Response::setContentType()
 
 void	Response::setBody(void)
 {
+	if (this->response_code == 201 || this->response_code == 204)
+		return;
 	if (this->response_code != 200)
 	{
 		this->setBodyError();
@@ -453,7 +518,8 @@ void	Response::parseCgiHeaders(void)
 
 void	Response::setContentLen(void)
 {
-	this->headers["Content-Length"] = this->getBodyLen();
+	if (this->response_code != 204)
+		this->headers["Content-Length"] = this->getBodyLen();
 }
 
 void	Response::setContentLang(void)
@@ -609,11 +675,13 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 
 void	Response::setLocation(void)
 {
-	if (this->response_code != 301)
+	if (this->response_code != 301 && this->response_code != 201)
 		return;
 
 	std::cout << "Pre" << this->req.get_path() << "Post" << std::endl;
-	std::string location = "http://" + this->req.get_header("Host") + this->req.get_path() + "/";
+	std::string location = "http://" + this->req.get_header("Host") + this->req.get_path();
+	if (this->response_code == 301)
+		location += "/";
 	this->headers["Location"] = location;
 }
 
