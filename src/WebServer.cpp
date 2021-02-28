@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 #include <errno.h>
 
 #include "Client.hpp"
@@ -81,11 +82,33 @@ void	WebServer::addNewClients(fd_set& read_set)
 	}
 }
 
+WebServer*	thisCopy;
+void	WebServer::closeSignal(int status)
+{
+	std::cout << "Received stop signal" << std::endl;
+
+	for (std::map<int, Client*>::iterator it = thisCopy->clients.begin(); it != thisCopy->clients.end(); it++)
+		delete it->second;
+	thisCopy->clients.clear();
+	thisCopy->servers.clear();
+
+	FD_ZERO(&thisCopy->read_sockets);
+	FD_ZERO(&thisCopy->write_sockets);
+
+	std::cout << "Server stopped cleanly" << std::endl;
+
+	exit(status);
+}
+
 void	WebServer::run()
 {
 	std::vector<int>	closed_clients;
 	fd_set				read_set;
 	fd_set				write_set;
+
+	thisCopy = this;
+	signal(SIGINT, WebServer::closeSignal);
+	signal(SIGPIPE, Response::setSigpipe);
 
 	while (1)
 	{

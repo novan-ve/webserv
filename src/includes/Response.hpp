@@ -28,7 +28,8 @@ class Response : public Message
 		Response& operator = (const Response& other);
 		~Response();
 
-		void	sendResponse(int fd) const;
+		static void	setSigpipe(int);
+		void	sendResponse(int fd);
 		void	printResponse(void) const;
 		void	composeResponse(void);
 		void	setRequest(Request& req);

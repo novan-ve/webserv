@@ -52,6 +52,7 @@ class WebServer : public Context
 		void	deleteClient(int fd);
 //		Server&	newServer();
 		void	addNewClients(fd_set& read_set);
+		static void	closeSignal(int status);
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
 	public:
