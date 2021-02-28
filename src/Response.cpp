@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/17 17:46:29 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/25 14:05:01 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,9 @@
 #include "includes/Utilities.hpp"
 #include "Server.hpp"
 #include "Properties.hpp"
+#include "Cgi.hpp"
 
-Response::Response() : location_block(NULL), isDir(false)
+Response::Response() : server_name(""), location_block(NULL), isDir(false)
 {
 	this->status_codes[200] = "200 OK";
 	this->status_codes[301] = "301 Moved Permanently";
@@ -35,8 +36,10 @@ Response::Response() : location_block(NULL), isDir(false)
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
-Response::Response(const Response& other) : status_codes(other.status_codes), status_line(other.status_line),
-											response_code(other.response_code), location_block(other.location_block), isDir(other.isDir) {}
+Response::Response(const Response& other) {
+
+	*this = other;
+}
 
 void	Response::setRequest(Request& req)
 {
@@ -59,6 +62,7 @@ Response& Response::operator = (const Response& other)
 		this->status_codes = other.status_codes;
 		this->location_block = other.location_block;
 		this->isDir = other.isDir;
+		this->server_name = other.server_name;
 	}
 	return (*this);
 }
@@ -116,6 +120,7 @@ void	Response::composeResponse(void)
 	this->setContentType();
 	this->setBody();
 	this->setContentLen();
+	this->setContentLang();
 	this->setLocation();
 	this->setModified();
 }
@@ -248,6 +253,8 @@ void	Response::setContentType()
 		type = "application/" + ext;
 	else if (ext == "js")
 		type = "application/javascript";
+	else if (ext == "php")
+		type = "application/x-httpd-php";
 	else if (ext == "jpg" || ext == "jpeg")
 		type = "image/jpeg";
 	else if (ext == "gif" || ext == "png" || ext == "tiff")
@@ -280,11 +287,42 @@ void	Response::setBody(void)
 		return;
 	}
 
-	int fd = open(this->path.c_str(), O_RDONLY);
+	int fd;
+
+	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
+		(this->headers["Content-Type"] == "application/x-httpd-php" &&
+		!this->location_block->get_properties().php_cgi.empty()))
+	{
+		Cgi	c;
+		c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
+				 		this->location_block->get_properties().ip_port.second,
+				 		this->location_block->get_properties().php_cgi);
+		fd = open("/tmp/webserv", O_RDONLY);
+
+		// Set default cgi content type to text/html
+		if (this->req.get_path().substr(0, 9) == "/cgi-bin/")
+			this->headers["Content-Type"] = "text/html";
+	}
+	else
+		fd = open(this->path.c_str(), O_RDONLY);
 	if (fd == -1)
 		throw ft::runtime_error("Error: Response can't open previously checked file in setBody()");
 
 	this->body = ft::get_lines(fd);
+
+	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
+		this->headers["Content-Type"] == "application/x-httpd-php")
+		this->parseCgiHeaders();
+
+	size_t body_size = 0;
+	for (size_t i = 0; i < this->body.size(); i++)
+		body_size += this->body[i].size() + ((i + 1 == this->body.size()) ? 0 : 2);
+	if (this->location_block && body_size > this->location_block->get_properties().client_max_body_size)
+	{
+		this->response_code = 413;
+		this->setBodyError();
+	}
+
 	close(fd);
 }
 
@@ -389,20 +427,56 @@ void	Response::listDirectory(void)
 	this->body.push_back("</html>");
 }
 
+void	Response::parseCgiHeaders(void)
+{
+	std::vector<std::string>::iterator it = this->body.begin();
+
+	while (it != this->body.end())
+	{
+		if ((*it).find(':') == std::string::npos)
+			break;
+		std::pair<std::string, std::string> header = ft::get_keyval(*it, ": ");
+
+		// Make sure header is in title case
+		header.first[0] = toupper(header.first[0]);
+		for (unsigned long i = 0; i < header.first.length(); i++)
+		{
+			if (header.first[i] == '-' && i + 1 != header.first.length())
+				header.first[i + 1] = toupper(header.first[i + 1]);
+		}
+		this->headers[header.first] = header.second;
+		it = this->body.erase(this->body.begin());
+	}
+	if (this->body.size() && (this->body.front() == "\r" || this->body.front() == ""))
+		this->body.erase(this->body.begin());
+}
+
 void	Response::setContentLen(void)
 {
-	std::string			length = "";
-	int 				total = 0;
+	this->headers["Content-Length"] = this->getBodyLen();
+}
 
-	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		total += (*it).size() + 2;
+void	Response::setContentLang(void)
+{
+	size_t		html_pos;
+	size_t		lang_pos;
+	std::string lang;
 
-	while (total != 0) {
-		length.insert(length.begin(), static_cast<char>(total % 10 + '0'));
-		total /= 10;
+	for (std::vector<std::string>::iterator it = this->body.begin(); it != this->body.end(); it++)
+	{
+		html_pos = (*it).find("<html");
+		if (html_pos == std::string::npos)
+			continue;
+
+		lang_pos = (*it).find("lang", html_pos);
+		if (lang_pos != std::string::npos)
+		{
+			for (size_t i = lang_pos + 6; (*it)[i] != '"'; i++)
+				lang += (*it)[i];
+			this->headers["Content-Language"] = lang;
+			return;
+		}
 	}
-
-	this->headers["Content-Length"] = length;
 }
 
 Server*	Response::server_match(const std::map<Server*, std::vector<std::string> >& server_names)
@@ -457,6 +531,17 @@ Server*	Response::server_match(const std::map<Server*, std::vector<std::string> 
 			continue ;
 		}
 
+		//if server_name matches explicitly
+		if (std::find(server_properties.server_names.begin(), server_properties.server_names.end(), host_uri.get_host()) != server_properties.server_names.end())
+		{
+			this->server_name = host_uri.get_host();
+			matching_server_name = it->first;
+		}
+		if (std::find(server_properties.server_names.begin(), server_properties.server_names.end(), this->req.uri.get_host()) != server_properties.server_names.end())
+		{
+			this->server_name = this->req.uri.get_host();
+			matching_server_name = it->first;
+		}
 
 		if (current_match.first > ip_port_match.first)
 		{
@@ -493,6 +578,8 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 	{
 		std::cout << "SERVER_BLOCK selected:" << std::endl;
 		ft::print_iteration(server_block->get_properties().server_names.begin(), server_block->get_properties().server_names.end(), "\n");
+		if (this->server_name == "")
+			this->server_name = server_block->get_properties().server_names.front();
 	}
 
 //	std::cout << "full uri: " << this->req.uri.get_uri() << std::endl;

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 09:28:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/15 15:27:22 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/26 12:37:36 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,8 @@ struct Properties
 	std::map<std::string, bool>			accepted_methods;
 	std::map<int, std::string>			error_pages;
 	size_t								client_max_body_size;
+	std::string							php_cgi;
+	std::map<std::string, std::string>	cgi_param;
 };
 
 #endif

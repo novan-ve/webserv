@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/23 15:30:59 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 13:41:21 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,6 +170,51 @@ namespace ft
 	unsigned short	host_to_network_short(unsigned short x)
 	{
 		return ((((x) >> 8) & 0xff ) | (((x) & 0xff) << 8));
+	}
+
+	char    *strdup(const char *s1)
+	{
+		char	*p;
+		int		len = 0;
+		int		i = 0;
+
+		while (s1[i])
+		{
+			len++;
+			i++;
+		}
+		p = (char*)malloc((sizeof(char) * len) + 1);
+		if (p == 0)
+			return (NULL);
+		for (int j = 0; j < len; j++)
+			p[j] = s1[j];
+		p[len] = '\0';
+		return (p);
+	}
+
+	std::string	toUpperStr(const std::string& str)
+	{
+		std::string 	upperstr = "";
+
+		for (unsigned long i = 0; i < str.size(); i++)
+			upperstr.push_back(toupper(str[i]));
+
+		return upperstr;
+	}
+
+	bool	isUpperStr(const std::string& str)
+	{
+		return (onlyConsistsOf(str, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	}
+
+	bool	isLowerStr(const std::string& str)
+	{
+		return (onlyConsistsOf(str, "abcdefghijklmnopqrstuvwxyz"));
+	}
+
+	bool	onlyConsistsOf(const std::string& str, std::string charset)
+	{
+		return (str.find_first_not_of(charset) == std::string::npos);
 	}
 
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)

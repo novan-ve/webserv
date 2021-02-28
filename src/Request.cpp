@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:26:25 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/25 19:39:36 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,25 @@ Request& Request::operator = (const Request& other)
 		this->uri = other.uri;
 	}
 	return (*this);
+}
+
+bool	Request::isMethod(std::string str)
+{
+	static const char *methods[] = {
+	"OPTIONS",
+	"GET",
+	"HEAD",
+	"POST",
+	"PUT",
+	"DELETE",
+	"TRACE",
+	"CONNECT"
+	};
+
+	for (size_t i = 0; i < sizeof(methods) / sizeof(char *); i++)
+		if (std::string(methods[i]) == str)
+			return (true);
+	return (false);
 }
 
 void	Request::process(int fd)
@@ -149,15 +168,13 @@ bool	Request::parseLine(std::string line)
 				end_pos_path--;
 			end_pos_path++;
 
-			try
-			{
-				this->method = Method(this->status_line.substr(0, end_pos_method));
-			}
-			catch (ft::runtime_error& e)
-			{
+			std::string methodpart = this->status_line.substr(0, end_pos_method);
+			if (isMethod(methodpart))
+				this->method = Method(methodpart);
+			else
 				this->status_code = 405;
-			}
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
+			std::cout << "Path: " << this->path << std::endl;
 			this->uri = URI(path);
 			if (this->uri.get_port() == "" && this->uri.get_scheme() == "HTTP")
 				this->uri.set_port("80");
@@ -258,3 +275,4 @@ bool			Request::get_done() const { return this->done; }
 std::string		Request::get_method() const { return this->method.get_str(); }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
+std::map<std::string, std::string>&	Request::get_headers() { return this->headers; }

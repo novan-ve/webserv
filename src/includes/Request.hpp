@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:19:37 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/25 19:37:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,12 @@ class Request : public Message
 		bool		get_done(void) const;
 		std::string	get_method(void) const;
 		std::string	get_path(void) const;
-		int			get_status_code() const;
+		int			get_status_code(void) const;
+		std::map<std::string, std::string>& get_headers(void);
 		URI							uri;
 
 	private:
+		bool		isMethod(std::string str);
 //		int							fd;
 		bool						done;
 		std::string 				status_line;
