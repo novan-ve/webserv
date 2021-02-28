@@ -369,7 +369,7 @@ void	Response::setBody(void)
 		c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
 				 		this->location_block->get_properties().ip_port.second,
 				 		this->location_block->get_properties().php_cgi);
-		fd = open("/tmp/webserv", O_RDONLY);
+		fd = open("/tmp/webservout", O_RDONLY);
 
 		// Set default cgi content type to text/html
 		if (this->req.get_path().substr(0, 9) == "/cgi-bin/")
@@ -383,7 +383,7 @@ void	Response::setBody(void)
 	this->body = ft::get_lines(fd);
 
 	if (this->req.get_path().substr(0, 9) == "/cgi-bin/" ||
-		this->headers["Content-Type"] == "application/x-httpd-php")
+		this->headers["Content-Type"] == "application/x-httpd-php" || this->req.get_method() == "POST")
 		this->parseCgiHeaders();
 
 	size_t body_size = 0;
