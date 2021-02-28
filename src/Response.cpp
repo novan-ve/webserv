@@ -88,8 +88,11 @@ void	Response::sendResponse(int fd) const
 	response.append("\r\n");
 
 	// Copy body into response
-	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		response.append(*it + "\r\n");
+	if (this->req.get_method() != "HEAD")
+	{
+		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+			response.append(*it + "\r\n");
+	}
 
 	//response.append("\r\n");
 
@@ -106,10 +109,14 @@ void	Response::printResponse(void) const
 	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++) {
 		std::cout << "\t" << it->first << ": " << it->second << "\r" << std::endl;
 	}
-	std::cout << "  Body:" << std::endl;
-	for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		std::cout << "\t" << *it << "\r" << std::endl;
-	std::cout << std::endl;
+
+	if (this->req.get_method() != "HEAD")
+	{
+		std::cout << "  Body:" << std::endl;
+		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+			std::cout << "\t" << *it << "\r" << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 void	Response::composeResponse(void)
