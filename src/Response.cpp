@@ -365,15 +365,22 @@ void	Response::setBody(void)
 		(this->headers["Content-Type"] == "application/x-httpd-php" &&
 		!this->location_block->get_properties().php_cgi.empty()))
 	{
-		Cgi	c;
-		c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
-				 		this->location_block->get_properties().ip_port.second,
-				 		this->location_block->get_properties().php_cgi);
-		fd = open("/tmp/webservout", O_RDONLY);
+		fd = open(this->location_block->get_properties().php_cgi.c_str(), O_RDONLY);
+		if (fd != -1)
+		{
+			close(fd);
+			Cgi	c;
+			c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
+					  this->location_block->get_properties().ip_port.second,
+					  this->location_block->get_properties().php_cgi);
+			fd = open("/tmp/webservout", O_RDONLY);
 
-		// Set default cgi content type to text/html
-		if (this->req.get_path().substr(0, 9) == "/cgi-bin/")
-			this->headers["Content-Type"] = "text/html";
+			// Set default cgi content type to text/html
+			if (this->req.get_path().substr(0, 9) == "/cgi-bin/")
+				this->headers["Content-Type"] = "text/html";
+		}
+		else
+			fd = open(this->path.c_str(), O_RDONLY);
 	}
 	else
 		fd = open(this->path.c_str(), O_RDONLY);
