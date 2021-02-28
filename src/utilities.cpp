@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/28 13:41:21 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 16:30:04 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ namespace ft
 		return (number);
 	}
 
-	std::string	base64decode(std::string input, std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+	std::string	base64decode(std::string input, std::string charset)
 	{
 		size_t bits = input.size() * 6;
 		bits -= (((input.size() >= 1 && input[input.size() - 1] == '=') + (input.size() >= 2 && input[input.size() - 2] == '=')) * 8);

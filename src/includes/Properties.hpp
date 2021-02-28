@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 09:28:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/26 12:37:36 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 16:48:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,18 @@
 # include <string>
 # include <iostream>
 # include <utility> //illegal
+
+struct Authorization
+{
+	bool								enabled;
+	std::string							realm;
+	std::map<std::string, std::string>	user_pass;
+	bool	operator () (std::string userpass) const;
+	Authorization();
+	~Authorization();
+	Authorization& operator = (const Authorization& other);
+	Authorization(const Authorization& other);
+};
 
 struct Properties
 {
@@ -37,6 +49,7 @@ struct Properties
 	size_t								client_max_body_size;
 	std::string							php_cgi;
 	std::map<std::string, std::string>	cgi_param;
+	Authorization						auth;
 };
 
 #endif

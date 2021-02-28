@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 16:21:50 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/26 13:34:35 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 14:03:46 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ Server::Server(Context& parent) : Context(parent)
 	this->keywords.push_back("error_page");
 	this->keywords.push_back("client_max_body_size");
 	this->keywords.push_back("cgi_param");
+	this->keywords.push_back("auth_basic");
+	this->keywords.push_back("auth_basic_user_file");
 }
 
 bool	Server::init()

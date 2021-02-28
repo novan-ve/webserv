@@ -15,6 +15,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unistd.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include "Context.hpp"
 #include "Properties.hpp"
@@ -214,6 +217,69 @@ Context *Context::key_php_cgi(const std::list<std::string>& args)
 	return (NULL);
 }
 
+Context *Context::key_auth_basic(const std::list<std::string>& args)
+{
+	std::cout << "AUTH_BASIC" << std::endl;
+	if (!args.size())
+		throw ft::runtime_error("Error: No arguments provided to 'auth_basic'");
+	this->properties.auth.enabled = true;
+	std::string first = args.front();
+	std::string last = args.back();
+	if (args.size() != 1 && (!first.size() || (first[0] != '"' && first[0] != '\'')) &&
+		(!last.size() || (last[last.size() - 1] != '"' && last[last.size() - 1] != '\'')) &&
+		last[last.size() - 1] != first[0])
+		throw ft::runtime_error("Invalid argument given to 'auth_basic'");
+
+	std::string argument;
+
+	if (args.size() == 1)
+		argument = first;
+	else
+	{
+		argument = first.substr(1, first.size()) + " ";
+		for (std::list<std::string>::const_iterator it = ++args.begin(); it != args.end(); it++)
+			argument += *it + " ";
+		argument = argument.substr(0, argument.size() - 2);
+		std::cout << "ARGUMENT: " << argument << std::endl;
+	}
+	this->properties.auth.realm = argument;
+	if (argument == "off")
+		this->properties.auth.enabled = false;
+	return (NULL);
+}
+
+bool	parse_htpasswd(std::map<std::string, std::string>& user_pass, std::string user_file)
+{
+	user_pass.clear();
+	int fd = open(user_file.c_str(), O_RDONLY);
+	if (fd == -1)
+		return (false);
+	bool valid = true;
+	std::vector<std::string>	lines = ft::get_lines(fd);
+	for (size_t i = 0; i < lines.size() && valid; i++)
+	{
+		if (!lines[i].size() || lines[i][0] == '#')
+			continue ;
+		if (lines[i].find(':') == std::string::npos)
+			valid = false;
+		user_pass.insert(ft::get_keyval(lines[i]));
+	}
+	close(fd);
+	return (valid);
+}
+
+Context *Context::key_auth_basic_user_file(const std::list<std::string>& args)
+{
+	std::cout << "AUTH_BASIC_USER_FILE" << std::endl;
+	if (args.size() != 1)
+		throw ft::runtime_error("Error: Invalid amount of arguments given to 'auth_basic_user_file'");
+	if (!this->properties.auth.enabled)
+		throw ft::runtime_error("Error: 'auth_basic_user_file' provided for disabled 'auth_basic' authentication");
+	if (!parse_htpasswd(this->properties.auth.user_pass, args.front()))
+		throw ft::runtime_error("Error: provided file either doesn't exist or does not conform to the htpasswd format");
+	return (NULL);
+}
+
 Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 {
 	const static std::pair<std::string, Context::keyword_func>	pairs[] = {
@@ -228,6 +294,9 @@ Context	*Context::parse_keyword(std::string key, std::list<std::string> args)
 		std::pair<std::string, Context::keyword_func>("root", &Context::key_root),
 		std::pair<std::string, Context::keyword_func>("error_page", &Context::key_error_page),
 		std::pair<std::string, Context::keyword_func>("php-cgi", &Context::key_php_cgi),
+		std::pair<std::string, Context::keyword_func>("cgi_param", &Context::key_cgi_param),
+		std::pair<std::string, Context::keyword_func>("auth_basic", &Context::key_auth_basic),
+		std::pair<std::string, Context::keyword_func>("auth_basic_user_file", &Context::key_auth_basic_user_file),
 	};
 	static std::map<std::string, Context::keyword_func>	functions(pairs, pairs + (sizeof(pairs) / sizeof(std::pair<std::string, Context::keyword_func>)));
 
