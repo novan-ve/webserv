@@ -38,6 +38,7 @@ class Request : public Message
 		std::string	get_path(void) const;
 		int			get_status_code(void) const;
 		std::map<std::string, std::string>& get_headers(void);
+		std::vector<std::string>&	get_body(void);
 		URI							uri;
 
 	private:
@@ -50,6 +51,9 @@ class Request : public Message
 		std::string					path;
 		int							status_code;
 		Method						method;
+		int							body_read;
+		int							body_total;
+		bool						body_started;
 };
 
 #endif

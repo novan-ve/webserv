@@ -17,7 +17,7 @@
 #include "Utilities.hpp"
 #include "Method.hpp"
 
-Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET) {}
+Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET), body_read(0), body_total(-1), body_started(false) {}
 
 Request::Request(const Request& other) : uri(other.uri), method(other.method)
 {
@@ -37,6 +37,9 @@ Request& Request::operator = (const Request& other)
 		this->headers = other.headers;
 		this->body = other.body;
 		this->uri = other.uri;
+		this->body_read = other.body_read;
+		this->body_total = other.body_total;
+		this->body_started = other.body_started;
 	}
 	return (*this);
 }
@@ -150,6 +153,19 @@ bool	Request::parseLine(std::string line)
 		}
 		else if (this->status_line != "" && this->lines.size() > 0)
 		{
+			if (this->body_total != 0 && this->body_total > this->body_read)
+			{
+				if (this->body_started)
+				{
+					this->body_read+= 2;
+					this->lines.push_back("\r\n");
+				}
+				else
+					this->lines.push_back("\r");
+				this->body_started = true;
+				return false;
+			}
+
 			int	end_pos_method = this->status_line.find(' ');
 			int start_pos_path = end_pos_method;
 
@@ -207,7 +223,7 @@ bool	Request::parseLine(std::string line)
 		}
 		return (false);
 	}
-	else if (line.find(':') != std::string::npos)
+	else if (line.find(':') != std::string::npos && !this->body_started)
 	{
 		if (this->status_line == "")
 		{
@@ -215,6 +231,15 @@ bool	Request::parseLine(std::string line)
 			return (true);
 		}
 		size_t carriage_return = line.find_last_of('\r');
+
+		if (line.substr(0, 16) == "Content-Length: ")
+		{
+			if (carriage_return != std::string::npos)
+				this->body_total = ft::stoi(line.substr(16, line.length() - 17));
+			else
+				this->body_total = ft::stoi(line.substr(16, line.length() - 16));
+		}
+
 		if (carriage_return != std::string::npos && carriage_return + 1 == line.size())
 			this->lines.push_back(line.substr(0, line.size() - 1));
 		else
@@ -222,7 +247,31 @@ bool	Request::parseLine(std::string line)
 		return (false);
 	}
 	if (this->status_line != "")
+	{
+		if (body_started)
+		{
+			size_t carriage = line.find_last_of('\r');
+			if (carriage != std::string::npos && carriage + 1 == line.size())
+				line += "\n";
+			else
+				line += "\r\n";
+
+			std::string newLine = "";
+
+			for (int i = 0; line[i] != '\0'; i++)
+			{
+				newLine.push_back(line[i]);
+				this->body_read++;
+				if (this->body_read == this->body_total)
+					break;
+			}
+			this->lines.push_back(newLine);
+
+			if (this->body_read >= this->body_total)
+				return (this->parseLine("\r"));
+		}
 		return (false);
+	}
 	this->status_code = 400;
 	return (true);
 }
@@ -247,9 +296,14 @@ void Request::splitRequest(void) {
 	}
 
 	// If a body exists, place this->lines inside body attribute
-	if (header_end != this->lines.end() && ++header_end != this->lines.end()) {
-		for (std::vector<std::string>::iterator it = header_end; it != this->lines.end(); it++)
-			this->body.push_back(*it);
+	if (header_end != lines.end())
+	{
+		header_end++;
+		if (header_end != lines.end())
+		{
+			for (std::vector<std::string>::iterator it = header_end; it != this->lines.end(); it++)
+				this->body.push_back(*it);
+		}
 	}
 }
 
@@ -276,3 +330,4 @@ std::string		Request::get_method() const { return this->method.get_str(); }
 std::string		Request::get_path() const { return this->path; }
 int				Request::get_status_code() const { return this->status_code; }
 std::map<std::string, std::string>&	Request::get_headers() { return this->headers; }
+std::vector<std::string>&	Request::get_body() { return this->body; }

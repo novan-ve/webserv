@@ -51,6 +51,8 @@ class Response : public Message
 		void	checkMethod(void);
 		void	checkPath(void);
 
+		void	handlePut(void);
+
 		void	setStatusLine(void);
 		void	setServer(void);
 		void	setDate(void);
