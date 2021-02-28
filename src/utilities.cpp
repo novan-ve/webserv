@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/28 16:30:04 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:27:21 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,12 +217,36 @@ namespace ft
 		return (str.find_first_not_of(charset) == std::string::npos);
 	}
 
+	// bool	is_closed(const std::string& str, std::string open, std::string close)
+	// {
+	// 	if (open.size() != close.size())
+	// 		return (false);
+	// 	std::stack<std::pair<size_t, size_t> >	pairs;
+
+	// 	for (size_t i = 0; i < str.size(); i++)
+	// }
+
+	std::string removeSet(std::string str, std::string remove)
+	{
+		size_t size = str.size();
+		for (size_t i = 0; i < remove.size(); i++)
+			size -= std::count(str.begin(), str.end(), remove[i]);
+		std::string result(size, ' ');
+		size = 0;
+		for (size_t i = 0; i < str.size(); i++)
+		{
+			if (remove.find(str[i]) == std::string::npos)
+				result[size++] = str[i];
+		}
+		return (result);
+	}
+
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)
 	{
 		std::pair<std::string, std::string>	keyval;
 		size_t	delim_pos = raw.find(delimiter);
 		if (delim_pos == std::string::npos)
-			return (keyval);
+			throw ft::runtime_error("Error: delimiter string not found in 'get_keyval'");
 		keyval.first = raw.substr(0, delim_pos);
 		keyval.second = raw.substr(delim_pos + delimiter.size(), raw.size());
 		return (keyval);

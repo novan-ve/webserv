@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 09:37:47 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/28 16:50:19 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:36:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,10 @@ bool	Authorization::operator () (std::string userpass) const
 	if (this->enabled == false)
 		return (true);
 	userpass = ft::base64decode(userpass);
-	std::pair<std::string, std::string>	user_and_pass = ft::get_keyval(userpass);
+	std::cout << "USER:PASS: " << userpass << std::endl;
+	if (userpass.find(':') == std::string::npos)
+		return (false);
+	std::pair<std::string, std::string>	user_and_pass = ft::get_keyval(userpass, ":");
 	std::map<std::string, std::string>	user_list = this->user_pass;
 	return (!user_list.size() || (user_list.count(user_and_pass.first) && user_list[user_and_pass.first] == user_and_pass.second));
 }

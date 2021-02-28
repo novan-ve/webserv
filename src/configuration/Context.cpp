@@ -223,26 +223,12 @@ Context *Context::key_auth_basic(const std::list<std::string>& args)
 	if (!args.size())
 		throw ft::runtime_error("Error: No arguments provided to 'auth_basic'");
 	this->properties.auth.enabled = true;
-	std::string first = args.front();
-	std::string last = args.back();
-	if (args.size() != 1 && (!first.size() || (first[0] != '"' && first[0] != '\'')) &&
-		(!last.size() || (last[last.size() - 1] != '"' && last[last.size() - 1] != '\'')) &&
-		last[last.size() - 1] != first[0])
-		throw ft::runtime_error("Invalid argument given to 'auth_basic'");
-
 	std::string argument;
-
-	if (args.size() == 1)
-		argument = first;
-	else
-	{
-		argument = first.substr(1, first.size()) + " ";
-		for (std::list<std::string>::const_iterator it = ++args.begin(); it != args.end(); it++)
-			argument += *it + " ";
-		argument = argument.substr(0, argument.size() - 2);
-		std::cout << "ARGUMENT: " << argument << std::endl;
-	}
+	for (std::list<std::string>::const_iterator it = args.begin(); it != args.end();)
+		argument += *it + ((++it == args.end()) ? "" : " ");
+	argument = ft::removeSet(argument, "\"\'");
 	this->properties.auth.realm = argument;
+	std::cout << "REALM: " << argument << std::endl;
 	if (argument == "off")
 		this->properties.auth.enabled = false;
 	return (NULL);
@@ -262,7 +248,9 @@ bool	parse_htpasswd(std::map<std::string, std::string>& user_pass, std::string u
 			continue ;
 		if (lines[i].find(':') == std::string::npos)
 			valid = false;
-		user_pass.insert(ft::get_keyval(lines[i]));
+		user_pass.insert(ft::get_keyval(lines[i], ":"));
+		// std::pair<std::string, std::string>	keyval = ft::get_keyval(lines[i], ":");
+		// std::cout << "USER: " << keyval.first << " | PASS: " << keyval.second << std::endl;
 	}
 	close(fd);
 	return (valid);

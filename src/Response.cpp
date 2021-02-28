@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/28 16:51:21 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:34:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,13 @@ void	Response::printResponse(void) const
 void	Response::composeResponse(void)
 {
 //	this->checkRequestBody();
-	this->checkAuthorization();
+	if (!this->checkAuthorization())
+	{
+		this->response_code = 401;
+		this->headers["WWW-Authenticate"] = "Basic realm=\"";
+		if (this->location_block)
+			this->headers["WWW-Authenticate"] += this->location_block->get_properties().auth.realm + "\"";
+	}
 	this->checkMethod();
 	this->checkPath();
 
@@ -132,39 +138,24 @@ void	Response::composeResponse(void)
 // 	if (!this->req.
 // }
 
-void	Response::checkAuthorization(void)
+bool	Response::checkAuthorization(void)
 {
 	if (this->location_block && this->location_block->get_properties().auth.enabled)
 	{
 		std::map<std::string, std::string>& headers = this->req.get_headers();
-		if (!headers.count("Authorization"))
-		{
-			this->response_code = 401;
-			return ;
-		}
+		if (!this->location_block->get_properties().auth.user_pass.size())
+			return (true);
+		if (!this->req.get_headers().count("Authorization"))
+			return (false);
 		std::vector<std::string>	value = ft::split(headers["Authorization"], " ");
-		if (value.size() != 2)
-		{
-			this->response_code = 401;
-			return ;
-		}
-		if (value[0] != "Basic")
-		{
-			this->response_code = 401;
-			return ;
-		}
-		if (!ft::onlyConsistsOf(value[1], "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"))
-		{
-			this->response_code = 401;
-			return ;
-		}
-		if (!this->location_block->get_properties().auth(value[1]))
-		{
-			this->response_code = 401;
-			return ;
-		}
+		for (size_t i = 0; i < value.size(); i++)
+			std::cout << "value[" << i << "] = " << value[i] << std::endl;
+		if (value.size() != 2 || value[0] != "Basic" || 
+			!ft::onlyConsistsOf(value[1], "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") ||
+			!this->location_block->get_properties().auth(value[1]))
+			return (false);
 	}
-	return ;
+	return (true);
 }
 
 void	Response::checkMethod(void)
