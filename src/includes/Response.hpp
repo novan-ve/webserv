@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:12:31 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/17 16:55:17 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 18:45:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Response : public Message
 //		void	checkRequestBody(void);
 		void	checkMethod(void);
 		void	checkPath(void);
+		bool	checkAuthorization(void);
 
 		void	handlePut(void);
 

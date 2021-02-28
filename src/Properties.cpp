@@ -6,12 +6,48 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 09:37:47 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/26 12:38:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:36:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "Properties.hpp"
 # include "Method.hpp"
+# include "Utilities.hpp"
+
+bool	Authorization::operator () (std::string userpass) const
+{
+	if (this->enabled == false)
+		return (true);
+	userpass = ft::base64decode(userpass);
+	std::cout << "USER:PASS: " << userpass << std::endl;
+	if (userpass.find(':') == std::string::npos)
+		return (false);
+	std::pair<std::string, std::string>	user_and_pass = ft::get_keyval(userpass, ":");
+	std::map<std::string, std::string>	user_list = this->user_pass;
+	return (!user_list.size() || (user_list.count(user_and_pass.first) && user_list[user_and_pass.first] == user_and_pass.second));
+}
+
+Authorization&	Authorization::operator = (const Authorization& other)
+{
+	if (this != &other)
+	{
+		this->enabled = other.enabled;
+		this->user_pass = other.user_pass;
+		this->realm = other.realm;
+	}
+	return (*this);
+}
+
+Authorization::Authorization() : enabled(false), realm(""), user_pass() {}
+
+Authorization::Authorization(const Authorization& other)
+{
+	*this = other;
+}
+
+Authorization::~Authorization() {}
+
+//----------------------------------------------------------------------------------------------
 
 Properties::Properties() :
 	root(""),
@@ -20,6 +56,7 @@ Properties::Properties() :
 	accepted_methods(), error_pages(), client_max_body_size(1000000),
 	php_cgi(""), cgi_param()
 {
+	auth.enabled = false;
 	for (size_t i = 0; i < E_METHOD_END; i++)
 		accepted_methods[Method((e_method)i).get_str()] = true;
 	this->index.push_back("index.html");
@@ -47,6 +84,7 @@ Properties& Properties::operator = (const Properties& other)
 		this->client_max_body_size = other.client_max_body_size;
 		this->php_cgi = other.php_cgi;
 		this->cgi_param = other.cgi_param;
+		this->auth = other.auth;
 	}
 	return (*this);
 }

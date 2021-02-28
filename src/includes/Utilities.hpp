@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 21:38:40 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/26 12:32:15 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:26:02 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,10 @@ namespace ft
 	bool	isLowerStr(const std::string& str);
 
 	bool	onlyConsistsOf(const std::string& str, std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+	std::string	base64decode(std::string input, std::string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+	std::string removeSet(std::string str, std::string remove);
 }
 
 #endif

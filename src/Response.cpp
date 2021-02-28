@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/25 14:05:01 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/02/28 19:34:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include "includes/Response.hpp"
-#include "includes/Utilities.hpp"
+#include "Response.hpp"
+#include "Utilities.hpp"
 #include "Server.hpp"
 #include "Properties.hpp"
 #include "Cgi.hpp"
@@ -35,6 +35,7 @@ Response::Response() : server_name(""), location_block(NULL), isDir(false)
 	this->status_codes[204] = "204 No Content";
 	this->status_codes[301] = "301 Moved Permanently";
 	this->status_codes[400] = "400 Bad Request";
+	this->status_codes[401] = "401 Unauthorized";
 	this->status_codes[404] = "404 Not Found";
 	this->status_codes[405] = "405 Method Not Allowed";
 	this->status_codes[409] = "409 Conflict";
@@ -136,6 +137,13 @@ void	Response::printResponse(void) const
 void	Response::composeResponse(void)
 {
 //	this->checkRequestBody();
+	if (!this->checkAuthorization())
+	{
+		this->response_code = 401;
+		this->headers["WWW-Authenticate"] = "Basic realm=\"";
+		if (this->location_block)
+			this->headers["WWW-Authenticate"] += this->location_block->get_properties().auth.realm + "\"";
+	}
 	this->checkMethod();
 	this->checkPath();
 
@@ -156,6 +164,26 @@ void	Response::composeResponse(void)
 // {
 // 	if (!this->req.
 // }
+
+bool	Response::checkAuthorization(void)
+{
+	if (this->location_block && this->location_block->get_properties().auth.enabled)
+	{
+		std::map<std::string, std::string>& headers = this->req.get_headers();
+		if (!this->location_block->get_properties().auth.user_pass.size())
+			return (true);
+		if (!this->req.get_headers().count("Authorization"))
+			return (false);
+		std::vector<std::string>	value = ft::split(headers["Authorization"], " ");
+		for (size_t i = 0; i < value.size(); i++)
+			std::cout << "value[" << i << "] = " << value[i] << std::endl;
+		if (value.size() != 2 || value[0] != "Basic" || 
+			!ft::onlyConsistsOf(value[1], "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") ||
+			!this->location_block->get_properties().auth(value[1]))
+			return (false);
+	}
+	return (true);
+}
 
 void	Response::checkMethod(void)
 {
