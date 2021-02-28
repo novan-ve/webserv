@@ -318,10 +318,7 @@ void	Request::printRequest(void) const {
 	if (this->body.size()) {
 		std::cout << "  Body:" << std::endl;
 		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-		{
 			std::cout << "\t" << *it << std::endl;
-			std::cout << "\t\tLength: " << (*it).length() << std::endl;
-		}
 	}
 	else {
 		std::cout << "  No body" << std::endl;
