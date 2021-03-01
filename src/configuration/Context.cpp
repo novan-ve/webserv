@@ -111,9 +111,12 @@ Context *Context::key_client_max_body_size(const std::list<std::string>& args)
 		value[i] = tolower(value[i]);
 	}
 	std::vector<std::string>	split_value = ft::split(value, "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz");
-	if (split_value.size() > 2)
-		throw ft::runtime_error("Error: invalid value provided to 'client_max_body_size'");
-	if ((split_value[0][0] < '0' || split_value[0][0] > '9') || split_value[1].size() != 1)
+	if (split_value.size() == 2)
+	{
+		if ((split_value[0][0] < '0' || split_value[0][0] > '9') || split_value[1].size() != 1)
+			throw ft::runtime_error("Error: invalid value provided to 'client_max_body_size'");
+	}
+	else if (split_value.size() != 1)
 		throw ft::runtime_error("Error: invalid value provided to 'client_max_body_size'");
 	size_t body_size = ft::stoul(split_value[0]);
 	

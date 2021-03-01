@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/06 01:22:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/28 14:03:53 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/01 15:07:48 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,13 @@ Location::Location(Context& parent, const std::string& location) : Context(paren
 	this->keywords.push_back("limit_except");
 	this->keywords.push_back("root");
 	this->keywords.push_back("autoindex");
+	this->keywords.push_back("index");
 	this->keywords.push_back("error_page");
 	this->keywords.push_back("php-cgi");
 	this->keywords.push_back("cgi_param");
 	this->keywords.push_back("auth_basic");
 	this->keywords.push_back("auth_basic_user_file");
+	this->keywords.push_back("client_max_body_size");
 	std::cout << "LOCATION CREATED!" << std::endl;
 }
 
