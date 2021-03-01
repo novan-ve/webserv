@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/28 19:34:53 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/01 14:09:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,6 +136,7 @@ void	Response::printResponse(void) const
 
 void	Response::composeResponse(void)
 {
+
 //	this->checkRequestBody();
 	if (!this->checkAuthorization())
 	{
@@ -454,6 +455,21 @@ void	Response::setBodyError(void)
 	if (this->location_block)
 		error_pages = this->location_block->get_properties().error_pages;
 
+	if (this->response_code == 405 && this->location_block)
+	{
+		size_t i = 0;
+		std::map<std::string, bool>&	accepted_methods = this->location_block->get_properties().accepted_methods;
+		for (std::map<std::string, bool>::const_iterator it = accepted_methods.begin(); it != accepted_methods.end(); it++)
+		{
+			if (it->second)
+			{
+				if (i)
+					this->headers["Allow"] += ", ";
+				this->headers["Allow"] += it->first;
+				i++;
+			}
+		}
+	}
 	if (error_pages.count(this->response_code))
 	{
 
