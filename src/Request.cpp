@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/28 16:40:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/01 16:28:43 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,12 +67,14 @@ void	Request::process(int fd)
 {
 	std::vector <std::string> lines_read = ft::get_lines(fd);
 
-	if (lines_read.size() == 0)
-	{
-		this->status_code = 400;
-		this->done = true;
-	}
+	// if (lines_read.size() == 0)
+	// {
+	// 	this->status_code = 400;
+	// 	this->done = true;
+	// }
 
+	// if (lines_read.size() == 1 && !lines_read[0].size())
+	// 	return ;
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
 	{
 		std::cout << "REQUEST: " << *it << std::endl;
