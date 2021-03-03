@@ -45,6 +45,20 @@
 		"random": "cpp",
 		"string": "cpp",
 		"map": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"xstring": "cpp",
+		"concepts": "cpp",
+		"ios": "cpp",
+		"queue": "cpp",
+		"xfacet": "cpp",
+		"xiosbase": "cpp",
+		"xlocale": "cpp",
+		"xlocinfo": "cpp",
+		"xlocnum": "cpp",
+		"xmemory": "cpp",
+		"xstddef": "cpp",
+		"xtr1common": "cpp",
+		"xtree": "cpp",
+		"xutility": "cpp"
 	}
 }
