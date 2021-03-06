@@ -24,36 +24,6 @@
 # define BUFFER_SIZE 256
 #endif
 
-std::string staticMap(char c) {
-	switch (c) {
-		case '\a': return "\\a";
-		case '\b': return "\\b";
-		case '\t': return "\\t";
-		case '\n': return "\\n";
-		case '\v': return "\\v";
-		case '\f': return "\\f";
-		case '\r': return "\\r";
-
-		case '\"': return "\\\"";
-		case '\'': return "\\\'";
-		case '\?': return "\\\?";
-		case '\\': return "\\\\";
-	}
-	std::string tmp;
-	tmp.push_back(c);
-	return tmp;
-}
-
-std::string	rawString(std::string const &str)
-{
-	std::string	tmp;
-
-	for (unsigned long i = 0; i < str.length(); i++)
-		tmp.append(staticMap(str[i]));
-
-	return tmp;
-}
-
 namespace ft
 {
 	std::vector<std::string>	get_lines(int fd, std::string eol_sequence, int* ret, bool encoding, size_t max_lines)
@@ -76,7 +46,6 @@ namespace ft
 					if (buffers[fd] != "\r" && buffers[fd].size() && !encoding && std::find(lines.begin(), lines.end(), "") != lines.end())
 					{
 						end_pos = buffers[fd].find(eol_sequence);
-//						std::cout << "\t\tbuffers[fd]: " << rawString(buffers[fd].substr(0, end_pos)) << std::endl;
 						lines.push_back(buffers[fd].substr(0, end_pos));
 						buffers.erase(fd);
 					}

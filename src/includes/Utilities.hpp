@@ -74,6 +74,7 @@ namespace ft
 
 	std::string toUpperStr(const std::string& str);
 
+	std::string	rawString(std::string const &str);
 
 	struct tm					getTime(time_t sec = 0);
 
