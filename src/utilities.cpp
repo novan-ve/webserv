@@ -241,7 +241,7 @@ namespace ft
 		return (result);
 	}
 
-	std::string staticMap(char c) {
+	std::string rawChar(char c) {
 		switch (c) {
 			case '\a': return "\\a";
 			case '\b': return "\\b";
@@ -266,7 +266,7 @@ namespace ft
 		std::string	tmp;
 
 		for (unsigned long i = 0; i < str.length(); i++)
-			tmp.append(staticMap(str[i]));
+			tmp.append(rawChar(str[i]));
 
 		return tmp;
 	}
