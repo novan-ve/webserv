@@ -17,7 +17,7 @@
 #include "Utilities.hpp"
 #include "Method.hpp"
 
-Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET), body_read(0), body_total(-1), body_started(false) {}
+Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET), body_read(0), body_total(-1), body_started(false), encoding(false) {}
 
 Request::Request(const Request& other) : uri(other.uri), method(other.method)
 {
@@ -40,6 +40,7 @@ Request& Request::operator = (const Request& other)
 		this->body_read = other.body_read;
 		this->body_total = other.body_total;
 		this->body_started = other.body_started;
+		this->encoding = other.encoding;
 	}
 	return (*this);
 }
@@ -67,7 +68,7 @@ void	Request::process(int fd)
 {
 	int		ret = 0;
 
-	std::vector <std::string> lines_read = ft::get_lines(fd, "\r\n", &ret, (!this->lines.empty() && this->body_total != -1));
+	std::vector <std::string> lines_read = ft::get_lines(fd, "\r\n", &ret, (!this->lines.empty() && this->body_total != -1 && !this->encoding));
 
 	 if (ret == -1)
 	 {
@@ -155,7 +156,7 @@ bool	Request::parseLine(std::string line)
 			this->status_code = 400;
 			return (true);
 		}
-		else if (this->status_line.size() && this->lines.size() > 0)
+		else if (this->status_line.size() && this->lines.size() > 0 && !this->encoding)
 		{
 			if (this->body_total != 0 && this->body_total > this->body_read)
 			{
@@ -243,6 +244,8 @@ bool	Request::parseLine(std::string line)
 			else
 				this->body_total = ft::stoi(line.substr(16, line.length() - 16));
 		}
+		else if (line.substr(0, 19) == "Transfer-Encoding: ")
+			this->encoding = true;
 
 		if (carriage_return != std::string::npos && carriage_return + 1 == line.size())
 			this->lines.push_back(line.substr(0, line.size() - 1));
@@ -273,6 +276,16 @@ bool	Request::parseLine(std::string line)
 
 			if (this->body_read >= this->body_total)
 				return (this->parseLine(""));
+		}
+		else if (this->encoding)
+		{
+			if (this->body_total == -1)
+			{
+				this->body_total = ft::stoi(line);
+				std::cout << "\tBody Total: " << this->body_total << std::endl;
+				if (this->body_total == 0)
+					this->encoding = false;
+			}
 		}
 		return (false);
 	}
