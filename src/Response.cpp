@@ -213,7 +213,8 @@ void	Response::checkPath(void)
 			this->path += "/";
 		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
 	}
-	if (this->response_code != 200 || (this->req.get_method() == "PUT" && this->req.get_headers().count("Content-Length")))
+	if (this->response_code != 200 || (this->req.get_method() == "PUT" && (this->req.get_headers().count("Content-Length") ||
+		this->req.get_headers().count("Transfer-Encoding"))))
 		return;
 
 	std::cout << "final path: " << this->path << std::endl;
@@ -271,7 +272,8 @@ void	Response::checkPath(void)
 
 void	Response::handlePut(void)
 {
-	if (this->response_code != 200 || this->req.get_method() != "PUT" || !this->req.get_headers().count("Content-Length"))
+	if (this->response_code != 200 || this->req.get_method() != "PUT" ||
+		(!this->req.get_headers().count("Content-Length") && !this->req.get_headers().count("Transfer-Encoding")))
 		return;
 
 	// Check if requested path is a directory
@@ -291,7 +293,11 @@ void	Response::handlePut(void)
 	close(fd);
 
 	// Check if body is too large
-	size_t	bodylen = static_cast<size_t>(ft::stoi(this->req.getBodyLen()));
+	size_t	bodylen = 0;
+	for (std::vector<std::string>::iterator it = req.get_body().begin(); it != req.get_body().end(); it++)
+		bodylen += (*it).size();
+	std::cout << "\t\t\tmax_body: " << this->location_block->get_properties().client_max_body_size << std::endl;
+	std::cout << "\t\t\tbodylen: " << bodylen << std::endl;
 	if (bodylen > this->location_block->get_properties().client_max_body_size)
 	{
 		this->response_code = 413;

@@ -80,7 +80,10 @@ void	Request::process(int fd)
 	// 	return ;
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
 	{
-		std::cout << "REQUEST: " << *it << std::endl;
+		if ((*it).length() > 1000)
+			std::cout << "REQUEST: " << (*it).substr(0, 1000) << "..." << std::endl;
+		else if (this->lines.size() < 50)
+			std::cout << "REQUEST: " << *it << std::endl;
 		this->done = parseLine(*it);
 	}
 	// if (this->done)
@@ -275,16 +278,26 @@ bool	Request::parseLine(std::string line)
 			this->lines.push_back(newLine);
 
 			if (this->body_read >= this->body_total)
-				return (this->parseLine(""));
+			{
+				if (!this->encoding)
+					return (this->parseLine(""));
+				this->body_read = 0;
+				this->body_total = -1;
+				this->body_started = false;
+			}
 		}
 		else if (this->encoding)
 		{
-			if (this->body_total == -1)
+			if (this->body_total == -1 && line != "")
 			{
-				this->body_total = ft::stoi(line);
+				this->body_total = ft::stoi(ft::toUpperStr(line), "0123456789ABCDEF");
 				if (this->body_total == 0)
 					this->encoding = false;
+				else
+					this->body_started = true;
 			}
+			else if (line == "")
+				this->lines.push_back(line);
 		}
 		return (false);
 	}
@@ -298,7 +311,7 @@ void Request::splitRequest(void) {
 
 	// Get position of empty line between header and body
 	for (header_end = this->lines.begin(); header_end != this->lines.end(); header_end++) {
-		if (*header_end == "\r")
+		if (*header_end == "\r" || *header_end == "")
 			break;
 	}
 
@@ -332,9 +345,19 @@ void	Request::printRequest(void) const {
 		std::cout << "\t" << it->first << ": " << it->second << std::endl;
 	}
 	if (this->body.size()) {
+
+		int		amount_printed = 0;
 		std::cout << "  Body:" << std::endl;
-		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-			std::cout << "\t" << *it << std::endl;
+		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end() && amount_printed < 5; it++)
+		{
+			if ((*it).length() > 1000)
+			{
+				std::cout << "\t" << ft::rawString((*it).substr(0, 1000)) << "..." << std::endl;
+				amount_printed++;
+			}
+			else
+				std::cout << "\t" << *it << std::endl;
+		}
 	}
 	else {
 		std::cout << "  No body" << std::endl;
