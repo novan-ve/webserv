@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/01 16:28:43 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/03 11:25:37 by tishj         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include "Utilities.hpp"
 #include "Method.hpp"
 
-Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET), body_read(0), body_total(-1), body_started(false) {}
+Request::Request() : uri(""), done(false), status_line(""), status_code(200), method(GET), body_read(0), body_total(-1), body_started(false), encoding(false) {}
 
 Request::Request(const Request& other) : uri(other.uri), method(other.method)
 {
@@ -40,6 +40,7 @@ Request& Request::operator = (const Request& other)
 		this->body_read = other.body_read;
 		this->body_total = other.body_total;
 		this->body_started = other.body_started;
+		this->encoding = other.encoding;
 	}
 	return (*this);
 }
@@ -65,13 +66,15 @@ bool	Request::isMethod(std::string str)
 
 void	Request::process(int fd)
 {
-	std::vector <std::string> lines_read = ft::get_lines(fd);
+	int		ret = 0;
 
-	// if (lines_read.size() == 0)
-	// {
-	// 	this->status_code = 400;
-	// 	this->done = true;
-	// }
+	std::vector <std::string> lines_read = ft::get_lines(fd, "\r\n", &ret, (!this->lines.empty() && this->body_total != -1 && !this->encoding));
+
+	 if (ret == -1)
+	 {
+	 	this->status_code = 400;
+	 	this->done = true;
+	 }
 
 	// if (lines_read.size() == 1 && !lines_read[0].size())
 	// 	return ;
@@ -80,6 +83,8 @@ void	Request::process(int fd)
 		std::cout << "REQUEST: " << *it << std::endl;
 		this->done = parseLine(*it);
 	}
+	// if (this->done)
+	// 	std::cout << "REQUEST IS DONE!" << std::endl;
 }
 
 Request::~Request() {}
@@ -106,8 +111,6 @@ bool Request::isStatusLine(const std::string &line)
 	// 	return (false);
 	//Request-line has to end on carriage return
 	size_t end = parts.size() - 1;
-	if (parts[end--] != "\r")
-		return (false);
 //	std::cout << "ENDS ON CARRIAGE RETURN\n";
 	//Skip over all spaces that are at the end of the request-line
 	for (;end > 0 && parts[end] == " "; end--) {}
@@ -144,16 +147,16 @@ bool Request::isStatusLine(const std::string &line)
 
 bool	Request::parseLine(std::string line)
 {
-	if (line == "\r")
+	if (line.empty())
 	{
-		if (this->status_line == "")
+		if (this->status_line.empty())
 			return false;
-		else if (this->status_line != "" && this->lines.size() == 0)
+		else if (this->status_line.size() && this->lines.size() == 0)
 		{
 			this->status_code = 400;
 			return (true);
 		}
-		else if (this->status_line != "" && this->lines.size() > 0)
+		else if (this->status_line.size() && this->lines.size() > 0 && !this->encoding)
 		{
 			if (this->body_total != 0 && this->body_total > this->body_read)
 			{
@@ -175,7 +178,7 @@ bool	Request::parseLine(std::string line)
 				start_pos_path++;
 
 			// Set end_pos_path to character before the \r\0 and remove whitespaces
-			int end_pos_path = this->status_line.length() - 2;
+			int end_pos_path = this->status_line.length() - 1;
 			while (this->status_line[end_pos_path] == ' ')
 				end_pos_path--;
 			// Move back to first character before HTTP/1.1
@@ -241,6 +244,8 @@ bool	Request::parseLine(std::string line)
 			else
 				this->body_total = ft::stoi(line.substr(16, line.length() - 16));
 		}
+		else if (line.substr(0, 19) == "Transfer-Encoding: ")
+			this->encoding = true;
 
 		if (carriage_return != std::string::npos && carriage_return + 1 == line.size())
 			this->lines.push_back(line.substr(0, line.size() - 1));
@@ -270,7 +275,16 @@ bool	Request::parseLine(std::string line)
 			this->lines.push_back(newLine);
 
 			if (this->body_read >= this->body_total)
-				return (this->parseLine("\r"));
+				return (this->parseLine(""));
+		}
+		else if (this->encoding)
+		{
+			if (this->body_total == -1)
+			{
+				this->body_total = ft::stoi(line);
+				if (this->body_total == 0)
+					this->encoding = false;
+			}
 		}
 		return (false);
 	}
