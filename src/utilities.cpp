@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/02/28 19:27:21 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/07 15:22:09 by tishj         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,9 @@ namespace ft
 {
 	bool	size_compare::operator () (const std::string& a, const std::string& b) const
 	{
-		return (a.size() > b.size());
+		if (a.size() != b.size())
+			return (a.size() > b.size());
+		return (a > b);
 	}
 
 	std::string	itos(int num, const std::string base)

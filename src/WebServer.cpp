@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:02:42 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/07 15:23:59 by tishj         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,15 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	}
 	if (this->servers.empty())
 		throw ft::runtime_error("Error: All of the specified servers failed to initialize");
+	// for (std::map<int, Server*>::iterator it = this->servers.begin(); it != this->servers.end(); it++)
+	// {
+	// 	Server* server = it->second;
+	// 	for (std::map<std::string, Location*>::iterator it2 = server->locations.begin(); it2 != server->locations.end(); it2++)
+	// 	{
+	// 		std::cout << "Location: " << it2->first << std::endl;
+	// 	}
+	// 	std::cout << "---" << std::endl;
+	// }
 }
 
 void	WebServer::deleteClient(int fd)
