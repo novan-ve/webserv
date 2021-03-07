@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/01 14:31:57 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/07 16:04:56 by tishj         ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,12 @@ void	Response::checkPath(void)
 	this->path = "/" + this->req.uri.get_path();
 	if (this->location_block && this->path.size() >= this->location_block->get_location().size() && this->path.substr(0, this->location_block->get_location().size()) == this->location_block->get_location())
 		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
+	else
+	{
+		if (this->path.size() > 1 && this->path[this->path.size() - 1] != '/')
+			this->path += "/";
+		this->path.replace(0, this->location_block->get_location().size(), this->location_block->get_properties().root);
+	}
 	if (this->response_code != 200 || (this->req.get_method() == "PUT" && this->req.get_headers().count("Content-Length")))
 		return;
 
@@ -230,6 +236,8 @@ void	Response::checkPath(void)
 			if (this->location_block)
 				index = this->location_block->get_properties().index;
 
+			if (this->path.size() && this->path[this->path.size() - 1] != '/')
+				this->path += "/";
 			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
 			{
 				fd = open((this->path + *it).c_str(), O_RDONLY);
@@ -732,7 +740,9 @@ void	Response::location_match(const std::map<Server*, std::vector<std::string> >
 	{
 		std::string location = it->first;
 //		std::cout << "CURRENT LOCATION_BLOCK: " << location << std::endl;
-		if (uri_target.size() >= it->first.size() && uri_target.substr(0, location.size()) == location)
+		if (uri_target.size() && uri_target[uri_target.size() - 1] != '/')
+			uri_target += "/";
+		if (uri_target.size() >= location.size() && uri_target.substr(0, location.size()) == location)
 		{
 //			std::cout << location << " is a match!" << std::endl;
 			location_path = location;
