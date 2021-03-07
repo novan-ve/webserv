@@ -282,7 +282,6 @@ bool	Request::parseLine(std::string line)
 			if (this->body_total == -1)
 			{
 				this->body_total = ft::stoi(line);
-				std::cout << "\tBody Total: " << this->body_total << std::endl;
 				if (this->body_total == 0)
 					this->encoding = false;
 			}
