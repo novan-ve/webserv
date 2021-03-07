@@ -408,10 +408,13 @@ void	Response::setBody(void)
 		(this->headers["Content-Type"] == "application/x-httpd-php" &&
 		!this->location_block->get_properties().php_cgi.empty()))
 	{
-		fd = open(this->location_block->get_properties().php_cgi.c_str(), O_RDONLY);
+		fd = 0;
+		if (this->headers["Content-Type"] == "application/x-httpd-php")
+			fd = open(this->location_block->get_properties().php_cgi.c_str(), O_RDONLY);
 		if (fd != -1)
 		{
-			close(fd);
+			if (fd)
+				close(fd);
 			Cgi	c;
 			c.execute(&req, this->path.substr(2, path.length() - 2), this->server_name,
 					  this->location_block->get_properties().ip_port.second,

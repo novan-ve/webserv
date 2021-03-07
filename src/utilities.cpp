@@ -243,6 +243,36 @@ namespace ft
 		return (result);
 	}
 
+	std::string rawChar(char c) {
+		switch (c) {
+			case '\a': return "\\a";
+			case '\b': return "\\b";
+			case '\t': return "\\t";
+			case '\n': return "\\n";
+			case '\v': return "\\v";
+			case '\f': return "\\f";
+			case '\r': return "\\r";
+
+			case '\"': return "\\\"";
+			case '\'': return "\\\'";
+			case '\?': return "\\\?";
+			case '\\': return "\\\\";
+		}
+		std::string tmp;
+		tmp.push_back(c);
+		return tmp;
+	}
+
+	std::string	rawString(std::string const &str)
+	{
+		std::string	tmp;
+
+		for (unsigned long i = 0; i < str.length(); i++)
+			tmp.append(rawChar(str[i]));
+
+		return tmp;
+	}
+
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter)
 	{
 		std::pair<std::string, std::string>	keyval;

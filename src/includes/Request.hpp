@@ -54,6 +54,7 @@ class Request : public Message
 		int							body_read;
 		int							body_total;
 		bool						body_started;
+		bool						encoding;
 };
 
 #endif
