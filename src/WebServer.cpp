@@ -61,6 +61,16 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	FD_ZERO(&this->write_sockets);
 	Configuration	config(config_path, this);
 	config.parse();
+
+	std::vector<std::string>	ports;
+	for (size_t i = 0 ; i < this->children.size(); i++)
+	{
+		if (std::find(ports.begin(), ports.end(), this->children[i]->get_properties().ip_port.second) != ports.end())
+			throw std::runtime_error("Error: detected multiple servers with the same port");
+		if (!this->children[i]->get_properties().ip_port.second.empty())
+			ports.push_back(this->children[i]->get_properties().ip_port.second);
+	}
+
 	for (size_t i = 0 ; i < this->children.size(); i++)
 	{
 		Server *current_server =  reinterpret_cast<Server*>(this->children[i]);
