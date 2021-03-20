@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <errno.h>
 
 #include "Client.hpp"
 #include "WebServer.hpp"
@@ -138,10 +137,7 @@ void	WebServer::run()
 		read_set = this->read_sockets;
 		write_set = this->write_sockets;
 		if (select(max_fd, &read_set, &write_set, NULL, NULL) == -1)
-		{
-			std::cerr << strerror(errno) << std::endl;
 			throw std::runtime_error("Error: select() returned an error");
-		}
 		this->addNewClients(read_set);
 		//loop through all the clients
 		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
