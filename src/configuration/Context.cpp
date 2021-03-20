@@ -279,6 +279,11 @@ bool	parse_htpasswd(std::map<std::string, std::string>& user_pass, std::string u
 		buf[bytes_read] = '\0';
 		result.append(std::string(buf));
 	}
+	if (bytes_read == -1)
+	{
+		close(fd);
+		throw std::runtime_error("Error: failed to read previously opened htpasswd file");
+	}
 	size_t	end_pos;
 	while ((end_pos = result.find("\n")) != std::string::npos)
 	{

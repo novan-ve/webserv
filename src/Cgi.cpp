@@ -152,7 +152,13 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 		throw std::runtime_error("Error: open failed in Cgi::execute");
 
 	for (std::vector<std::string>::iterator it = req->get_body().begin(); it != req->get_body().end(); it++)
-		write(in_fd, (*it).c_str(), (*it).length());
+	{
+		if ((write(in_fd, (*it).c_str(), (*it).length())) == -1)
+		{
+			close(in_fd);
+			throw std::runtime_error("Error: failed writing to previously opened /tmp/webservin");
+		}
+	}
 	if (close(in_fd) == -1)
 		throw std::runtime_error("Error: close failed in Cgi::execute");
 

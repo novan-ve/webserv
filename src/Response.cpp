@@ -40,6 +40,7 @@ Response::Response() : server_name(""), location_block(NULL), isDir(false), root
 	this->status_codes[405] = "405 Method Not Allowed";
 	this->status_codes[409] = "409 Conflict";
 	this->status_codes[413] = "413 Payload Too Large";
+	this->status_codes[500] = "500 Internal Server Error";
 	this->status_codes[505] = "505 HTTP Version Not Supported";
 }
 
@@ -111,10 +112,11 @@ void	Response::sendResponse(int fd)
 
 	//response.append("\r\n");
 
-	int		bytes_send = send(fd, response.c_str(), response.length(), 0);
 	int		len = static_cast<int>(response.length());
+	int		bytes_send = send(fd, response.c_str(), response.length(), 0);
+	int		ret = 0;
 
-	while (bytes_send < len)
+	while (bytes_send < len || bytes_send == -1)
 	{
 		if (bytes_send == -1 && !g_sigpipe)
 			throw std::runtime_error("Error: Could not send request to the client");
@@ -124,7 +126,13 @@ void	Response::sendResponse(int fd)
 			return;
 		}
 		if (bytes_send < len)
-			bytes_send += write(fd, response.substr(bytes_send, len - bytes_send).c_str(), len - bytes_send);
+		{
+			ret = write(fd, response.substr(bytes_send, len - bytes_send).c_str(), len - bytes_send);
+			if (ret == -1)
+				bytes_send = -1;
+			else
+				bytes_send += ret;
+		}
 		usleep(10000);
 	}
 }
@@ -356,7 +364,13 @@ void	Response::handlePut(void)
 
 	fd = open(this->path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, 0644);
 	for (std::vector<std::string>::iterator it = req.get_body().begin(); it != req.get_body().end(); it++)
-		write(fd, (*it).c_str(), (*it).length());
+	{
+		if ((write(fd, (*it).c_str(), (*it).length())) == -1)
+		{
+			this->response_code = 500;
+			break;
+		}
+	}
 	close(fd);
 }
 

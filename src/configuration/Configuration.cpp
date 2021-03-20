@@ -77,13 +77,15 @@ void	Configuration::populateTokens(std::list<std::string>& tokens)
 	std::string	raw_content;
 
 	char	*buffer[BUFFER_SIZE + 1];
-	size_t	bytes_read = 0;
+	int 	bytes_read = 0;
 
 	//read raw content
 	while (1)
 	{
 		raw_content += std::string((char *)buffer, bytes_read);
 		bytes_read = read(this->fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			throw std::runtime_error("Error: failed to read config file");
 		if (!bytes_read)
 			break ;
 	}
