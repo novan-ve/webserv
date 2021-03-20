@@ -66,7 +66,7 @@ class URI
 		URI(const std::string& uri);
 		URI(const URI& other);
 		URI& operator = (const URI& other);
-		~URI();
+		virtual ~URI();
 	private:
 		void	print_state();
 		URI();

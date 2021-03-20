@@ -22,15 +22,14 @@
 class Location : public Context
 {
 	public:
-		~Location();
+		virtual ~Location();
 		Location(Context& parent, const std::string& location);
 		Location(const Location& other);
 		std::string	get_location() const;
-		// void		set_location(const std::string& location);
 	private:
 		std::string location;
-//		Location();
-//		Location& operator = (const Location& other);
+		Location();
+		Location& operator = (const Location& other);
 };
 
 #endif

@@ -24,12 +24,12 @@ public:
 	Cgi();
 	Cgi(const Cgi & src);
 	Cgi & operator=(const Cgi & rhs);
-	~Cgi();
+	virtual ~Cgi();
 
 	void	execute(Request *req, std::string path, std::string host, std::string port, std::string phpcgi);
 
 private:
-	void	set_env(Request *req, std::string path, std::string host, std::string port);
+	void	set_env(Request *req, std::string path, std::string host, std::string port, std::string phpcgi);
 
 	std::map<std::string, std::string>	_vars;
 	char								**_env;

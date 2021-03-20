@@ -6,14 +6,14 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:37:38 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/03 11:25:37 by tishj         ########   odam.nl         */
+/*   Updated: 2021/03/15 12:33:47 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
 #include "includes/Request.hpp"
-#include "includes/Exception.hpp"
+#include <exception>
 #include "Utilities.hpp"
 #include "Method.hpp"
 
@@ -68,7 +68,7 @@ void	Request::process(int fd)
 {
 	int		ret = 0;
 
-	std::vector <std::string> lines_read = ft::get_lines(fd, "\r\n", &ret, (!this->lines.empty() && this->body_total != -1 && !this->encoding));
+	std::vector <std::string> lines_read = ft::get_lines(fd, "\r\n", &ret, this->encoding);
 
 	 if (ret == -1)
 	 {
@@ -76,14 +76,12 @@ void	Request::process(int fd)
 	 	this->done = true;
 	 }
 
-	// if (lines_read.size() == 1 && !lines_read[0].size())
-	// 	return ;
 	for (std::vector<std::string>::iterator it = lines_read.begin(); it != lines_read.end() && !this->done; it++)
 	{
-		if ((*it).length() > 1000)
-			std::cout << "REQUEST: " << (*it).substr(0, 1000) << "..." << std::endl;
-		else if (this->lines.size() < 50)
-			std::cout << "REQUEST: " << *it << std::endl;
+//		if ((*it).length() > 1000)
+//			std::cout << "REQUEST: " << (*it).substr(0, 1000) << "..." << std::endl;
+//		else if (this->lines.size() < 50)
+//			std::cout << "REQUEST: " << *it << std::endl;
 		this->done = parseLine(*it);
 	}
 	// if (this->done)
@@ -102,39 +100,29 @@ bool Request::isStatusLine(const std::string &line)
 	//First part has to be METHOD
 	if (parts[i++].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ") != std::string::npos)
 		return (false);
-//	std::cout << "METHOD IS ONLY CAPS\n";
 	//Has to have atleast one space
 	if (parts[i++] != " ")
 		return (false);
-//	std::cout << "SEPARATED BY SPACE\n";
 	//Skip over all spaces
 	for (; parts[i] == " "; i++) {}
-	//request-target has to start with '/'
-	// if (parts[i][0] != '/')
-	// 	return (false);
 	//Request-line has to end on carriage return
 	size_t end = parts.size() - 1;
-//	std::cout << "ENDS ON CARRIAGE RETURN\n";
 	//Skip over all spaces that are at the end of the request-line
 	for (;end > 0 && parts[end] == " "; end--) {}
 	//Check if the version consists of HTTP/[0-9][0-9]
 	if (parts[end].substr(0, 5) != "HTTP/")
 		return (false);
-//	std::cout << "PROTOCOL IS 'HTTP/'\n";
 	std::vector<std::string>	version = ft::split(parts[end].substr(5, parts[end].size()), ".");
 	if (version.size() != 2)
 		return (false);
-//	std::cout << "VERSION SIZE OF 2 ([0-9]\\.[0-9])\n";
 	if (version[0].find_first_not_of("0123456789") != std::string::npos)
 		return (false);
 	if (version[1].find_first_not_of("0123456789") != std::string::npos)
 		return (false);
-//	std::cout << "VERSION IS ONLY NUMBERS\n";
 
 	//Protocol has to have a minimum of one space before it
 	if (parts[--end] != " ")
 		return (false);
-//	std::cout << "PROTOCOL SEPARATED FROM REQUEST-TARGET BY SPACE\n";
 	if (i >= end)
 		return (false);
 	//Skip over all spaces preceding Protocol
@@ -198,12 +186,12 @@ bool	Request::parseLine(std::string line)
 			else
 				this->status_code = 405;
 			this->path = this->status_line.substr(start_pos_path, end_pos_path - start_pos_path);
-			std::cout << "Path: " << this->path << std::endl;
+			std::cout << "Request received to: " << this->path << std::endl;
 			this->uri = URI(path);
 			if (this->uri.get_port() == "" && this->uri.get_scheme() == "HTTP")
 				this->uri.set_port("80");
 			this->splitRequest();
-			this->printRequest();
+			//this->printRequest();
 
 			return (true);
 		}
@@ -275,7 +263,10 @@ bool	Request::parseLine(std::string line)
 				if (this->body_read == this->body_total)
 					break;
 			}
-			this->lines.push_back(newLine);
+			if (this->encoding && this->lines.back() != "")
+				this->lines.back().append(newLine);
+			else
+				this->lines.push_back(newLine);
 
 			if (this->body_read >= this->body_total)
 			{

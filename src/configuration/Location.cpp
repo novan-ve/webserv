@@ -13,9 +13,6 @@
 #include "Location.hpp"
 #include "Context.hpp"
 
-//impossible
-//Location::Location() {}
-
 //Location is a child Context of Server
 Location::Location(Context& parent, const std::string& location) : Context(parent), location(location)
 {
@@ -29,34 +26,32 @@ Location::Location(Context& parent, const std::string& location) : Context(paren
 	this->keywords.push_back("auth_basic");
 	this->keywords.push_back("auth_basic_user_file");
 	this->keywords.push_back("client_max_body_size");
-	std::cout << "LOCATION CREATED!" << std::endl;
+	this->keywords.push_back("ext");
+	//std::cout << "LOCATION CREATED!" << std::endl;
 }
 
-Location::~Location()
-{
-	std::cout << "LOCATION DECONSTRUCTED" << std::endl;
-}
+Location::Location() {}
+
+Location::~Location() {}
 
 std::string	Location::get_location() const
 {
 	return (this->location);
 }
 
-// void		Location::set_location(const std::string& location)
-// {
-// 	this->location = location;
-// }
+ Location& Location::operator = (const Location& other)
+ {
+ 	if (this != &other)
+ 	{
+ 		this->keywords = other.keywords;
+ 		this->parent = other.parent;
+ 		this->children = other.children;
+ 		this->properties = other.properties;
+ 	}
+ 	return (*this);
+ }
 
-// Location& Location::operator = (const Location& other)
-// {
-// 	if (this != &other)
-// 	{
-// 		this->keywords = other.keywords;
-// 		this->parent = other.parent;
-// 		this->children = other.children;
-// 		this->properties = other.properties;
-// 	}
-// 	return (*this);
-// }
-
-Location::Location(const Location& other) : Context(other.parent) {}
+Location::Location(const Location& other)
+{
+	*this = other;
+}

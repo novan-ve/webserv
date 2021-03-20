@@ -6,12 +6,12 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 20:24:09 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:15:31 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/15 12:31:53 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Method.hpp"
-#include "Exception.hpp"
+#include <exception>
 #include <string>
 #include <vector>
 
@@ -44,4 +44,4 @@ Method&	Method::operator = (const Method& other)
 
 Method::~Method() {}
 
-Method::Method() : EnumString() {} //fuck 42s coplien
+Method::Method() : EnumString() {}

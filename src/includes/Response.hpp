@@ -26,7 +26,7 @@ class Response : public Message
 		Response();
 		Response(const Response& other);
 		Response& operator = (const Response& other);
-		~Response();
+		virtual ~Response();
 
 		static void	setSigpipe(int);
 		void	sendResponse(int fd);
@@ -46,6 +46,8 @@ class Response : public Message
 		std::string 				server_name;
 		Location*					location_block;
 		bool						isDir;
+		std::string					root;
+		std::string					location_key;
 
 //		void	checkRequestBody(void);
 		void	checkMethod(void);

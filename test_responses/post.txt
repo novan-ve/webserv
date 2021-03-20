@@ -1,0 +1,7 @@
+<html>
+<body>
+
+Welcome webserv_user<br>
+Your email address is: webserv@student.codam.nl
+</body>
+</html>

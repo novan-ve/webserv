@@ -35,11 +35,11 @@ class	Method : public EnumString<e_method>
 		Method(e_method id);
 		Method(std::string str);
 		Method(const Method& other);
-		~Method();
+		virtual ~Method();
 		Method& operator = (const Method& other); //everything is const
 
 	private:
-		Method(); //fuck 42s coplien
+		Method();
 		static const char * const names[]; //needed for EnumString, declared in cpp
 };
 

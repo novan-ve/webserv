@@ -25,16 +25,13 @@
 # include "Location.hpp"
 # include "Utilities.hpp"
 
-//# define PORT 8080
-
 class Server : public Context
 {
 	public:
-//		Server();
 		Server(Context& parent);
 		Server( const Server &src );
 		Server&	operator=( const Server &rhs );
-		~Server();
+		virtual ~Server();
 		bool	init();
 
 		void	startListening( void );
@@ -46,6 +43,7 @@ class Server : public Context
 		int									_server_fd;
 
 	private:
+		Server();
 		struct sockaddr_in			_address;
 };
 

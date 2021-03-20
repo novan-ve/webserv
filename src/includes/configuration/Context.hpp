@@ -39,6 +39,8 @@ class Context
 		Context	*key_cgi_param(const std::list<std::string>& args);
 		Context *key_auth_basic(const std::list<std::string>& args);
 		Context *key_auth_basic_user_file(const std::list<std::string>& args);
+		Context *key_ext(const std::list<std::string>& args);
+
 	protected:
 		Context&					parent;
 		Properties					properties;
@@ -48,7 +50,8 @@ class Context
 		std::vector<std::string>	keywords;
 		Context	*parse_keyword(std::string key, std::list<std::string> args);
 		Context();
-		Context(Context& other);
+		Context(Context & src);
+		Context& operator=(Context & rhs);
 		virtual ~Context();
 };
 

@@ -18,20 +18,18 @@
 class Client
 {
 	private:
-		Server&					server;
+		Server*					server;
 		struct sockaddr_in		address;
 		socklen_t				addr_len;
-//		Request					*req;
-//		Client(); //impossible because no Server reference is provided
-//		Client& operator = (const Client& other); //server is a reference, cant be copied with assignment operator, so this makes 0 sense
+		Request					*req;
+		Client();
+		Client& operator = (const Client& other);
 		int						fd;
 	public:
-//		void	handleResponse(int code);
-//		int		handleRequest();
 		int		getFd();
-		Client(Server& server);
+		Client(Server* server);
 		Client(const Client& other);
-		~Client();
+		virtual ~Client();
 };
 
 #endif

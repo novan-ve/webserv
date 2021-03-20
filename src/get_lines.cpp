@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 13:00:05 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/03 11:13:40 by tishj         ########   odam.nl         */
+/*   Updated: 2021/03/17 14:43:42 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,40 +26,64 @@
 
 namespace ft
 {
-	std::vector<std::string>	get_lines(int fd, std::string eol_sequence, int* ret, bool encoding, size_t max_lines)
+	std::vector<std::string>	get_lines(int fd, std::string eol_sequence, int* ret, bool encoding, bool file, size_t max_lines)
 	{
 		static std::map<int,std::string>	buffers;
 		std::vector<std::string>			lines;
 		char								buf[BUFFER_SIZE + 1];
 		ssize_t								bytes_read = 1;
 		size_t								end_pos;
+		bool								large = false;
+		std::string							largeBuffer = "";
+		unsigned long						total_size = 0;
 
 		for (size_t i = 0; i < max_lines && bytes_read; i++)
 		{
-//			std::cout << "GET_LINES BUFFER[" << fd << "] = " << buffers[fd] << "\n" << std::endl;
 			while ((end_pos = buffers[fd].find(eol_sequence)) == std::string::npos) //while there is no newline in buffer
 			{
-		//		std::cerr << "\nNO EOL_SEQUENCE FOUND\n";
 				bytes_read = read(fd, buf, BUFFER_SIZE); //read again
 				if (bytes_read == -1)
 				{
-					if (buffers[fd] != "\r" && buffers[fd].size() && !encoding && std::find(lines.begin(), lines.end(), "") != lines.end())
+					if (eol_sequence.size() > 1 && buffers[fd].size() && buffers[fd][0] != eol_sequence[0] && !encoding &&
+						std::find(lines.begin(), lines.end(), "") != lines.end() && lines.size() &&
+						std::find(lines.begin(), lines.end(), "Transfer-Encoding: chunked") == lines.end() &&
+						buffers[fd].find("Transfer-Encoding: chunked") == std::string::npos)
 					{
 						end_pos = buffers[fd].find(eol_sequence);
 						lines.push_back(buffers[fd].substr(0, end_pos));
 						buffers.erase(fd);
 					}
-//					buffers.erase(fd);
 					return (lines);
 				}
 				buf[bytes_read] = '\0';
-				buffers[fd] += std::string(buf); //replace buffer with newly read data
+				if (large)
+					largeBuffer.append(std::string(buf));
+				else
+					buffers[fd].append(std::string(buf)); //replace buffer with newly read data
 				if (!bytes_read)
 				{
 					if (ret && !lines.size())
 						*ret = -1;
 					break ;
 				}
+				if (!large && buffers[fd].size() >= 100000 && file)
+				{
+					large = true;
+					largeBuffer.reserve(MB);
+					largeBuffer = buffers[fd];
+					total_size += MB;
+				}
+				if (large && largeBuffer.size() + BUFFER_SIZE > total_size)
+				{
+					total_size += MB;
+					largeBuffer.reserve(total_size);
+				}
+			}
+			if (large)
+			{
+				lines.push_back(largeBuffer);
+				buffers[fd].clear();
+				return lines;
 			}
 			end_pos = buffers[fd].find(eol_sequence);
 			if (end_pos != std::string::npos) //if there is a newline, we add the last part of the line
@@ -69,7 +93,6 @@ namespace ft
 					new_line = "";
 				else
 					new_line = buffers[fd].substr(0, end_pos);
-		//		std::cerr << "NEW_LINE: " << new_line << std::endl;
 				if (new_line.empty())
 					lines.push_back("");
 				else if (i >= lines.size())
@@ -77,6 +100,12 @@ namespace ft
 				else
 					lines[i].append(new_line);
 				buffers[fd] = buffers[fd].substr(end_pos + eol_sequence.size(), buffers[fd].size()); //remove the last part of the line from buff
+			}
+			else if (file && buffers[fd][buffers[fd].length()] != '\r' && buffers[fd][buffers[fd].length()] != '\n' && buffers[fd].size())
+			{
+				lines.push_back(buffers[fd]);
+				buffers[fd].clear();
+				return lines;
 			}
 			else
 			{

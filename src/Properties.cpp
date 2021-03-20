@@ -19,7 +19,7 @@ bool	Authorization::operator () (std::string userpass) const
 	if (this->enabled == false)
 		return (true);
 	userpass = ft::base64decode(userpass);
-	std::cout << "USER:PASS: " << userpass << std::endl;
+	//std::cout << "USER:PASS: " << userpass << std::endl;
 	if (userpass.find(':') == std::string::npos)
 		return (false);
 	std::pair<std::string, std::string>	user_and_pass = ft::get_keyval(userpass, ":");
@@ -54,7 +54,7 @@ Properties::Properties() :
 	ip_port(std::pair<std::string, std::string>("0.0.0.0", "80")),
 	server_names(), index(), auto_index(false),
 	accepted_methods(), error_pages(), client_max_body_size(1000000),
-	php_cgi(""), cgi_param()
+	php_cgi(""), cgi_param(), ext()
 {
 	auth.enabled = false;
 	for (size_t i = 0; i < E_METHOD_END; i++)
@@ -68,7 +68,7 @@ Properties::Properties(const Properties& other) :
 	index(other.index), auto_index(other.auto_index),
 	accepted_methods(other.accepted_methods),
 	error_pages(other.error_pages), client_max_body_size(other.client_max_body_size), php_cgi(other.php_cgi),
-	cgi_param(other.cgi_param) {}
+	cgi_param(other.cgi_param), ext(other.ext) {}
 
 Properties& Properties::operator = (const Properties& other)
 {

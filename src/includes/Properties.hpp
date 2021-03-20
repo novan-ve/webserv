@@ -18,7 +18,6 @@
 # include <list>
 # include <string>
 # include <iostream>
-# include <utility> //illegal
 
 struct Authorization
 {
@@ -27,7 +26,7 @@ struct Authorization
 	std::map<std::string, std::string>	user_pass;
 	bool	operator () (std::string userpass) const;
 	Authorization();
-	~Authorization();
+	virtual ~Authorization();
 	Authorization& operator = (const Authorization& other);
 	Authorization(const Authorization& other);
 };
@@ -37,7 +36,7 @@ struct Properties
 	Properties();
 	Properties(const Properties& other);
 	Properties& operator = (const Properties& other);
-	~Properties();
+	virtual ~Properties();
 
 	std::string							root;
 	std::pair<std::string, std::string>	ip_port;
@@ -50,6 +49,7 @@ struct Properties
 	std::string							php_cgi;
 	std::map<std::string, std::string>	cgi_param;
 	Authorization						auth;
+	std::vector<std::string>			ext;
 };
 
 #endif

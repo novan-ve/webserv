@@ -25,14 +25,16 @@ class WebServer;
 class Configuration
 {
 	public:
-		Configuration(char *config, WebServer& webserv);
-		~Configuration();
+		Configuration(char *config, WebServer* webserv);
+		Configuration(const Configuration & src);
+		Configuration&	operator=(const Configuration & rhs);
+		virtual ~Configuration();
 		void	parse();
 	private:
 		int		fd;
 		void	populateTokens(std::list<std::string>& tokens);
-		WebServer&	webserv;
-//		Configuration();
+		WebServer*	webserv;
+		Configuration();
 };
 
 #endif

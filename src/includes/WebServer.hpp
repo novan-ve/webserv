@@ -41,7 +41,6 @@ class WebServer : public Context
 		std::map<int, Server*>							servers;
 		std::map<int, Client*>							clients; //has to be pointer so the destructor only gets called once, when it's deleted
 
-		//could be moved to run() probably
 		std::map<int, std::queue<Request> >				requests;
 		std::map<int, std::queue<Response> >			responses;
 
@@ -50,7 +49,6 @@ class WebServer : public Context
 		std::map<Server*, std::vector<std::string> >	server_names;
 
 		void	deleteClient(int fd);
-//		Server&	newServer();
 		void	addNewClients(fd_set& read_set);
 		static void	closeSignal(int status);
 
@@ -61,7 +59,7 @@ class WebServer : public Context
 		WebServer(const WebServer& other);
 		void	run();
 		WebServer& operator = (const WebServer& other);
-		~WebServer();
+		virtual ~WebServer();
 };
 
 #endif

@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/02/15 14:31:04 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/03/15 12:33:04 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,6 @@ HEADER =	Server.hpp \
 			Response.hpp \
 			URI.hpp \
 			Utilities.hpp \
-			Exception.hpp \
 			WebServer.hpp
 
 HEADER :=	$(addprefix ./src/includes/, $(HEADER))
@@ -55,7 +54,6 @@ SRC =	main.cpp \
 		Request.cpp \
 		Response.cpp \
 		get_lines.cpp \
-		Exception.cpp \
 		Message.cpp
 
 OBJ := $(SRC:%.cpp=./obj/%.o)

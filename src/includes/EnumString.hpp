@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 12:04:00 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/16 16:27:13 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define ENUM_STRING_HPP
 
 #include <string>
-#include "Exception.hpp"
+#include <exception>
 #include <vector>
 #include <iostream>
 
@@ -35,7 +35,7 @@ class EnumString
 	protected:
 		Enum			id;
 		std::string		str;
-		EnumString() : id(), str() {} //fuck 42s coplien
+		EnumString() : id(), str() {}
 
 		EnumString(Enum id, const char *const names[], size_t len) : names(names, names + (len / sizeof(char *))), id(id), str(toString(id)) {}
 
@@ -48,11 +48,13 @@ class EnumString
 			if (this != &other)
 			{
 				this->names = other.names;
+				this->id = other.id;
+				this->str = other.str;
 			}
 			return (*this);
 		}
 
-		~EnumString() {}
+		virtual ~EnumString() {}
 
 		Enum			toId(std::string str)
 		{
@@ -61,14 +63,14 @@ class EnumString
 				if (str == names[i])
 					return Enum(i);
 			}
-			throw ft::runtime_error("Error: Conversion from str to id failed in EnumString::toID()");
+			throw std::runtime_error("Error: Conversion from str to id failed in EnumString::toID()");
 		}
 
 		std::string		toString(Enum id)
 		{
 			if (id >= 0 && id < names.size())
 				return (names[id]);
-			throw ft::runtime_error("Error: Conversion from id to str failed in EnumString::toString()");
+			throw std::runtime_error("Error: Conversion from id to str failed in EnumString::toString()");
 		}
 };
 

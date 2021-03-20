@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/11 10:46:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,36 @@
 #include "WebServer.hpp"
 #include "Server.hpp"
 #include "Parse.hpp"
+#include "WebServer.hpp"
 
 #include <fcntl.h>
 #include <string>
 #include <list>
 
 //open the config or revert back to the default config file
-Configuration::Configuration(char *config, WebServer& webserv) : webserv(webserv)
+Configuration::Configuration(char *config, WebServer* webserv) : webserv(webserv)
 {
 	if (!config)
 		config = (char *)DEFAULT_CONFIG;
 	this->fd = open(config, O_RDONLY);
 	if (this->fd == -1 || read(this->fd, NULL, 0) == -1)
-		throw ft::runtime_error("Error: Failed to open config file for reading");
+		throw std::runtime_error("Error: Failed to open config file for reading");
+}
+
+Configuration::Configuration(const Configuration & src) : webserv(src.webserv)
+{
+	*this = src;
+}
+
+Configuration&	Configuration::operator=(const Configuration & rhs)
+{
+	if (this != &rhs)
+	{
+		this->fd = rhs.fd;
+		this->webserv = rhs.webserv;
+	}
+
+	return *this;
 }
 
 void	strip_comments(std::string& config)
@@ -75,13 +92,14 @@ void	Configuration::populateTokens(std::list<std::string>& tokens)
 	tokens = std::list<std::string>(vec_tokens.begin(), vec_tokens.end());
 }
 
-//parse the config into Servers and presumably also global settings ?
+//parse the config into Servers
 void	Configuration::parse()
 {
 	std::list<std::string>	tokens;
 	populateTokens(tokens);
 	std::list<std::string>	arguments;
 	Parse(this->webserv, tokens).parse();
+	std::cout << "Configuration loaded" << std::endl;
 }
 
 Configuration::~Configuration()
@@ -89,4 +107,4 @@ Configuration::~Configuration()
 	close(this->fd);
 }
 
-//Configuration::Configuration() {}
+Configuration::Configuration() : webserv(NULL) {}

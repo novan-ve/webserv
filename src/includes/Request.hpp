@@ -17,15 +17,13 @@
 # include "Method.hpp"
 # include "URI.hpp"
 
-# include <utility>
-
 class Request : public Message
 {
 	public:
 		Request();
 		Request(const Request& other);
 		Request& operator = (const Request& other);
-		~Request();
+		virtual ~Request();
 
 		bool 		isStatusLine(const std::string& line);
 		bool		parseLine(std::string line);
@@ -43,11 +41,9 @@ class Request : public Message
 
 	private:
 		bool		isMethod(std::string str);
-//		int							fd;
 		bool						done;
 		std::string 				status_line;
 		std::vector<std::string>	lines;
-//		std::string					method;
 		std::string					path;
 		int							status_code;
 		Method						method;

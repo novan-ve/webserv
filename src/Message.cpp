@@ -48,6 +48,8 @@ std::string Message::getBodyLen()
 
 	if (total == 0)
 		length = "0";
+	else
+		total -= 2;
 
 	while (total != 0) {
 		length.insert(length.begin(), static_cast<char>(total % 10 + '0'));

@@ -24,6 +24,10 @@
 # define BUFFER_SIZE 256
 #endif
 
+#ifndef MB
+# define MB 1000000
+#endif
+
 namespace ft
 {
 	std::string	itos(int num, const std::string base = "0123456789");
@@ -78,7 +82,7 @@ namespace ft
 
 	struct tm					getTime(time_t sec = 0);
 
-	std::vector<std::string>	get_lines(int fd, std::string eol_sequence = "\n", int *ret = NULL, bool encoding = false, size_t max_lines = std::numeric_limits<size_t>::max());
+	std::vector<std::string>	get_lines(int fd, std::string eol_sequence = "\n", int *ret = NULL, bool encoding = false, bool file = false, size_t max_lines = std::numeric_limits<size_t>::max());
 	std::pair<std::string, std::string>	get_keyval(std::string raw, std::string delimiter = ": ");
 
 	size_t	first_of_group(std::string raw, const std::vector<std::string>& delim_groups, size_t search_start, int& match);

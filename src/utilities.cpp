@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 20:29:21 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/07 15:22:09 by tishj         ########   odam.nl         */
+/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "Exception.hpp"
+#include <exception>
 #include "Utilities.hpp"
 
 namespace ft
@@ -71,7 +71,7 @@ namespace ft
 		{
 			size_t num = base.find(number[i]);
 			if (num == std::string::npos)
-				throw ft::runtime_error("Error: string is not a number");
+				continue;
 			res = res * base.size() + num;
 		}
 		sign += (!sign);
@@ -88,7 +88,7 @@ namespace ft
 		{
 			size_t num = base.find(number[i]);
 			if (num == std::string::npos)
-				throw ft::runtime_error("Error: string is not a number");
+				continue;
 			res = res * base.size() + num;
 		}
 		return (res);
@@ -219,15 +219,6 @@ namespace ft
 		return (str.find_first_not_of(charset) == std::string::npos);
 	}
 
-	// bool	is_closed(const std::string& str, std::string open, std::string close)
-	// {
-	// 	if (open.size() != close.size())
-	// 		return (false);
-	// 	std::stack<std::pair<size_t, size_t> >	pairs;
-
-	// 	for (size_t i = 0; i < str.size(); i++)
-	// }
-
 	std::string removeSet(std::string str, std::string remove)
 	{
 		size_t size = str.size();
@@ -278,7 +269,7 @@ namespace ft
 		std::pair<std::string, std::string>	keyval;
 		size_t	delim_pos = raw.find(delimiter);
 		if (delim_pos == std::string::npos)
-			throw ft::runtime_error("Error: delimiter string not found in 'get_keyval'");
+			throw std::runtime_error("Error: delimiter string not found in 'get_keyval'");
 		keyval.first = raw.substr(0, delim_pos);
 		keyval.second = raw.substr(delim_pos + delimiter.size(), raw.size());
 		return (keyval);
