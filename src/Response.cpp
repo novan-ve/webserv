@@ -462,7 +462,13 @@ void	Response::setBody(void)
 	}
 
 	int fd;
-	if ((this->req.get_path().substr(0, 9) == "/cgi-bin/" || this->req.get_method() == "POST" ||
+	int	ret;
+	struct stat	s;
+
+	ret = stat(this->path.c_str(), &s);
+
+	if ((((this->req.get_path().substr(0, 9) == "/cgi-bin/" || this->req.get_method() == "POST") &&
+		(s.st_mode & S_IXUSR || ret == -1)) ||
 		(this->headers["Content-Type"] == "application/x-httpd-php" &&
 		!this->location_block->get_properties().php_cgi.empty())) && this->req.get_path().find("?") == std::string::npos)
 	{
