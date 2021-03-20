@@ -273,8 +273,10 @@ void	Response::checkPath(void)
 		if ( s.st_mode & S_IFDIR )
 		{
 			std::vector<std::string>	index;
-			if (this->location_block)
+			if (this->location_block && !this->location_block->get_properties().index.empty())
 				index = this->location_block->get_properties().index;
+			else
+				index.push_back("index.html");
 
 			for (std::vector<std::string>::iterator it = index.begin(); it != index.end(); it++)
 			{
@@ -409,7 +411,7 @@ void	Response::setContentType()
 
 	size_t		pos = this->path.find_last_of('.');
 
-	if (pos == std::string::npos)
+	if (pos == std::string::npos || pos == 0)
 	{
 		this->headers["Content-Type"] = "text/plain";
 		return;

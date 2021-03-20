@@ -59,7 +59,6 @@ Properties::Properties() :
 	auth.enabled = false;
 	for (size_t i = 0; i < E_METHOD_END; i++)
 		accepted_methods[Method((e_method)i).get_str()] = true;
-	this->index.push_back("index.html");
 }
 
 Properties::Properties(const Properties& other) :
