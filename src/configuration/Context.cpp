@@ -169,6 +169,7 @@ Context *Context::key_index(const std::list<std::string>& args)
 	//std::cout << "INDEX" << std::endl;
 	if (!args.size())
 		throw std::runtime_error("Error: No arguments given to 'index'");
+	this->properties.index.clear();
 	for (std::list<std::string>::const_iterator it = args.begin(); it != args.end(); it++)
 		this->properties.index.push_back(*it);
 	return (NULL);
