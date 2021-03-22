@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/03/15 12:33:04 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/03/22 16:36:20 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -68,6 +68,7 @@ endif
 CC = clang++
 
 all: $(NAME)
+	@mkdir -p ./html/uploads
 
 obj/%.o: src/%.cpp $(HEADER)
 	mkdir -p $(@D)
