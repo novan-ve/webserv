@@ -18,7 +18,6 @@
 
 #include "Cgi.hpp"
 #include "Utilities.hpp"
-#include <exception>
 
 Cgi::Cgi() {
 	ft::memset(this->args, (int)NULL, sizeof(args));
@@ -164,10 +163,7 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 
 	pid = fork();
 	if (pid == -1)
-	{
-		std::cout << "Fork failed with error code: " << strerror(errno) << std::endl;
 		throw std::runtime_error("Error: fork failed in Cgi::execute");
-	}
 
 	if (pid == 0)
 	{
