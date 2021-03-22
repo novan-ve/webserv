@@ -319,8 +319,9 @@ void	Response::checkPath(void)
 
 void	Response::handlePut(void)
 {
-	if (this->response_code != 200 || this->req.get_method() != "PUT" ||
-		(!this->req.get_headers().count("Content-Length") && !this->req.get_headers().count("Transfer-Encoding")))
+	if (!(this->response_code == 404 && this->req.get_method() == "POST" && this->location_block->get_properties().php_cgi.empty()) &&
+		(this->response_code != 200 || this->req.get_method() != "PUT" ||
+		 (!this->req.get_headers().count("Content-Length") && !this->req.get_headers().count("Transfer-Encoding"))))
 		return;
 
 	// Check if requested path is a directory
