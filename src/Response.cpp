@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/22 13:32:56 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/22 14:30:27 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,7 +261,7 @@ void	Response::checkPath(void)
 
 	//std::cout << "final path: " << this->path << std::endl;
 
-	if (this->location_block->get_properties().root == "")
+	if (this->location_block->get_properties().root == "" && this->req.get_method() == "POST")
 		return;
 
 	int fd = open(this->path.c_str(), O_RDONLY);
@@ -451,6 +451,7 @@ void	Response::setContentType()
 
 void	Response::setBody(void)
 {
+	std::cout << "PATH: " << this->path << std::endl;
 	if (this->response_code == 201 || this->response_code == 204)
 		return;
 	if (this->response_code != 200)
@@ -503,7 +504,9 @@ void	Response::setBody(void)
 			fd = open(this->path.c_str(), O_RDONLY);
 	}
 	else
+	{
 		fd = open(this->path.c_str(), O_RDONLY);
+	}
 	if (fd == -1)
 		throw std::runtime_error("Error: Response can't open previously checked file in setBody()");
 
