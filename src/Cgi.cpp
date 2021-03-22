@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/17 13:59:06 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/22 17:44:58 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/22 17:47:49 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,7 +165,7 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 	pid = fork();
 	if (pid == -1)
 	{
-		std::cout << "Fork failed with error code: " << strerror(NULL) << std::endl;
+		std::cout << "Fork failed with error code: " << strerror(errno) << std::endl;
 		throw std::runtime_error("Error: fork failed in Cgi::execute");
 	}
 
