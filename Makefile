@@ -6,7 +6,7 @@
 #    By: novan-ve <marvin@codam.nl>                   +#+                      #
 #                                                    +#+                       #
 #    Created: 2021/02/01 20:11:54 by novan-ve      #+#    #+#                  #
-#    Updated: 2021/03/22 16:36:20 by tbruinem      ########   odam.nl          #
+#    Updated: 2021/03/22 17:32:54 by tbruinem      ########   odam.nl          #
 #                                                                              #
 # **************************************************************************** #
 
@@ -63,6 +63,8 @@ FLAGS = -Wall -Werror -Wextra -pedantic -std=c++98
 
 ifdef DEBUG
 	FLAGS += -g -fsanitize=address
+else
+	FLAGS += -O3
 endif
 
 CC = clang++
