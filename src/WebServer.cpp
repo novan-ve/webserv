@@ -144,6 +144,7 @@ void	WebServer::run()
 	std::vector<int>	closed_clients;
 	fd_set				read_set;
 	fd_set				write_set;
+	bool				finished = true;
 
 	thisCopy = this;
 	signal(SIGINT, WebServer::closeSignal);
@@ -159,37 +160,15 @@ void	WebServer::run()
 			throw std::runtime_error("Error: select() returned an error");
 		this->addNewClients(read_set);
 		//loop through all the clients
-		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();)
-		{
+		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end();) {
 			int fd = it->first;
-			if (FD_ISSET(fd, &read_set))
-			{
-				// std::cout << "CLIENT IS READY FOR READING" << std::endl;
-				//create the request if it doesn't exist.
-				if (!requests[fd].size())
-					requests[fd].push(Request());
-				Request& current_request = requests[fd].front();
-				current_request.process(fd);
-				if (current_request.get_done())
-				{
-					responses[fd].push(Response());
-					Response& current_response = responses[fd].back();
-					current_response.setRequest(requests[fd].front());
-					current_response.location_match(this->server_names);
-					current_response.composeResponse();
-					requests[fd].pop();
-					if (requests[fd].empty())
-						FD_CLR(fd, &this->read_sockets);
-					FD_SET(fd, &this->write_sockets);
-				}
-			}
 			//if write_set, send the response
-			else if (FD_ISSET(fd, &write_set))
+			if (FD_ISSET(fd, &write_set))
 			{
 //				std::cout << "CLIENT IS READY FOR RESPONSE" << std::endl;
 				Response& current_response = responses[fd].front();
 				current_response.sendResponse(fd);
-				if (current_response.getFinished())
+				if ((finished = current_response.getFinished()))
 				{
 					if (current_response.get_status_code() != 400)
 						std::cout << "[" << current_response.get_status_code() << "] Response send!" << std::endl;
@@ -201,6 +180,31 @@ void	WebServer::run()
 						FD_CLR(fd, &this->write_sockets);
 						FD_SET(fd, &this->read_sockets);
 					}
+				}
+				else
+					break;
+			}
+			it++;
+		}
+		for (std::map<int, Client*>::iterator it = this->clients.begin(); it != this->clients.end() && finished;) {
+			int fd = it->first;
+			if (FD_ISSET(fd, &read_set)) {
+				// std::cout << "CLIENT IS READY FOR READING" << std::endl;
+				//create the request if it doesn't exist.
+				if (!requests[fd].size())
+					requests[fd].push(Request());
+				Request &current_request = requests[fd].front();
+				current_request.process(fd);
+				if (current_request.get_done()) {
+					responses[fd].push(Response());
+					Response &current_response = responses[fd].back();
+					current_response.setRequest(requests[fd].front());
+					current_response.location_match(this->server_names);
+					current_response.composeResponse();
+					requests[fd].pop();
+					if (requests[fd].empty())
+						FD_CLR(fd, &this->read_sockets);
+					FD_SET(fd, &this->write_sockets);
 				}
 			}
 			it++;

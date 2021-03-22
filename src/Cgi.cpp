@@ -175,9 +175,8 @@ void	Cgi::execute(Request *req, std::string path, std::string host, std::string 
 			throw std::runtime_error("Error: open failed in Cgi::execute");
 		if (dup2(in_fd, STDIN_FILENO) == -1 || close(in_fd) == -1)
 			throw std::runtime_error("Error: dup2/close failed in Cgi::execute");
-		if ((execve(this->args[0], this->args, this->_env)) == -1)
-			throw std::runtime_error("Error: execve failed in Cgi::execute");
-		throw std::runtime_error("Error: something went wrong in Cgi::execute");
+		execve(this->args[0], this->args, this->_env);
+		exit(0);
 	}
 	waitpid(0, &status, 0);
 }

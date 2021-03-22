@@ -452,7 +452,6 @@ void	Response::setContentType()
 
 void	Response::setBody(void)
 {
-	std::cout << "PATH: " << this->path << std::endl;
 	if (this->response_code == 201 || this->response_code == 204)
 		return;
 	if (this->response_code != 200)
