@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/22 13:16:33 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,15 +180,18 @@ void	WebServer::run()
 //				std::cout << "CLIENT IS READY FOR RESPONSE" << std::endl;
 				Response& current_response = responses[fd].front();
 				current_response.sendResponse(fd);
-				if (current_response.get_status_code() != 400)
-					std::cout << "[" << current_response.get_status_code() << "] Response send!" << std::endl;
-				if (current_response.get_status_code() == 400 || current_response.get_status_code() == 505)
-					closed_clients.push_back(fd);
-				responses[fd].pop();
-				if (responses[fd].empty())
+				if (current_response.getFinished())
 				{
-					FD_CLR(fd, &this->write_sockets);
-					FD_SET(fd, &this->read_sockets);
+					if (current_response.get_status_code() != 400)
+						std::cout << "[" << current_response.get_status_code() << "] Response send!" << std::endl;
+					if (current_response.get_status_code() == 400 || current_response.get_status_code() == 505)
+						closed_clients.push_back(fd);
+					responses[fd].pop();
+					if (responses[fd].empty())
+					{
+						FD_CLR(fd, &this->write_sockets);
+						FD_SET(fd, &this->read_sockets);
+					}
 				}
 			}
 			it++;

@@ -6,7 +6,7 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/04 23:28:03 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/22 13:32:56 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 
 bool g_sigpipe;
 
-Response::Response() : server_name(""), location_block(NULL), isDir(false), root(""), location_key("")
+Response::Response() : server_name(""), location_block(NULL), isDir(false), root(""), location_key(""), response(""), size(0), send(0), finished(false)
 {
 	this->status_codes[200] = "200 OK";
 	this->status_codes[201] = "201 Created";
@@ -73,8 +73,17 @@ Response& Response::operator = (const Response& other)
 		this->server_name = other.server_name;
 		this->root = other.root;
 		this->location_key = other.location_key;
+		this->send = other.send;
+		this->size = other.size;
+		this->finished = other.finished;
+		this->response = other.response;
 	}
 	return (*this);
+}
+
+bool	Response::getFinished(void)
+{
+	return (this->finished);
 }
 
 Response::~Response() {}
@@ -88,53 +97,49 @@ void	Response::setSigpipe(int)
 Response*	responseCopy;
 void	Response::sendResponse(int fd)
 {
-	std::string response;
-
-	responseCopy = this;
-	g_sigpipe = false;
-	// Copy status line into response
-	response.append(this->status_line + "\r\n");
-
-	// Copy headers into response
-	for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
-		response.append(it->first + ": " + it->second + "\r\n");
-
-	// Copy newline into response to seperate headers and body
-	response.append("\r\n");
-	// Copy body into response
-	if (this->req.get_method() != "HEAD")
+	if (!this->size)
 	{
-		for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
-				response.append(*it + "\r\n");
-		if (this->body.begin() != this->body.end())
-			response.erase(response.end() - 2, response.end());
-	}
+		responseCopy = this;
+		g_sigpipe = false;
+		// Copy status line into response
+		this->response.append(this->status_line + "\r\n");
 
+		// Copy headers into response
+		for (std::map<std::string, std::string>::const_iterator it = this->headers.begin(); it != this->headers.end(); it++)
+			this->response.append(it->first + ": " + it->second + "\r\n");
+
+		// Copy newline into response to seperate headers and body
+		response.append("\r\n");
+		// Copy body into response
+		if (this->req.get_method() != "HEAD")
+		{
+			for (std::vector<std::string>::const_iterator it = this->body.begin(); it != this->body.end(); it++)
+					this->response.append(*it + "\r\n");
+			if (this->body.begin() != this->body.end())
+				this->response.erase(response.end() - 2, response.end());
+		}
+		this->size = response.length();
+	}
 	//response.append("\r\n");
 
-	int		len = static_cast<int>(response.length());
-	int		bytes_send = send(fd, response.c_str(), response.length(), 0);
-	int		ret = 0;
+	ssize_t	ret;
 
-	while (bytes_send < len || bytes_send == -1)
+	if (!this->send)
+		ret = write(fd, response.c_str(), this->size);
+	else
+		ret = write(fd, response.substr(this->send, this->size - this->send).c_str(), this->size - this->send);
+	if (ret == -1 && !g_sigpipe)
+		throw std::runtime_error("Error: Could not send request to the client");
+	if (g_sigpipe)
 	{
-		if (bytes_send == -1 && !g_sigpipe)
-			throw std::runtime_error("Error: Could not send request to the client");
-		if (g_sigpipe)
-		{
-			responseCopy->response_code = 400;
-			return;
-		}
-		if (bytes_send < len)
-		{
-			ret = write(fd, response.substr(bytes_send, len - bytes_send).c_str(), len - bytes_send);
-			if (ret == -1)
-				bytes_send = -1;
-			else
-				bytes_send += ret;
-		}
-		usleep(10000);
+		responseCopy->response_code = 400;
+		g_sigpipe = 0;
+		return;
 	}
+	this->send += ret;
+
+	if (this->send == this->size)
+		this->finished = true;
 }
 
 void	Response::printResponse(void) const
