@@ -36,6 +36,7 @@ Response::Response() : server_name(""), location_block(NULL), isDir(false), root
 	this->status_codes[301] = "301 Moved Permanently";
 	this->status_codes[400] = "400 Bad Request";
 	this->status_codes[401] = "401 Unauthorized";
+	this->status_codes[403] = "403 Forbidden";
 	this->status_codes[404] = "404 Not Found";
 	this->status_codes[405] = "405 Method Not Allowed";
 	this->status_codes[409] = "409 Conflict";
@@ -371,6 +372,11 @@ void	Response::handlePut(void)
 	}
 
 	fd = open(this->path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, 0644);
+	if (fd == -1)
+	{
+		this->response_code = 403;
+		return;
+	}
 	for (std::vector<std::string>::iterator it = req.get_body().begin(); it != req.get_body().end(); it++)
 	{
 		if ((write(fd, (*it).c_str(), (*it).length())) == -1)

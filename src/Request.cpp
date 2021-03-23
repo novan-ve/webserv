@@ -94,7 +94,7 @@ Request::~Request() {}
 bool Request::isStatusLine(const std::string &line)
 {
 	size_t i = 0;
-	if (!line.size() || line.size() >= 8000)
+	if (!line.size() || line.size() >= 8000 || line.find(' ') == std::string::npos)
 		return (false);
 	std::vector<std::string>	parts = ft::split(line, " \r", " \r");
 	//First part has to be METHOD
