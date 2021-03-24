@@ -6,14 +6,13 @@
 /*   By: novan-ve <marvin@codam.nl>                   +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/01 21:00:20 by novan-ve      #+#    #+#                 */
-/*   Updated: 2021/03/15 12:32:41 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/24 13:05:27 by tbruinem      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServer.hpp"
 #include "URI.hpp"
 
-#include <stdio.h>
 #include <iostream>
 #include "Utilities.hpp"
 #include <exception>
@@ -21,8 +20,10 @@
 int		main(int argc, char **argv)
 {
 	if (argc != 1 && argc != 2)
-		return (!!dprintf(2, "Wrong number of arguments!"));
-
+	{
+		std::cerr << "Wrong number of argument to webserver!" << std::endl;
+		return (1);
+	}
 	try
 	{
 		WebServer	webserv(argv[1]);
