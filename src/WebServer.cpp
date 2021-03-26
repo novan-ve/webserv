@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 16:00:59 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/22 15:17:34 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/26 17:47:23 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,24 +61,6 @@ WebServer::WebServer(char *config_path) : Context(), servers(), clients()
 	FD_ZERO(&this->write_sockets);
 	Configuration	config(config_path, this);
 	config.parse();
-
-	// Check for multiple server_blocks with the same port and server_name
-	std::map<std::string, const Properties*>	ports;
-	for (size_t i = 0 ; i < this->children.size(); i++)
-	{
-		if (ports.count(this->children[i]->get_properties().ip_port.second))
-		{
-			for (std::vector<std::string>::const_iterator it = this->children[i]->get_properties().server_names.begin();
-				 it != this->children[i]->get_properties().server_names.end(); it++)
-			{
-				std::vector<std::string> tmp = ports[this->children[i]->get_properties().ip_port.second]->server_names;
-				if (std::find(tmp.begin(), tmp.end(), *it) != tmp.end())
-					throw std::runtime_error("Error: detected multiple servers with the same port");
-			}
-		}
-		if (!this->children[i]->get_properties().ip_port.second.empty())
-			ports[this->children[i]->get_properties().ip_port.second] = &this->children[i]->get_properties();
-	}
 
 	for (size_t i = 0 ; i < this->children.size(); i++)
 	{

@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/03 18:51:51 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/03/15 12:32:26 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/26 17:50:21 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,27 @@ void	Configuration::populateTokens(std::list<std::string>& tokens)
 	tokens = std::list<std::string>(vec_tokens.begin(), vec_tokens.end());
 }
 
+void	Configuration::checkMultiplePorts(void) const
+{
+		// Check for multiple server_blocks with the same port and server_name
+	std::map<std::string, const Properties*>	ports;
+	for (size_t i = 0 ; i < this->webserv->children.size(); i++)
+	{
+		if (ports.count(this->webserv->children[i]->get_properties().ip_port.second))
+		{
+			for (std::vector<std::string>::const_iterator it = this->webserv->children[i]->get_properties().server_names.begin();
+				 it != this->webserv->children[i]->get_properties().server_names.end(); it++)
+			{
+				std::vector<std::string> tmp = ports[this->webserv->children[i]->get_properties().ip_port.second]->server_names;
+				if (std::find(tmp.begin(), tmp.end(), *it) != tmp.end())
+					throw std::runtime_error("Error: detected multiple servers with the same port");
+			}
+		}
+		if (!this->webserv->children[i]->get_properties().ip_port.second.empty())
+			ports[this->webserv->children[i]->get_properties().ip_port.second] = &this->webserv->children[i]->get_properties();
+	}
+}
+
 //parse the config into Servers
 void	Configuration::parse()
 {
@@ -101,6 +122,7 @@ void	Configuration::parse()
 	populateTokens(tokens);
 	std::list<std::string>	arguments;
 	Parse(this->webserv, tokens).parse();
+	checkMultiplePorts();
 	std::cout << "Configuration loaded" << std::endl;
 }
 

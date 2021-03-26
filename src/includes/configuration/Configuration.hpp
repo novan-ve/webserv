@@ -6,7 +6,7 @@
 /*   By: tbruinem <tbruinem@student.codam.nl>         +#+                     */
 /*                                                   +#+                      */
 /*   Created: 2021/02/02 19:00:37 by tbruinem      #+#    #+#                 */
-/*   Updated: 2021/02/07 16:50:38 by tbruinem      ########   odam.nl         */
+/*   Updated: 2021/03/26 17:50:17 by novan-ve      ########   odam.nl         */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ class Configuration
 	private:
 		int		fd;
 		void	populateTokens(std::list<std::string>& tokens);
+		void	checkMultiplePorts(void) const;
 		WebServer*	webserv;
 		Configuration();
 };
