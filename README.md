@@ -2,9 +2,9 @@
 
 ![CI](https://github.com/novan-ve/webserv/workflows/CI/badge.svg)
 
-Fully functional webserver from scratch written in C++, based on nginx. Supports GET, POST, PUT and HEAD.
+Fully functional webserver from scratch written in C++, based on nginx.
 
-Compliant with the norms for HTTP described in RFC 7230-7235.
+Compliant with the norms described for HTTP in RFC 7230-7235.
 
 
 ## Webserver features
