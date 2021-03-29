@@ -3,19 +3,31 @@
 ![CI](https://github.com/novan-ve/webserv/workflows/CI/badge.svg)
 
 Creating a fully functional webserver in C++, based on nginx.
-Compliant with RFC 7230-7235.
+Compliant with RFC 7230-7235. Supports GET, POST, PUT and HEAD.
 
-Supports GET, POST, PUT and HEAD.
-
-## Features
-  - Custom configuration files
+## Webserver features
+  - HTTP request/response parsing
   - HTTP authentication
-  - Compatibility with php-cgi
+  - Custom configuration files
+  - Common Gateway Interface (CGI)
+  - Php-cgi compatibility
   - File uploads
-  - Parsing of encoded requests
-  - Multiple servers running at the same time
-  - Crash resistance when handling multiple clients
-  - Sigpipe and sigint handling
+  - Chunked encoding
+  - Multiple server support
+  - Signal handling
+
+## Configuration options
+  - Port and host of each server
+  - Server_names
+  - Default error pages
+  - Max client body size
+  - Allowed HTTP request methods
+  - Url root location
+  - Directory listing
+  - Default file to answer if requested path is a directory
+  - CGI
+
+All configuration options are based on the behaviour of nginx.
 
 ## Usage
 ```
