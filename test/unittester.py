@@ -19,7 +19,7 @@ class WebservTestCase(unittest.TestCase):
     def test_get(self):
         """Simple GET request to /"""
         r = req.get(self.url)
-        with open('./html/index.html', 'r') as f:
+        with open('../html/index.html', 'r') as f:
             contents = f.read().replace('\n', '')
             self.assertEqual(r.text.replace('\r\n', ''), contents)
 
@@ -139,7 +139,7 @@ class WebservTestCase(unittest.TestCase):
         correct = False
         for _ in range(1000):
             r = req.get(self.url)
-            with open('./html/index.html', 'r') as f:
+            with open('../html/index.html', 'r') as f:
                 correct = r.text.replace('\r\n', '') == f.read().replace('\n', '')
                 if not correct:
                     break
@@ -150,9 +150,9 @@ class WebservTestCase(unittest.TestCase):
         headers = {'Content-Type': 'text/plain', 'Host': '127.0.0.1:8080'}
         r = req.put(self.url + 'put_test/' + self.filename, headers=headers, data='0000000000')
         contents = ''
-        with open('./html/uploads/' + self.filename, 'r') as f:
+        with open('../html/uploads/' + self.filename, 'r') as f:
             contents = f.read()
-        os.system('rm ./html/uploads/' + self.filename)
+        os.system('rm ../html/uploads/' + self.filename)
         self.assertEqual(contents, '0000000000')
 
     def test_forbidden_put(self):
@@ -166,10 +166,10 @@ class WebservTestCase(unittest.TestCase):
         headers = {'Content-Type': 'text/plain', 'Host': '127.0.0.1:8080'}
         r = req.put(self.url + 'put_test/' + self.filename, headers=headers, data='0000000000')
         contents = ''
-        with open('./html/uploads/' + self.filename, 'r') as f:
+        with open('../html/uploads/' + self.filename, 'r') as f:
             contents = f.read()
         r = req.put(self.url + 'put_test/' + self.filename, headers=headers, data='0000000000')
-        os.system('rm ./html/uploads/' + self.filename)
+        os.system('rm ../html/uploads/' + self.filename)
         self.assertEqual(r.status_code, 204)
 
     def test_put_directory(self):
@@ -192,9 +192,9 @@ class WebservTestCase(unittest.TestCase):
         for _ in range(1000000):
             large_str += chr(random.randint(97, 97 + 25))
         r = req.put(self.url + 'put_test/' + self.filename, headers=headers, data=large_str)
-        with open('./html/uploads/' + self.filename, 'r') as f:
+        with open('../html/uploads/' + self.filename, 'r') as f:
             contents = f.read()
-        os.system('rm ./html/uploads/' + self.filename)
+        os.system('rm ../html/uploads/' + self.filename)
         self.assertEqual(contents, large_str)
     
     def test_too_large_put(self):

@@ -48,9 +48,17 @@ class WebServer : public Context
 		fd_set											write_sockets; //contains all sockets that need to be written to
 		std::map<Server*, std::vector<std::string> >	server_names;
 
+		std::vector<int>								closed_clients;
+		fd_set											read_set;
+		fd_set											write_set;
+		bool											finished;
+
 		void	deleteClient(int fd);
-		void	addNewClients(fd_set& read_set);
+		void	addNewClients();
 		static void	closeSignal(int status);
+
+		void	handleRead();
+		void	handleWrite();
 
 		//to be able to have one fd_set containing all connections, clients are collected in the all-encompassing class
 	public:
