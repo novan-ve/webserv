@@ -4,7 +4,7 @@
 
 Fully functional webserver from scratch in C++, based on nginx. Supports GET, POST, PUT and HEAD.
 
-Compliant with RFC 7230-7235.
+Compliant with the norms for HTTP described in RFC 7230-7235.
 
 
 ## Webserver features
