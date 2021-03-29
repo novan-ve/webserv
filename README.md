@@ -3,7 +3,10 @@
 ![CI](https://github.com/novan-ve/webserv/workflows/CI/badge.svg)
 
 Creating a fully functional webserver in C++, based on nginx.
-Compliant with RFC 7230-7235. Supports GET, POST, PUT and HEAD.
+
+Compliant with RFC 7230-7235.
+
+Supports GET, POST, PUT and HEAD.
 
 ## Webserver features
   - HTTP request/response parsing
