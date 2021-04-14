@@ -39,3 +39,4 @@ Custom configuration file:
 ```
 make && ./webserv path-to-config-file
 ```
+The default server runs on localhost:8080
