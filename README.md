@@ -6,7 +6,6 @@ Fully functional webserver from scratch written in C++, based on nginx.
 
 Compliant with the norms for HTTP defined in RFC 7230-7235.
 
-
 ## Webserver features
   - HTTP request/response parsing
   - HTTP authentication
