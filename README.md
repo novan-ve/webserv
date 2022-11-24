@@ -1,5 +1,4 @@
 # Webserv
-
 ![CI](https://github.com/novan-ve/webserv/workflows/CI/badge.svg)
 
 Fully functional webserver from scratch written in C++, based on nginx.
